@@ -1,0 +1,23 @@
+api = 0.2
+
+[buildpack]
+id = "org.cloudfoundry.dotnet-core-runtime"
+name = ".NETCore Runtime Buildpack"
+version = "{{ .Version }}"
+
+[metadata]
+include_files = ["bin/build","bin/detect","buildpack.toml","go.mod","go.sum"]
+pre_package = "./scripts/build.sh"
+
+[[metadata.dependencies]]
+id = "dotnet-runtime"
+name = ".NETCore Runtime"
+version = "2.2.6"
+uri = "http://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.2.6.linux-amd64-cflinuxfs3-050ef843.tar.xz"
+sha256 = "050ef84312785800b55b1a5aec7ea398ad20908f94f7ba722285e02885ccc4ba"
+stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+source = "https://github.com/dotnet/cli/archive/3e0e612cb176daae0fce6ca54608d40428c9d27e.tar.gz"
+source_sha256 = "e7a0d34b933d2dcac5d7536ab850f75af967b52567c82cd75e36e7d8145c9c2e"
+
+[[stacks]]
+id = "org.cloudfoundry.stacks.cflinuxfs3"
