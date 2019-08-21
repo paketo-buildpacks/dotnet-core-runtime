@@ -11,13 +11,18 @@ pre_package = "./scripts/build.sh"
 
 [[metadata.dependencies]]
 id = "dotnet-runtime"
-name = ".NETCore Runtime"
-version = "2.2.6"
-uri = "http://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.2.6.linux-amd64-cflinuxfs3-050ef843.tar.xz"
 sha256 = "050ef84312785800b55b1a5aec7ea398ad20908f94f7ba722285e02885ccc4ba"
+source = "https://github.com/dotnet/cli/archive/729b316c13bf9289b033272c07c7dfd046ffbcaf.tar.gz"
+source_sha256 = "1e2463cc161ae8f516aa047b09bef29aff6732f8346626b312b3acd75e9191ba"
 stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
-source = "https://github.com/dotnet/cli/archive/3e0e612cb176daae0fce6ca54608d40428c9d27e.tar.gz"
-source_sha256 = "e7a0d34b933d2dcac5d7536ab850f75af967b52567c82cd75e36e7d8145c9c2e"
+uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.2.6.linux-amd64-cflinuxfs3-050ef843.tar.xz"
+version = "2.2.6"
+
+[[metadata.dependency_deprecation_dates]]
+date = 2019-12-23T00:00:00Z
+link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
+name = "dotnet-runtime"
+version_line = "2.2.x"
 
 [[stacks]]
 id = "org.cloudfoundry.stacks.cflinuxfs3"
