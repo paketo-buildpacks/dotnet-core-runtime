@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/buildpack/libbuildpack/buildplan"
 	"github.com/cloudfoundry/dotnet-core-runtime-cnb/runtime"
@@ -21,7 +23,7 @@ func TestUnitDetect(t *testing.T) {
 	spec.Run(t, "Detect", testDetect, spec.Report(report.Terminal{}))
 }
 
-func testDetect(t *testing.T, _ spec.G, it spec.S) {
+func testDetect(t *testing.T, when spec.G, it spec.S) {
 	var factory *test.DetectFactory
 
 	it.Before(func() {
@@ -193,5 +195,98 @@ version = "2.2.5"
 				Metadata: buildplan.Metadata{"launch": true},
 			}},
 		}))
+	})
+
+	when("there is both a buildpack.yml and a runtimeconfig.json", func() {
+		it("should error out when the major version of both the buildpack.yml and runtimeconfig.json don't match", func() {
+			runtimeConfigJSONPath := filepath.Join(factory.Detect.Application.Root, "appName.runtimeconfig.json")
+			Expect(ioutil.WriteFile(runtimeConfigJSONPath, []byte(`
+{
+ "runtimeOptions": {
+   "tfm": "netcoreapp3.2",
+   "framework": {
+     "name": "Microsoft.NETCore.App",
+     "version": "2.1.0"
+   }
+ }
+}
+`), os.ModePerm)).To(Succeed())
+			test.WriteFile(t, filepath.Join(factory.Detect.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "3.1.2"))
+
+			errorMessage := errors.New("major versions of runtimes do not match between buildpack.yml and runtimeconfig.json")
+			code, err := runDetect(factory.Detect)
+			Expect(err).To(HaveOccurred())
+			Expect(code).To(Equal(detect.FailStatusCode))
+			Expect(err).To(Equal(errorMessage))
+		})
+
+		it("should error out when the minor version of the buildpack.yml is less than than the minor version of the runtimeconfig.json", func() {
+			runtimeConfigJSONPath := filepath.Join(factory.Detect.Application.Root, "appName.runtimeconfig.json")
+			Expect(ioutil.WriteFile(runtimeConfigJSONPath, []byte(`
+{
+ "runtimeOptions": {
+   "tfm": "netcoreapp3.2",
+   "framework": {
+     "name": "Microsoft.NETCore.App",
+     "version": "2.2.0"
+   }
+ }
+}
+`), os.ModePerm)).To(Succeed())
+			test.WriteFile(t, filepath.Join(factory.Detect.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "2.1.0"))
+
+			errorMessage := errors.New("the minor version of the runtimeconfig.json is greater than the minor version of the buildpack.yml")
+			code, err := runDetect(factory.Detect)
+			Expect(err).To(HaveOccurred())
+			Expect(code).To(Equal(detect.FailStatusCode))
+			Expect(err).To(Equal(errorMessage))
+		})
+
+		it("roll forward the version found in the buildpack.yml", func() {
+			runtimeConfigJSONPath := filepath.Join(factory.Detect.Application.Root, "appName.runtimeconfig.json")
+			Expect(ioutil.WriteFile(runtimeConfigJSONPath, []byte(`
+{
+ "runtimeOptions": {
+   "tfm": "netcoreapp3.2",
+   "framework": {
+     "name": "Microsoft.NETCore.App",
+     "version": "2.1.0"
+   }
+ }
+}
+`), os.ModePerm)).To(Succeed())
+			test.WriteFile(t, filepath.Join(factory.Detect.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "2.2.0"))
+
+			fakeBuildpackToml := `
+[[dependencies]]
+id = "dotnet-runtime"
+name = "Dotnet Runtime"
+stacks = ["org.testeroni"]
+uri = "some-uri"
+version = "2.2.5"
+
+[[dependencies]]
+id = "dotnet-runtime"
+name = "Dotnet Runtime"
+stacks = ["org.testeroni"]
+uri = "some-uri"
+version = "2.1.4"
+`
+			_, err := toml.Decode(fakeBuildpackToml, &factory.Detect.Buildpack.Metadata)
+			Expect(err).ToNot(HaveOccurred())
+			factory.Detect.Stack = "org.testeroni"
+
+			code, err := runDetect(factory.Detect)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(code).To(Equal(detect.PassStatusCode))
+			Expect(factory.Plans.Plan).To(Equal(buildplan.Plan{
+				Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}},
+				Requires: []buildplan.Required{{
+					Name:     runtime.DotnetRuntime,
+					Version:  "2.2.5",
+					Metadata: buildplan.Metadata{"launch": true},
+				}},
+			}))
+		})
 	})
 }

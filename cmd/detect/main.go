@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cloudfoundry/dotnet-core-runtime-cnb/runtime"
+	"github.com/cloudfoundry/libcfbuildpack/helper"
 	"github.com/gravityblast/go-jsmin"
 	"github.com/pkg/errors"
 	"os"
@@ -14,6 +15,12 @@ import (
 	"github.com/buildpack/libbuildpack/buildplan"
 	"github.com/cloudfoundry/libcfbuildpack/detect"
 )
+
+type BuildpackYAML struct {
+	Config struct{
+		Version string `yaml:"version""`
+	} `yaml:"dotnet-runtime"`
+}
 
 type ConfigJSON struct {
 	RuntimeOptions struct {
@@ -50,9 +57,24 @@ func runDetect(context detect.Detect) (int, error) {
 	plan := buildplan.Plan{
 		Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}}}
 
+	buildpackYAML, err := LoadBuildpackYAML(context.Application.Root)
+	if err != nil {
+		return context.Fail(), err
+	}
+
 	//Is FDD
 	if hasRuntimeOptions(runtimeConfig) {
-		version, compatibleVersion, err := rollForward(runtimeConfig.RuntimeOptions.Framework.Version, context)
+		rollForwardVersion := runtimeConfig.RuntimeOptions.Framework.Version
+
+		if buildpackYAML != (BuildpackYAML{}) {
+			err := checkIfVersionsAreValid(runtimeConfig.RuntimeOptions.Framework.Version, buildpackYAML.Config.Version)
+			if err != nil {
+				return context.Fail(), err
+			}
+			rollForwardVersion = buildpackYAML.Config.Version
+		}
+
+		version, compatibleVersion, err := rollForward(rollForwardVersion, context)
 		if err != nil {
 			return context.Fail(), err
 		}
@@ -73,6 +95,21 @@ func runDetect(context detect.Detect) (int, error) {
 
 func hasRuntimeOptions(runtimeConfig ConfigJSON) bool {
 	return runtimeConfig.RuntimeOptions.Framework.Name != ""
+}
+
+func checkIfVersionsAreValid(versionRuntimeConfig, versionBuildpackYAML string) error{
+	splitVersionRuntimeConfig := strings.Split(versionRuntimeConfig, ".")
+	splitVersionBuildpackYAML := strings.Split(versionBuildpackYAML, ".")
+
+	if splitVersionBuildpackYAML[0] != splitVersionRuntimeConfig[0] {
+		return fmt.Errorf("major versions of runtimes do not match between buildpack.yml and runtimeconfig.json")
+	}
+
+	if splitVersionBuildpackYAML[1] < splitVersionRuntimeConfig[1]{
+		return fmt.Errorf("the minor version of the runtimeconfig.json is greater than the minor version of the buildpack.yml")
+	}
+
+	return nil
 }
 
 func createRuntimeConfig(appRoot string) (ConfigJSON, error){
@@ -143,7 +180,6 @@ func rollForward(version string, context detect.Detect) (string, bool, error){
 
 	versions := []string {version, anyPatch, anyMinor}
 
-
 	deps, err := context.Buildpack.Dependencies()
 	if err != nil {
 		return "", false, err
@@ -157,4 +193,17 @@ func rollForward(version string, context detect.Detect) (string, bool, error){
 	}
 
 	return "", false, fmt.Errorf("no compatible versions found")
+}
+
+func LoadBuildpackYAML(appRoot string) (BuildpackYAML, error) {
+	var err error
+	buildpackYAML := BuildpackYAML{}
+	bpYamlPath := filepath.Join(appRoot, "buildpack.yml")
+
+	if exists, err := helper.FileExists(bpYamlPath); err != nil {
+		return BuildpackYAML{}, err
+	} else if exists {
+		err = helper.ReadBuildpackYaml(bpYamlPath, &buildpackYAML)
+	}
+	return buildpackYAML, err
 }
