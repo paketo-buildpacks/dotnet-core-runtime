@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/buildpack/libbuildpack/buildplan"
@@ -49,13 +50,13 @@ func main() {
 
 
 func runDetect(context detect.Detect) (int, error) {
+	plan := buildplan.Plan{
+		Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}}}
+
 	runtimeConfig, err := createRuntimeConfig(context.Application.Root)
 	if err != nil {
 		return context.Fail(), err
 	}
-
-	plan := buildplan.Plan{
-		Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}}}
 
 	buildpackYAML, err := LoadBuildpackYAML(context.Application.Root)
 	if err != nil {
@@ -105,7 +106,17 @@ func checkIfVersionsAreValid(versionRuntimeConfig, versionBuildpackYAML string) 
 		return fmt.Errorf("major versions of runtimes do not match between buildpack.yml and runtimeconfig.json")
 	}
 
-	if splitVersionBuildpackYAML[1] < splitVersionRuntimeConfig[1]{
+	minorBPYAML, err := strconv.Atoi(splitVersionBuildpackYAML[1])
+	if err != nil{
+		return err
+	}
+
+	minorRuntimeConfig, err := strconv.Atoi(splitVersionRuntimeConfig[1])
+	if err != nil{
+		return err
+	}
+
+	if minorBPYAML < minorRuntimeConfig{
 		return fmt.Errorf("the minor version of the runtimeconfig.json is greater than the minor version of the buildpack.yml")
 	}
 
