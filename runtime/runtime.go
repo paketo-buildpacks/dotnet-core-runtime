@@ -49,9 +49,10 @@ func (c Contributor) Contribute() error {
 			return err
 		}
 
-		if err := layer.OverrideSharedEnv("DOTNET_ROOT", filepath.Join(c.runtimeLayer.Root)); err != nil {
+		if err := layer.OverrideSharedEnv("DOTNET_ROOT", filepath.Join(layer.Root)); err != nil {
 			return err
 		}
+
 
 		return nil
 	}, getFlags(c.plan.Metadata)...)

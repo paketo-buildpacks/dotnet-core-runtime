@@ -154,6 +154,27 @@ version = "2.2.5"
 		}))
 	})
 
+	it("passes when there is a valid runtimeconfig.json where the only runtime options are for ASPNet", func() {
+		runtimeConfigJSONPath := filepath.Join(factory.Detect.Application.Root, "appName.runtimeconfig.json")
+		Expect(ioutil.WriteFile(runtimeConfigJSONPath, []byte(`
+{
+   "runtimeOptions": {
+    "tfm": "netcoreapp2.2",
+    "framework": {
+      "name": "Microsoft.AspNetCore.App",
+      "version": "1.1.0"
+    }
+  }
+}
+`), os.ModePerm)).To(Succeed())
+		code, err := runDetect(factory.Detect)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(code).To(Equal(detect.PassStatusCode))
+		Expect(factory.Plans.Plan).To(Equal(buildplan.Plan{
+			Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}},
+		}))
+	})
+
 	it("passes when there is no valid runtimeconfig.json meaning that app is source based", func() {
 		code, err := runDetect(factory.Detect)
 		Expect(err).ToNot(HaveOccurred())

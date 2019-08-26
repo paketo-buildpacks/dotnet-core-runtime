@@ -95,7 +95,7 @@ func runDetect(context detect.Detect) (int, error) {
 }
 
 func hasRuntimeOptions(runtimeConfig ConfigJSON) bool {
-	return runtimeConfig.RuntimeOptions.Framework.Name != ""
+	return runtimeConfig.RuntimeOptions.Framework.Name == "Microsoft.NETCore.App"
 }
 
 func checkIfVersionsAreValid(versionRuntimeConfig, versionBuildpackYAML string) error{
