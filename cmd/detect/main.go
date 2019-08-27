@@ -1,17 +1,15 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/cloudfoundry/dotnet-core-runtime-cnb/runtime"
 	"github.com/cloudfoundry/libcfbuildpack/helper"
-	"github.com/gravityblast/go-jsmin"
-	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/cloudfoundry/dotnet-core-conf-cnb/utils"
 
 	"github.com/buildpack/libbuildpack/buildplan"
 	"github.com/cloudfoundry/libcfbuildpack/detect"
@@ -21,16 +19,6 @@ type BuildpackYAML struct {
 	Config struct{
 		Version string `yaml:"version""`
 	} `yaml:"dotnet-runtime"`
-}
-
-type ConfigJSON struct {
-	RuntimeOptions struct {
-		Framework struct {
-			Name    string `json:"name"`
-			Version string `json:"version"`
-		} `json:"framework"`
-		ApplyPatches *bool `json:"applyPatches"`
-	} `json:"runtimeOptions"`
 }
 
 func main() {
@@ -53,7 +41,8 @@ func runDetect(context detect.Detect) (int, error) {
 	plan := buildplan.Plan{
 		Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}}}
 
-	runtimeConfig, err := createRuntimeConfig(context.Application.Root)
+
+	runtimeConfig, err := utils.CreateRuntimeConfig(context.Application.Root)
 	if err != nil {
 		return context.Fail(), err
 	}
@@ -94,7 +83,7 @@ func runDetect(context detect.Detect) (int, error) {
 	return context.Pass(plan)
 }
 
-func hasRuntimeOptions(runtimeConfig ConfigJSON) bool {
+func hasRuntimeOptions(runtimeConfig utils.ConfigJSON) bool {
 	return runtimeConfig.RuntimeOptions.Framework.Name == "Microsoft.NETCore.App"
 }
 
@@ -121,66 +110,6 @@ func checkIfVersionsAreValid(versionRuntimeConfig, versionBuildpackYAML string) 
 	}
 
 	return nil
-}
-
-func createRuntimeConfig(appRoot string) (ConfigJSON, error){
-	path, err := runtimeConfigPath(appRoot)
-	if err != nil {
-		return ConfigJSON{}, err
-	}
-
-	runtimeJSON := ConfigJSON{}
-
-	if path != "" {
-		runtimeJSON, err = parseRuntimeConfig(path)
-		if err != nil {
-			return ConfigJSON{}, err
-		}
-	}
-
-	return runtimeJSON, nil
-}
-
-func runtimeConfigPath(appRoot string) (string, error) {
-	if configFiles, err := filepath.Glob(filepath.Join(appRoot, "*.runtimeconfig.json")); err != nil {
-		return "", err
-	} else if len(configFiles) == 1 {
-		return configFiles[0], nil
-	} else if len(configFiles) > 1 {
-		return "", fmt.Errorf("multiple *.runtimeconfig.json files present")
-	}
-	return "", nil
-}
-
-func parseRuntimeConfig(runtimeConfigPath string) (ConfigJSON, error) {
-	obj := ConfigJSON{}
-
-	buf, err := sanitizeJsonConfig(runtimeConfigPath)
-	if err != nil {
-		return obj, err
-	}
-
-	if err := json.Unmarshal(buf, &obj); err != nil {
-		return obj, errors.Wrap(err, "unable to parse runtime config")
-	}
-
-	return obj, nil
-}
-
-func sanitizeJsonConfig(runtimeConfigPath string) ([]byte, error) {
-	input, err := os.Open(runtimeConfigPath)
-	if err != nil {
-		return nil, err
-	}
-	defer input.Close()
-
-	output := &bytes.Buffer{}
-
-	if err := jsmin.Min(input, output); err != nil {
-		return nil, err
-	}
-
-	return output.Bytes(), nil
 }
 
 

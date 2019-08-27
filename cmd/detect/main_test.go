@@ -184,39 +184,6 @@ version = "2.2.5"
 		}))
 	})
 
-	it("passes when there is a valid runtimeconfig.json with comments", func() {
-		runtimeConfigJSONPath := filepath.Join(factory.Detect.Application.Root, "appName.runtimeconfig.json")
-		Expect(ioutil.WriteFile(runtimeConfigJSONPath, []byte(`
-{
-  "runtimeOptions": {
-    /*
-    Multi line
-    Comment
-    */
-    "tfm": "netcoreapp2.2",
-    "framework": {
-      "name": "Microsoft.NETCore.App",
-      "version": "2.2.5"
-    },
-    // comment here ok?
-    "configProperties": {
-      "System.GC.Server": true
-    }
-  }
-}
-`), os.ModePerm)).To(Succeed())
-		code, err := runDetect(factory.Detect)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(code).To(Equal(detect.PassStatusCode))
-		Expect(factory.Plans.Plan).To(Equal(buildplan.Plan{
-			Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}},
-			Requires: []buildplan.Required{{
-				Name: runtime.DotnetRuntime,
-				Version: "2.2.5",
-				Metadata: buildplan.Metadata{"launch": true},
-			}},
-		}))
-	})
 
 	when("there is both a buildpack.yml and a runtimeconfig.json", func() {
 		it("should error out when the major version of both the buildpack.yml and runtimeconfig.json don't match", func() {
