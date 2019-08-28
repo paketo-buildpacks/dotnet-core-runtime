@@ -42,7 +42,7 @@ func runDetect(context detect.Detect) (int, error) {
 		Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}}}
 
 
-	runtimeConfig, err := utils.CreateRuntimeConfig(context.Application.Root)
+	runtimeConfig, err := utils.NewRuntimeConfig(context.Application.Root)
 	if err != nil {
 		return context.Fail(), err
 	}
@@ -52,39 +52,43 @@ func runDetect(context detect.Detect) (int, error) {
 		return context.Fail(), err
 	}
 
-	//Is FDD
-	if hasRuntimeOptions(runtimeConfig) {
-		rollForwardVersion := runtimeConfig.RuntimeOptions.Framework.Version
+	hasFDE, err := runtimeConfig.HasFDE()
+	if err != nil {
+		return context.Fail(), err
+	}
 
-		if buildpackYAML != (BuildpackYAML{}) {
-			err := checkIfVersionsAreValid(runtimeConfig.RuntimeOptions.Framework.Version, buildpackYAML.Config.Version)
+	//Is FDD that only relies on runtime
+	if runtimeConfig.HasRuntimeDependency() {
+		// Has an FDE
+		if hasFDE {
+			rollForwardVersion := runtimeConfig.Version
+
+			if buildpackYAML != (BuildpackYAML{}) {
+				err := checkIfVersionsAreValid(rollForwardVersion, buildpackYAML.Config.Version)
+				if err != nil {
+					return context.Fail(), err
+				}
+				rollForwardVersion = buildpackYAML.Config.Version
+			}
+
+			version, compatibleVersion, err := rollForward(rollForwardVersion, context)
 			if err != nil {
 				return context.Fail(), err
 			}
-			rollForwardVersion = buildpackYAML.Config.Version
-		}
 
-		version, compatibleVersion, err := rollForward(rollForwardVersion, context)
-		if err != nil {
-			return context.Fail(), err
-		}
+			if !compatibleVersion {
+				return context.Fail(), fmt.Errorf("no version of the dotnet-runtime was compatible with what was specified in the runtimeconfig.json of the application")
+			}
 
-		if !compatibleVersion {
-			return context.Fail(), fmt.Errorf("no version of the dotnet-runtime was compatible with what was specified in the runtimeconfig.json of the application")
+			plan.Requires = []buildplan.Required{{
+				Name:     runtime.DotnetRuntime,
+				Version:  version,
+				Metadata: buildplan.Metadata{"launch": true},
+			}}
 		}
-
-		plan.Requires = []buildplan.Required{{
-			Name:     runtime.DotnetRuntime,
-			Version:  version,
-			Metadata: buildplan.Metadata{"launch": true},
-		}}
 	}
 
 	return context.Pass(plan)
-}
-
-func hasRuntimeOptions(runtimeConfig utils.ConfigJSON) bool {
-	return runtimeConfig.RuntimeOptions.Framework.Name == "Microsoft.NETCore.App"
 }
 
 func checkIfVersionsAreValid(versionRuntimeConfig, versionBuildpackYAML string) error{
