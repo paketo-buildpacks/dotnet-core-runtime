@@ -1,4 +1,4 @@
-api = 0.2
+api = "0.2"
 
 [buildpack]
 id = "org.cloudfoundry.dotnet-core-runtime"
