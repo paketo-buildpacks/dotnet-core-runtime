@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"fmt"
-	"github.com/Masterminds/semver"
+	"github.com/cloudfoundry/dotnet-core-conf-cnb/utils"
 	"github.com/cloudfoundry/libcfbuildpack/build"
 	"github.com/cloudfoundry/libcfbuildpack/buildpackplan"
 	"github.com/cloudfoundry/libcfbuildpack/helper"
@@ -38,7 +38,6 @@ func NewContributor(context build.Build) (Contributor, bool, error) {
 	version := plan.Version
 
 	if plan.Version != "" {
-		var compatibleVersion bool
 		rollForwardVersion := plan.Version
 
 		buildpackYAML, err := LoadBuildpackYAML(context.Application.Root)
@@ -47,19 +46,19 @@ func NewContributor(context build.Build) (Contributor, bool, error) {
 		}
 
 		if buildpackYAML != (BuildpackYAML{}) {
-			err := checkIfVersionsAreValid(rollForwardVersion, buildpackYAML.Config.Version)
+			err := utils.BuildpackYAMLVersionCheck(rollForwardVersion, buildpackYAML.Config.Version)
 			if err != nil {
 				return Contributor{}, false, err
 			}
 			rollForwardVersion = buildpackYAML.Config.Version
 		}
 
-		version, compatibleVersion, err = rollForward(rollForwardVersion, context)
+		version, err = utils.FrameworkRollForward(rollForwardVersion, DotnetRuntime, context)
 		if err != nil {
 			return Contributor{}, false, err
 		}
 
-		if !compatibleVersion {
+		if version == "" {
 			return Contributor{}, false, fmt.Errorf("no version of the dotnet-runtime was compatible with what was specified in the runtimeconfig.json of the application")
 		}
 	}
@@ -105,53 +104,6 @@ func getFlags(metadata buildpackplan.Metadata) []layers.Flag{
 		}
 	}
 	return flagsArray
-}
-
-func checkIfVersionsAreValid(versionRuntimeConfig, versionBuildpackYAML string) error {
-	runtimeVersion, err := semver.NewVersion(versionRuntimeConfig)
-	if err != nil {
-		return err
-	}
-
-	buildpackYAMLVersion, err := semver.NewVersion(versionBuildpackYAML)
-	if err != nil {
-		return err
-	}
-
-	if runtimeVersion.Major() != buildpackYAMLVersion.Major(){
-		return fmt.Errorf("major versions of runtimes do not match between buildpack.yml and runtimeconfig.json")
-	}
-
-	if buildpackYAMLVersion.Minor() < runtimeVersion.Minor() {
-		return fmt.Errorf("the minor version of the runtimeconfig.json is greater than the minor version of the buildpack.yml")
-	}
-
-	return nil
-}
-
-func rollForward(version string, context build.Build) (string, bool, error) {
-	splitVersion, err := semver.NewVersion(version)
-	if err != nil {
-		return "", false, err
-	}
-	anyPatch := fmt.Sprintf("%d.%d.*", splitVersion.Major(), splitVersion.Minor())
-	anyMinor := fmt.Sprintf("%d.*.*", splitVersion.Major())
-
-	versions := []string{version, anyPatch, anyMinor}
-
-	deps, err := context.Buildpack.Dependencies()
-	if err != nil {
-		return "", false, err
-	}
-
-	for _, versionConstraint := range versions {
-		highestVersion, err := deps.Best(DotnetRuntime, versionConstraint, context.Stack)
-		if err == nil {
-			return highestVersion.Version.String(), true, nil
-		}
-	}
-
-	return "", false, fmt.Errorf("no compatible versions found")
 }
 
 func LoadBuildpackYAML(appRoot string) (BuildpackYAML, error) {

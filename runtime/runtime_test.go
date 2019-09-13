@@ -35,37 +35,17 @@ func testDotnet(t *testing.T, when spec.G, it spec.S) {
 			it("returns true if a build plan exists and matching version is found", func() {
 				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.2.5"})
 
-				contributor, willContribute, err := NewContributor(factory.Build)
+				_, willContribute, err := NewContributor(factory.Build)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(willContribute).To(BeTrue())
-				Expect(contributor.runtimeLayer.Dependency.Version.String()).To(Equal("2.2.5"))
 			})
 
-			it("returns true if a build plan exists and matching minor is found", func() {
-				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.2.0"})
-
-				contributor, willContribute, err := NewContributor(factory.Build)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(willContribute).To(BeTrue())
-				Expect(contributor.runtimeLayer.Dependency.Version.String()).To(Equal("2.2.5"))
-			})
-
-			it("returns true if a build plan exists and matching major is found", func() {
-				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.1.0"})
-
-				contributor, willContribute, err := NewContributor(factory.Build)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(willContribute).To(BeTrue())
-				Expect(contributor.runtimeLayer.Dependency.Version.String()).To(Equal("2.2.5"))
-			})
-
-			it("returns true if a build plan exists and no valid roll forward version is found", func() {
+			it("returns true if a build plan exists and no matching version is found", func() {
 				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "1.0.0"})
 
-				contributor, willContribute, err := NewContributor(factory.Build)
+				_, willContribute, err := NewContributor(factory.Build)
 				Expect(err).To(HaveOccurred())
 				Expect(willContribute).To(BeFalse())
-				Expect(contributor).To(Equal(Contributor{}))
 			})
 		})
 
@@ -81,31 +61,6 @@ func testDotnet(t *testing.T, when spec.G, it spec.S) {
 				Expect(willContribute).To(BeTrue())
 				Expect(contributor.runtimeLayer.Dependency.Version.String()).To(Equal("2.2.5"))
 			})
-
-			it("returns false if plan version and buildpack.yml version have different majors", func() {
-				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.0.0"})
-				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "3.2.0"))
-				defer os.RemoveAll(filepath.Join(factory.Build.Application.Root, "buildpack.yml"))
-
-				contributor, willContribute, err := NewContributor(factory.Build)
-				Expect(err).To(HaveOccurred())
-				Expect(willContribute).To(BeFalse())
-				Expect(contributor).To(Equal(Contributor{}))
-
-			})
-
-			it("returns false if plan version minor is greater than and buildpack.yml version minor", func() {
-				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.3.0"})
-				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "2.2.0"))
-				defer os.RemoveAll(filepath.Join(factory.Build.Application.Root, "buildpack.yml"))
-
-				contributor, willContribute, err := NewContributor(factory.Build)
-				Expect(err).To(HaveOccurred())
-				Expect(willContribute).To(BeFalse())
-				Expect(contributor).To(Equal(Contributor{}))
-
-			})
-
 		})
 
 		it("returns false if a build plan does not exist", func() {
