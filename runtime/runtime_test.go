@@ -51,11 +51,12 @@ func testDotnet(t *testing.T, when spec.G, it spec.S) {
 
 		when("when there is a buildpack.yml", func () {
 			it.Before(func() {
-				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.0.0"})
-				factory.AddDependencyWithVersion(DotnetRuntime, "2.1.0", stubDotnetRuntimeFixture)
+				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.1.0"})
+				factory.AddDependencyWithVersion(DotnetRuntime, "2.1.5", stubDotnetRuntimeFixture)
+				factory.AddDependencyWithVersion(DotnetRuntime, "2.2.2", stubDotnetRuntimeFixture)
 			})
 
-			it("that has a version range it returns roll forward from buildpack.yml", func() {
+			it("that has a version range it returns that highest patch for that range", func() {
 				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "2.2.*"))
 				defer os.RemoveAll(filepath.Join(factory.Build.Application.Root, "buildpack.yml"))
 
@@ -64,13 +65,15 @@ func testDotnet(t *testing.T, when spec.G, it spec.S) {
 				Expect(willContribute).To(BeTrue())
 				Expect(contributor.runtimeLayer.Dependency.Version.String()).To(Equal("2.2.5"))
 			})
-			it("that has a version range it returns roll forward from buildpack.yml", func() {
-				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "2.2.0"))
+			it("that has an exact version it only uses that exact version ", func() {
+				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "2.2.2"))
 				defer os.RemoveAll(filepath.Join(factory.Build.Application.Root, "buildpack.yml"))
 
-				_, willContribute, err := NewContributor(factory.Build)
-				Expect(err).To(HaveOccurred())
-				Expect(willContribute).To(BeFalse())
+
+				contributor, willContribute, err := NewContributor(factory.Build)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(willContribute).To(BeTrue())
+				Expect(contributor.runtimeLayer.Dependency.Version.String()).To(Equal("2.2.2"))
 
 			})
 		})
