@@ -50,12 +50,12 @@ func NewContributor(context build.Build) (Contributor, bool, error) {
 			if err != nil {
 				return Contributor{}, false, err
 			}
-			rollForwardVersion = buildpackYAML.Config.Version
-		}
-
-		version, err = utils.FrameworkRollForward(rollForwardVersion, DotnetRuntime, context)
-		if err != nil {
-			return Contributor{}, false, err
+			version = buildpackYAML.Config.Version
+		} else {
+			version, err = utils.FrameworkRollForward(rollForwardVersion, DotnetRuntime, context)
+			if err != nil {
+				return Contributor{}, false, err
+			}
 		}
 
 		if version == "" {
