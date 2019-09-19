@@ -57,7 +57,7 @@ func testDotnet(t *testing.T, when spec.G, it spec.S) {
 			})
 
 			it("that has a version range it returns that highest patch for that range", func() {
-				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "2.2.*"))
+				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-framework:\n  version: %s", "2.2.*"))
 				defer os.RemoveAll(filepath.Join(factory.Build.Application.Root, "buildpack.yml"))
 
 				contributor, willContribute, err := NewContributor(factory.Build)
@@ -66,7 +66,7 @@ func testDotnet(t *testing.T, when spec.G, it spec.S) {
 				Expect(contributor.runtimeLayer.Dependency.Version.String()).To(Equal("2.2.5"))
 			})
 			it("that has an exact version it only uses that exact version ", func() {
-				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-runtime:\n  version: %s", "2.2.2"))
+				test.WriteFile(t, filepath.Join(factory.Build.Application.Root, "buildpack.yml"), fmt.Sprintf("dotnet-framework:\n  version: %s", "2.2.2"))
 				defer os.RemoveAll(filepath.Join(factory.Build.Application.Root, "buildpack.yml"))
 
 

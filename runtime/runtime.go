@@ -23,7 +23,7 @@ type Contributor struct {
 type BuildpackYAML struct {
 	Config struct {
 		Version string `yaml:"version""`
-	} `yaml:"dotnet-runtime"`
+	} `yaml:"dotnet-framework"`
 }
 
 func NewContributor(context build.Build) (Contributor, bool, error) {

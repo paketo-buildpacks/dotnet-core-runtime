@@ -1,6 +1,10 @@
 package integration
 
 import (
+	"fmt"
+	"github.com/BurntSushi/toml"
+	"github.com/Masterminds/semver"
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 
@@ -55,16 +59,72 @@ func testIntegration(t *testing.T, _ spec.G, it spec.S) {
 		Expect(body).To(ContainSubstring("Hello world!"))
 	})
 
-	it("runs a simple framework-dependent deployment with a framework-dependent executable that has a buildpack.yml in it", func() {
+	it.Focus("runs a simple framework-dependent deployment with a framework-dependent executable that has a buildpack.yml in it", func() {
+		majorMinor := "2.2"
+		version, err := getLowestRuntimeVersionInMajorMinor(majorMinor)
+		Expect(err).ToNot(HaveOccurred())
+		bpYml := fmt.Sprintf(`---
+dotnet-framework:
+  version: "%s"
+`, version)
+
+		bpYmlPath := filepath.Join("testdata", "simple_app_with_buildpack_yml", "buildpack.yml")
+		Expect(ioutil.WriteFile(bpYmlPath, []byte(bpYml), 0644)).To(Succeed())
+
 		app, err = dagger.PackBuild(filepath.Join("testdata", "simple_app_with_buildpack_yml"), bp)
 		Expect(err).ToNot(HaveOccurred())
 		app.Memory = "128m"
 		Expect(app.StartWithCommand("./source_code")).To(Succeed())
 
-		Expect(app.BuildLogs()).To(ContainSubstring("dotnet-runtime.2.1"))
+		Expect(app.BuildLogs()).To(ContainSubstring(fmt.Sprintf("dotnet-runtime.%s", version)))
 
 		body, _, err := app.HTTPGet("/")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(body).To(ContainSubstring("Hello world!"))
 	})
+}
+
+func getLowestRuntimeVersionInMajorMinor(majorMinor string) (string, error) {
+	type buildpackTomlVersion struct {
+		Metadata struct {
+			Dependencies []struct {
+				Version string `toml:"version"`
+			} `toml:"dependencies"`
+		} `toml:"metadata"`
+	}
+
+	bpToml := buildpackTomlVersion{}
+	output, err := ioutil.ReadFile(filepath.Join("..", "buildpack.toml"))
+	if err != nil {
+		return "", err
+	}
+
+	majorMinorConstraint, err := semver.NewConstraint(fmt.Sprintf("%s.*", majorMinor))
+	if err != nil {
+		return "", err
+	}
+
+	lowestVersion, err := semver.NewVersion(fmt.Sprintf("%s.99", majorMinor))
+	if err != nil {
+		return "", err
+	}
+
+	_, err = toml.Decode(string(output), &bpToml)
+	if err != nil {
+		return "", err
+	}
+
+	for _, dep := range bpToml.Metadata.Dependencies {
+		depVersion, err := semver.NewVersion(dep.Version)
+		if err != nil {
+			return "", err
+		}
+		if majorMinorConstraint.Check(depVersion){
+			if depVersion.LessThan(lowestVersion){
+				lowestVersion = depVersion
+			}
+		}
+	}
+
+	return lowestVersion.String(), nil
 }
