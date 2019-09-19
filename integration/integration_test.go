@@ -59,7 +59,7 @@ func testIntegration(t *testing.T, _ spec.G, it spec.S) {
 		Expect(body).To(ContainSubstring("Hello world!"))
 	})
 
-	it.Focus("runs a simple framework-dependent deployment with a framework-dependent executable that has a buildpack.yml in it", func() {
+	it("runs a simple framework-dependent deployment with a framework-dependent executable that has a buildpack.yml in it", func() {
 		majorMinor := "2.2"
 		version, err := getLowestRuntimeVersionInMajorMinor(majorMinor)
 		Expect(err).ToNot(HaveOccurred())
