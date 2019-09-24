@@ -29,11 +29,11 @@ version = "2.1.13"
 
 [[metadata.dependencies]]
 id = "dotnet-runtime"
-sha256 = "050ef84312785800b55b1a5aec7ea398ad20908f94f7ba722285e02885ccc4ba"
-source = "https://github.com/dotnet/cli/archive/729b316c13bf9289b033272c07c7dfd046ffbcaf.tar.gz"
-source_sha256 = "1e2463cc161ae8f516aa047b09bef29aff6732f8346626b312b3acd75e9191ba"
+sha256 = "915829b4fe61f0770f419df17febd38aaf228e5e796039a1e03947064d79f2f1"
+source = "https://github.com/dotnet/cli/archive/3e0e612cb176daae0fce6ca54608d40428c9d27e.tar.gz"
+source_sha256 = "e7a0d34b933d2dcac5d7536ab850f75af967b52567c82cd75e36e7d8145c9c2e"
 stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
-uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.2.6.linux-amd64-cflinuxfs3-050ef843.tar.xz"
+uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.2.6.linux-amd64-cflinuxfs3-915829b4.tar.xz"
 version = "2.2.6"
 
 [[metadata.dependencies]]
