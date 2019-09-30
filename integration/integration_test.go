@@ -82,6 +82,18 @@ dotnet-framework:
 		Expect(err).NotTo(HaveOccurred())
 		Expect(body).To(ContainSubstring("Hello world!"))
 	})
+
+	// Todo - Copied from V2 to be fixed for V3
+	it("runs a simple framework-dependent deployment with a self_contained_2.1 executable", func() {
+		// app, err = dagger.PackBuild(filepath.Join("testdata", "self_contained_2.1"), bp)
+		// Expect(err).ToNot(HaveOccurred())
+		// app.Memory = "128m"
+		// Expect(app.StartWithCommand("./self_contained_2.1")).To(Succeed())
+
+		// body, _, err := app.HTTPGet("/")
+		// Expect(err).NotTo(HaveOccurred())
+		// Expect(body).To(ContainSubstring("Hello world!"))
+	})
 }
 
 func getLowestRuntimeVersionInMajorMinor(majorMinor string) (string, error) {
