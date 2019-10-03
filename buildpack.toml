@@ -38,6 +38,15 @@ version = "2.1.13"
 
 [[metadata.dependencies]]
 id = "dotnet-runtime"
+sha256 = "62657e5f8c231adb266718329c7e50dac203385666c8fae5a0761f606359e9c5"
+source = "https://download.visualstudio.microsoft.com/download/pr/853048a3-764a-4b4d-a608-c6144a84f257/99c5cb1ea145f9dc3c2bbd093c682c9b/dotnet-runtime-2.2.4-linux-x64.tar.gz/archive/.tar.gz"
+source_sha256 = "0e494df7a3936ac59c17de3b91d928bb3ab3cdd1e6734d581ad4774f551ca239"
+stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.2.4.linux-amd64-cflinuxfs3-62657e5f.tar.xz"
+version = "2.2.4"
+
+[[metadata.dependencies]]
+id = "dotnet-runtime"
 sha256 = "9b0680d0a193ff5b89a8bc8a04ec2dd56aecc6321b5b57a185ad9f1ccc7ee77d"
 source = "https://download.visualstudio.microsoft.com/download/pr/21968111-f65e-48c7-9c35-8b40de4af06c/66b7a2c7b92b54bd3311f4509cc9b9ed/dotnet-runtime-2.2.5-linux-x64.tar.gz/archive/.tar.gz"
 source_sha256 = "a49ebecf9b1a4cadd47e4db65ae63425b94be75628314107def3abf52d5d0221"
