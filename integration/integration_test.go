@@ -2,11 +2,12 @@ package integration
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/Masterminds/semver"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
+
+	"github.com/BurntSushi/toml"
+	"github.com/Masterminds/semver"
 
 	"github.com/cloudfoundry/dagger"
 
@@ -17,17 +18,17 @@ import (
 )
 
 var (
-	bp string
+	runtimeURI string
 )
 
 func TestIntegration(t *testing.T) {
 	RegisterTestingT(t)
 	root, err := dagger.FindBPRoot()
 	Expect(err).ToNot(HaveOccurred())
-	bp, err = dagger.PackageBuildpack(root)
+	runtimeURI, err = dagger.PackageBuildpack(root)
 	Expect(err).NotTo(HaveOccurred())
 	defer func() {
-		dagger.DeleteBuildpack(bp)
+		dagger.DeleteBuildpack(runtimeURI)
 	}()
 
 	spec.Run(t, "Integration", testIntegration, spec.Report(report.Terminal{}))
@@ -36,8 +37,8 @@ func TestIntegration(t *testing.T) {
 func testIntegration(t *testing.T, _ spec.G, it spec.S) {
 	var (
 		Expect func(interface{}, ...interface{}) Assertion
-		app *dagger.App
-		err error
+		app    *dagger.App
+		err    error
 	)
 	it.Before(func() {
 		Expect = NewWithT(t).Expect
@@ -49,7 +50,11 @@ func testIntegration(t *testing.T, _ spec.G, it spec.S) {
 	})
 
 	it("runs a simple framework-dependent deployment with a framework-dependent executable", func() {
-		app, err = dagger.PackBuild(filepath.Join("testdata", "simple_app"), bp)
+		app, err = dagger.NewPack(
+			filepath.Join("testdata", "simple_app"),
+			dagger.RandomImage(),
+			dagger.SetBuildpacks(runtimeURI),
+		).Build()
 		Expect(err).ToNot(HaveOccurred())
 		app.Memory = "128m"
 		Expect(app.StartWithCommand("./source_code")).To(Succeed())
@@ -71,7 +76,11 @@ dotnet-framework:
 		bpYmlPath := filepath.Join("testdata", "simple_app_with_buildpack_yml", "buildpack.yml")
 		Expect(ioutil.WriteFile(bpYmlPath, []byte(bpYml), 0644)).To(Succeed())
 
-		app, err = dagger.PackBuild(filepath.Join("testdata", "simple_app_with_buildpack_yml"), bp)
+		app, err = dagger.NewPack(
+			filepath.Join("testdata", "simple_app_with_buildpack_yml"),
+			dagger.RandomImage(),
+			dagger.SetBuildpacks(runtimeURI),
+		).Build()
 		Expect(err).ToNot(HaveOccurred())
 		app.Memory = "128m"
 		Expect(app.StartWithCommand("./source_code")).To(Succeed())
@@ -119,8 +128,8 @@ func getLowestRuntimeVersionInMajorMinor(majorMinor string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if majorMinorConstraint.Check(depVersion){
-			if depVersion.LessThan(lowestVersion){
+		if majorMinorConstraint.Check(depVersion) {
+			if depVersion.LessThan(lowestVersion) {
 				lowestVersion = depVersion
 			}
 		}
