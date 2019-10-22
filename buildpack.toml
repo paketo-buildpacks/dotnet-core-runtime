@@ -14,7 +14,7 @@ id = "dotnet-runtime"
 sha256 = "f00cdbc21bcd581b719bdb5ed89048374cbcceac76d9913e2fe43454ed3632be"
 source = "https://github.com/dotnet/cli/archive/243f6de49b3c4c16dd1a6413c39f463fcbdcf58d.tar.gz"
 source_sha256 = "47e87c339c0069b6f487fa7077d7db41eff18d9334b1753d885d6568062b45cc"
-stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+stacks = ["org.cloudfoundry.stacks.cflinuxfs3", "io.buildpacks.stacks.bionic"]
 uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.1.12.linux-amd64-cflinuxfs3-f00cdbc2.tar.xz"
 version = "2.1.12"
 
@@ -23,7 +23,7 @@ id = "dotnet-runtime"
 sha256 = "1879da5f9cd2d3fe3e39beec21daf5eaf19df34a9d6378c13f1fce7434d74b9f"
 source = "https://github.com/dotnet/cli/archive/9b0b46aacc95a4e12fa7df23aa2c19dec1dacc03.tar.gz"
 source_sha256 = "ecedcefdf5d8090e83c4f150ea2fa802f5dd92a2c3e1bb23b82a69fe1a9c9f18"
-stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+stacks = ["org.cloudfoundry.stacks.cflinuxfs3", "io.buildpacks.stacks.bionic"]
 uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.1.13.linux-amd64-cflinuxfs3-1879da5f.tar.xz"
 version = "2.1.13"
 
@@ -32,7 +32,7 @@ id = "dotnet-runtime"
 sha256 = "915829b4fe61f0770f419df17febd38aaf228e5e796039a1e03947064d79f2f1"
 source = "https://github.com/dotnet/cli/archive/3e0e612cb176daae0fce6ca54608d40428c9d27e.tar.gz"
 source_sha256 = "e7a0d34b933d2dcac5d7536ab850f75af967b52567c82cd75e36e7d8145c9c2e"
-stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+stacks = ["org.cloudfoundry.stacks.cflinuxfs3", "io.buildpacks.stacks.bionic"]
 uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.2.6.linux-amd64-cflinuxfs3-915829b4.tar.xz"
 version = "2.2.6"
 
@@ -41,7 +41,7 @@ id = "dotnet-runtime"
 sha256 = "4d6dfb78b9efc3fe4ad5fe351daedba1097994e417517ffb3f461d9fe22f2169"
 source = "https://github.com/dotnet/cli/archive/7a42b83262bb2b52804a2c14b4fad289d794c8be.tar.gz"
 source_sha256 = "0b4a86f13d63418636762a997ecac5acd5ce5a8d59ff28f8a0f3e7a0c701ff4e"
-stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+stacks = ["org.cloudfoundry.stacks.cflinuxfs3", "io.buildpacks.stacks.bionic"]
 uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.2.7.linux-amd64-cflinuxfs3-4d6dfb78.tar.xz"
 version = "2.2.7"
 
@@ -50,7 +50,7 @@ id = "dotnet-runtime"
 sha256 = "a870ada6e456dc6ecf87c58d14f345038d6ff2968340c66e6f571cf0773e9dc5"
 source = "https://download.visualstudio.microsoft.com/download/pr/a5ff9cbb-d558-49d1-9fd2-410cb1c8b095/a940644f4133b81446cb3733a620983a/dotnet-runtime-3.0.0-linux-x64.tar.gz"
 source_sha256 = "dea07b9c3cb102c042f3c4b9a500347bdbf214f03e78dfe9738de974544fffa1"
-stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+stacks = ["org.cloudfoundry.stacks.cflinuxfs3", "io.buildpacks.stacks.bionic"]
 uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.3.0.0.linux-amd64-cflinuxfs3-a870ada6.tar.xz"
 version = "3.0.0"
 
@@ -68,3 +68,6 @@ version_line = "2.2.x"
 
 [[stacks]]
 id = "org.cloudfoundry.stacks.cflinuxfs3"
+
+[[stacks]]
+id = "io.buildpacks.stacks.bionic"
