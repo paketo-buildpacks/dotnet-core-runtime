@@ -2,13 +2,14 @@ package runtime
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/cloudfoundry/dotnet-core-conf-cnb/utils"
 	"github.com/cloudfoundry/libcfbuildpack/build"
 	"github.com/cloudfoundry/libcfbuildpack/buildpackplan"
 	"github.com/cloudfoundry/libcfbuildpack/helper"
 	"github.com/cloudfoundry/libcfbuildpack/layers"
 	"github.com/cloudfoundry/libcfbuildpack/logger"
-	"path/filepath"
 )
 
 const DotnetRuntime = "dotnet-runtime"
@@ -16,13 +17,14 @@ const DotnetRuntime = "dotnet-runtime"
 type Contributor struct {
 	context      build.Build
 	plan         buildpackplan.Plan
+	version      string
 	runtimeLayer layers.DependencyLayer
 	logger       logger.Logger
 }
 
 type BuildpackYAML struct {
 	Config struct {
-		Version string `yaml:"version""`
+		Version string `yaml:"version"`
 	} `yaml:"dotnet-framework"`
 }
 
@@ -71,6 +73,7 @@ func NewContributor(context build.Build) (Contributor, bool, error) {
 	return Contributor{
 		context:      context,
 		plan:         plan,
+		version:      dep.Version.Version.String(),
 		runtimeLayer: context.Layers.DependencyLayer(dep),
 		logger:       context.Logger,
 	}, true, nil
@@ -89,14 +92,17 @@ func (c Contributor) Contribute() error {
 			return err
 		}
 
+		if err := layer.OverrideBuildEnv("RUNTIME_VERSION", c.version); err != nil {
+			return err
+		}
 
 		return nil
 	}, getFlags(c.plan.Metadata)...)
 }
 
-func getFlags(metadata buildpackplan.Metadata) []layers.Flag{
+func getFlags(metadata buildpackplan.Metadata) []layers.Flag {
 	flagsArray := []layers.Flag{}
-	flagValueMap := map[string]layers.Flag {"build": layers.Build, "launch": layers.Launch, "cache": layers.Cache}
+	flagValueMap := map[string]layers.Flag{"build": layers.Build, "launch": layers.Launch, "cache": layers.Cache}
 	for _, flagName := range []string{"build", "launch", "cache"} {
 		flagPresent, _ := metadata[flagName].(bool)
 		if flagPresent {
