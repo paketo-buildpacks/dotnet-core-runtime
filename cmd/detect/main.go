@@ -2,15 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/cloudfoundry/dotnet-core-conf-cnb/utils"
 	"github.com/cloudfoundry/dotnet-core-runtime-cnb/runtime"
-	"os"
 
 	"github.com/buildpack/libbuildpack/buildplan"
 	"github.com/cloudfoundry/libcfbuildpack/detect"
 )
-
-
 
 func main() {
 	context, err := detect.DefaultDetect()
@@ -36,7 +35,7 @@ func runDetect(context detect.Detect) (int, error) {
 		return context.Fail(), err
 	}
 
-	hasFDE, err := runtimeConfig.HasFDE()
+	hasFDE, err := runtimeConfig.HasExecutable()
 	if err != nil {
 		return context.Fail(), err
 	}
@@ -56,5 +55,3 @@ func runDetect(context detect.Detect) (int, error) {
 
 	return context.Pass(plan)
 }
-
-
