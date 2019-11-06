@@ -16,20 +16,45 @@ import (
 )
 
 var (
-	runtimeURI string
+	runtimeURI, builder string
+	bpList              []string
 )
 
-func TestIntegration(t *testing.T) {
-	RegisterTestingT(t)
+const testBuildpack = "test-buildpack"
+
+func BeforeSuite() {
 	root, err := dagger.FindBPRoot()
 	Expect(err).ToNot(HaveOccurred())
 	runtimeURI, err = dagger.PackageBuildpack(root)
 	Expect(err).NotTo(HaveOccurred())
-	defer func() {
-		dagger.DeleteBuildpack(runtimeURI)
-	}()
 
+	config, err := dagger.ParseConfig("config.json")
+	Expect(err).NotTo(HaveOccurred())
+
+	builder = config.Builder
+
+	for _, bp := range config.BuildpackOrder[builder] {
+		var bpURI string
+		if bp == testBuildpack {
+			bpList = append(bpList, runtimeURI)
+			continue
+		}
+		bpURI, err = dagger.GetLatestBuildpack(bp)
+		Expect(err).NotTo(HaveOccurred())
+		bpList = append(bpList, bpURI)
+	}
+}
+
+func AfterSuite() {
+	for _, bp := range bpList {
+		Expect(dagger.DeleteBuildpack(bp)).To(Succeed())
+	}
+}
+func TestIntegration(t *testing.T) {
+	RegisterTestingT(t)
+	BeforeSuite()
 	spec.Run(t, "Integration", testIntegration, spec.Report(report.Terminal{}))
+	AfterSuite()
 }
 
 func testIntegration(t *testing.T, _ spec.G, it spec.S) {
@@ -51,10 +76,16 @@ func testIntegration(t *testing.T, _ spec.G, it spec.S) {
 		app, err = dagger.NewPack(
 			filepath.Join("testdata", "simple_app"),
 			dagger.RandomImage(),
-			dagger.SetBuildpacks(runtimeURI),
+			dagger.SetBuildpacks(bpList...),
+			dagger.SetBuilder(builder),
 		).Build()
 		Expect(err).ToNot(HaveOccurred())
 		app.Memory = "128m"
+
+		if builder == "bionic" {
+			app.SetHealthCheck("stat /workspace", "2s", "15s")
+		}
+
 		Expect(app.StartWithCommand("./source_code")).To(Succeed())
 
 		body, _, err := app.HTTPGet("/")
@@ -77,10 +108,16 @@ dotnet-framework:
 		app, err = dagger.NewPack(
 			filepath.Join("testdata", "simple_app_with_buildpack_yml"),
 			dagger.RandomImage(),
-			dagger.SetBuildpacks(runtimeURI),
+			dagger.SetBuildpacks(bpList...),
+			dagger.SetBuilder(builder),
 		).Build()
 		Expect(err).ToNot(HaveOccurred())
 		app.Memory = "128m"
+
+		if builder == "bionic" {
+			app.SetHealthCheck("stat /workspace", "2s", "15s")
+		}
+
 		Expect(app.StartWithCommand("./source_code")).To(Succeed())
 
 		Expect(app.BuildLogs()).To(ContainSubstring(fmt.Sprintf("dotnet-runtime.%s", version)))
