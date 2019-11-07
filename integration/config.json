@@ -2,7 +2,7 @@
   "builder" : "cflinuxfs3",
 	"buildpackOrder" : {
 		"bionic": ["icu-cnb", "test-buildpack", "dotnet-core-conf-cnb"],
-		"cflinuxfs3": ["dotnet-core-runtime-cnb", "dotnet-core-conf-cnb"]
+		"cflinuxfs3": ["test-buildpack", "dotnet-core-conf-cnb"]
 	}
 }
 
