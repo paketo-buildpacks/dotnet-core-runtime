@@ -29,6 +29,15 @@ api = "0.2"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
+    sha256 = "b569ddf9529fd0e956c41a537a9defe43e83baaf9b35ff69f4538c13df3ba488"
+    source = "https://download.visualstudio.microsoft.com/download/pr/5f7daa05-c09f-41c3-b607-eabeefb6b677/1effcfea7b7f5208de533db8686f6e0f/dotnet-runtime-2.1.14-linux-x64.tar.gz"
+    source_sha256 = "2350dc4c68f2110930996e84c64b3e82d8a623c959e0138df92807a9d35a3877"
+    stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.1.14.linux-amd64-cflinuxfs3-b569ddf9.tar.xz"
+    version = "2.1.14"
+
+  [[metadata.dependencies]]
+    id = "dotnet-runtime"
     sha256 = "915829b4fe61f0770f419df17febd38aaf228e5e796039a1e03947064d79f2f1"
     source = "https://github.com/dotnet/cli/archive/3e0e612cb176daae0fce6ca54608d40428c9d27e.tar.gz"
     source_sha256 = "e7a0d34b933d2dcac5d7536ab850f75af967b52567c82cd75e36e7d8145c9c2e"
