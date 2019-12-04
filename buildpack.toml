@@ -83,11 +83,11 @@ api = "0.2"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
-    sha256 = "6817128c9ec5e408fc9e4ba5a419661ce5f004d82818cdcf617c15fb972131a0"
+    sha256 = "70b27eb07bdcefe2b1ec50fabae8f65d87735f2d4209bd2caa811ec4eb202dd4"
     source = "https://download.visualstudio.microsoft.com/download/pr/5d139dff-4ca0-4e0c-a68b-0976281d5b2d/d306f725466e058842faa25bf1b2f379/dotnet-runtime-3.1.0-linux-x64.tar.gz"
     source_sha256 = "3fd138add3787c5edf6446245b821dbe0b4acae032c2b9a4cc2b8eac2d9b9997"
-    stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.3.1.0.linux-amd64-cflinuxfs3-6817128c.tar.xz"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.3.1.0.linux-amd64-any-stack-70b27eb0.tar.xz"
     version = "3.1.0"
 
   [[metadata.dependency_deprecation_dates]]
