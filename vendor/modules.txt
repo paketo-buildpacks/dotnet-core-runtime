@@ -25,7 +25,7 @@ github.com/cloudfoundry/dagger/utils
 # github.com/cloudfoundry/dotnet-core-conf-cnb v0.0.64
 github.com/cloudfoundry/dotnet-core-conf-cnb/utils
 github.com/cloudfoundry/dotnet-core-conf-cnb/utils/dotnettesting
-# github.com/cloudfoundry/libcfbuildpack v1.91.14
+# github.com/cloudfoundry/libcfbuildpack v1.91.15
 github.com/cloudfoundry/libcfbuildpack/build
 github.com/cloudfoundry/libcfbuildpack/buildpack
 github.com/cloudfoundry/libcfbuildpack/buildpackplan
