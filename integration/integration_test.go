@@ -94,7 +94,7 @@ func testIntegration(t *testing.T, _ spec.G, it spec.S) {
 	})
 
 	it("runs a simple framework-dependent deployment with a framework-dependent executable that has a buildpack.yml in it", func() {
-		majorMinor := "2.2"
+		majorMinor := "2.1"
 		version, err := dotnettesting.GetLowestRuntimeVersionInMajorMinor(majorMinor, filepath.Join("..", "buildpack.toml"))
 		Expect(err).ToNot(HaveOccurred())
 		bpYml := fmt.Sprintf(`---
