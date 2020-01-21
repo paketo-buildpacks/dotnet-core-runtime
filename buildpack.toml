@@ -70,7 +70,13 @@ api = "0.2"
     version_line = "2.1.x"
 
   [[metadata.dependency_deprecation_dates]]
-    date = 2022-12-04T00:00:00Z
+    date = 2020-03-03T00:00:00Z
+    link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
+    name = "dotnet-runtime"
+    version_line = "3.0.x"
+
+  [[metadata.dependency_deprecation_dates]]
+    date = 2022-12-03T00:00:00Z
     link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
     name = "dotnet-runtime"
     version_line = "3.1.x"
