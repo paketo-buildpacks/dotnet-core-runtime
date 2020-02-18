@@ -47,21 +47,21 @@ api = "0.2"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
-    sha256 = "70b27eb07bdcefe2b1ec50fabae8f65d87735f2d4209bd2caa811ec4eb202dd4"
-    source = "https://download.visualstudio.microsoft.com/download/pr/5d139dff-4ca0-4e0c-a68b-0976281d5b2d/d306f725466e058842faa25bf1b2f379/dotnet-runtime-3.1.0-linux-x64.tar.gz"
-    source_sha256 = "3fd138add3787c5edf6446245b821dbe0b4acae032c2b9a4cc2b8eac2d9b9997"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.3.1.0.linux-amd64-any-stack-70b27eb0.tar.xz"
-    version = "3.1.0"
-
-  [[metadata.dependencies]]
-    id = "dotnet-runtime"
     sha256 = "6cb244edb9899f3d23d029034b39ad3563ee7bd2147ef27956dc31d58a14c517"
     source = "https://download.visualstudio.microsoft.com/download/pr/e060c2eb-1476-4d70-857c-24f5eead2070/ff0e007b7373c04f754b3818ffdb2134/dotnet-runtime-3.1.1-linux-x64.tar.gz"
     source_sha256 = "e049ceeeb912e873534fb0871b3b147deae59dc315236c69731a168d6639adae"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.3.1.1.linux-amd64-any-stack-6cb244ed.tar.xz"
     version = "3.1.1"
+
+  [[metadata.dependencies]]
+    id = "dotnet-runtime"
+    sha256 = "aa9fc821099a28966d72d662c150c0caee729c4de99620e3f8aac10347d86c8e"
+    source = "https://download.visualstudio.microsoft.com/download/pr/38269fba-9fdb-4723-a14c-067cc316827d/53e4161da346d70404375fb8804ee91a/dotnet-runtime-3.1.2-linux-x64.tar.gz"
+    source_sha256 = "5c6dc963344c26a67d6268e15c96c0155a456f8dc34f20b1076e9e51bac7ea2c"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.3.1.2.linux-amd64-any-stack-aa9fc821.tar.xz"
+    version = "3.1.2"
 
   [[metadata.dependency_deprecation_dates]]
     date = 2021-08-21T00:00:00Z
@@ -76,7 +76,7 @@ api = "0.2"
     version_line = "3.0.x"
 
   [[metadata.dependency_deprecation_dates]]
-    date = 2022-12-03T00:00:00Z
+    date = 2022-12-04T00:00:00Z
     link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
     name = "dotnet-runtime"
     version_line = "3.1.x"
