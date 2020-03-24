@@ -29,21 +29,22 @@ api = "0.2"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
-    sha256 = "6cb244edb9899f3d23d029034b39ad3563ee7bd2147ef27956dc31d58a14c517"
-    source = "https://download.visualstudio.microsoft.com/download/pr/e060c2eb-1476-4d70-857c-24f5eead2070/ff0e007b7373c04f754b3818ffdb2134/dotnet-runtime-3.1.1-linux-x64.tar.gz"
-    source_sha256 = "e049ceeeb912e873534fb0871b3b147deae59dc315236c69731a168d6639adae"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.3.1.1.linux-amd64-any-stack-6cb244ed.tar.xz"
-    version = "3.1.1"
-
-  [[metadata.dependencies]]
-    id = "dotnet-runtime"
     sha256 = "aa9fc821099a28966d72d662c150c0caee729c4de99620e3f8aac10347d86c8e"
     source = "https://download.visualstudio.microsoft.com/download/pr/38269fba-9fdb-4723-a14c-067cc316827d/53e4161da346d70404375fb8804ee91a/dotnet-runtime-3.1.2-linux-x64.tar.gz"
     source_sha256 = "5c6dc963344c26a67d6268e15c96c0155a456f8dc34f20b1076e9e51bac7ea2c"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.3.1.2.linux-amd64-any-stack-aa9fc821.tar.xz"
     version = "3.1.2"
+
+  [[metadata.dependencies]]
+    deprecation_date = "2022-12-04T00:00:00Z"
+    id = "dotnet-runtime"
+    sha256 = "676e8b85b8474755e17eca5b1876d4741f62cb2ba4416128474f3107263fda5e"
+    source = "https://download.visualstudio.microsoft.com/download/pr/c1d419e7-4312-4464-b272-27bee7676560/22e7bb584ff56f3089c85d98b21c0445/dotnet-runtime-3.1.3-linux-x64.tar.gz"
+    source_sha256 = "e0a9d4a206caece4de6d39e7d95245b2357ae69280b1f3e1b19fb9de8e1c1174"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.3_linux_x64_any-stack_676e8b85.tar.xz"
+    version = "3.1.3"
 
   [[metadata.dependency_deprecation_dates]]
     date = 2021-08-21T00:00:00Z
