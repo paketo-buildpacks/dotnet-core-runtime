@@ -11,21 +11,22 @@ api = "0.2"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
-    sha256 = "d97abbf8bde59c16091193d2646c3bafef32f8dc34ee7cd4771e4a1218578f54"
-    source = "https://download.visualstudio.microsoft.com/download/pr/d2fb0b54-01ce-452c-b2a2-86dbef286265/055ad7740827cbe862d14ceb7ea54fac/dotnet-runtime-2.1.15-linux-x64.tar.gz"
-    source_sha256 = "089becb6063b2577d51fc5f09e61e2c0f896c36b2854b6d53a1ab7762b7a6cb6"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.1.15.linux-amd64-any-stack-d97abbf8.tar.xz"
-    version = "2.1.15"
-
-  [[metadata.dependencies]]
-    id = "dotnet-runtime"
     sha256 = "1753f11d02f864c0f5eba8de3fa4e954dffe4b9dfe6376b304d0e708d546290e"
     source = "https://download.visualstudio.microsoft.com/download/pr/bf08e56f-f5bb-4a11-80e6-f3e663f1d2ae/b589c7600042c20ca48de32bb388f145/dotnet-runtime-2.1.16-linux-x64.tar.gz"
     source_sha256 = "71c575e2eb1843b5015fba50d19743b605ef446712247c1d725c4d202fbf49e2"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.1.16.linux-amd64-any-stack-1753f11d.tar.xz"
     version = "2.1.16"
+
+  [[metadata.dependencies]]
+    deprecation_date = "2021-08-21T00:00:00Z"
+    id = "dotnet-runtime"
+    sha256 = "34d99c794df6aaf55d491f9c9b6faa3e5e94cac9da1f08674af53f1c251d55f3"
+    source = "https://download.visualstudio.microsoft.com/download/pr/a668ac5e-ffcc-419a-8c82-9e5feb7b2619/4108ef8aede75bbb569a359dff689c5c/dotnet-runtime-2.1.17-linux-x64.tar.gz"
+    source_sha256 = "f6e2fa7c920977a989302dcb39967df374b361d795379cbbd492a9e0c8feea3c"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.17_linux_x64_any-stack_34d99c79.tar.xz"
+    version = "2.1.17"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
