@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/cloudfoundry/dotnet-core-conf-cnb/utils"
 	"github.com/cloudfoundry/libcfbuildpack/build"
 	"github.com/cloudfoundry/libcfbuildpack/buildpackplan"
 	"github.com/cloudfoundry/libcfbuildpack/helper"
@@ -48,13 +47,13 @@ func NewContributor(context build.Build) (Contributor, bool, error) {
 		}
 
 		if buildpackYAML != (BuildpackYAML{}) {
-			err := utils.BuildpackYAMLVersionCheck(rollForwardVersion, buildpackYAML.Config.Version)
+			err := BuildpackYAMLVersionCheck(rollForwardVersion, buildpackYAML.Config.Version)
 			if err != nil {
 				return Contributor{}, false, err
 			}
 			version = buildpackYAML.Config.Version
 		} else {
-			version, err = utils.FrameworkRollForward(rollForwardVersion, DotnetRuntime, context)
+			version, err = FrameworkRollForward(rollForwardVersion, DotnetRuntime, context)
 			if err != nil {
 				return Contributor{}, false, err
 			}

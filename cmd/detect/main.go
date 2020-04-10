@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cloudfoundry/dotnet-core-conf-cnb/utils"
 	"github.com/cloudfoundry/dotnet-core-runtime-cnb/runtime"
 
 	"github.com/buildpack/libbuildpack/buildplan"
@@ -30,7 +29,7 @@ func runDetect(context detect.Detect) (int, error) {
 	plan := buildplan.Plan{
 		Provides: []buildplan.Provided{{Name: runtime.DotnetRuntime}}}
 
-	runtimeConfig, err := utils.NewRuntimeConfig(context.Application.Root)
+	runtimeConfig, err := runtime.NewRuntimeConfig(context.Application.Root)
 	if err != nil {
 		return context.Fail(), err
 	}
