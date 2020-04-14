@@ -37,7 +37,7 @@ file that looks like the following:
     # Setting the build flag to true will ensure that the Dotnet Core Runtime
     # dependency is available to subsequent buildpacks during their build phase.
     # Currently we do not recommend having your application directly interface with
-    # the runtimes instead use the dotnet-core-sdk-cnb. However,
+    # the runtimes instead use the dotnet-core-sdk. However,
     # if you are writing a buildpack that needs to use the dotnet core runtime during
     # its build process, this flag should be set to true.
     build = true
