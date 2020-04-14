@@ -1,10 +1,17 @@
 # Dotnet Core Runtime Cloud Native Buildpack
 
+The Dotnet Core Runtime CNB provides a version of the [Dotnet Core
+Runtime](https://github.com/dotnet/runtime) and sets the initial `$DOTNET_ROOT`
+location.
+
 ## Integration
 
-The Dotnet Core Runtime CNB provides the dotnet core runtime as a dependency. Downstream buildpacks, like
-[Dotnet Core Build](https://github.com/paketo-buildpacks/dotnet-core-build) or
-by generating a [Build Plan
+The Dotnet Core Runtime CNB provides dotnet-runtime as a dependency.
+Downstream buildpacks, like [Dotnet Core
+Build](https://github.com/paketo-buildpacks/dotnet-core-build), [Dotnet Core
+ASPNet](https://github.com/paketo-buildpacks/dotnet-core-aspnet) and [Dotnet
+Core SDK](https://github.com/paketo-buildpacks/dotnet-core-sdk) can require the
+dotnet-runtime dependency by generating a [Build Plan
 TOML](https://github.com/buildpacks/spec/blob/master/buildpack.md#build-plan-toml)
 file that looks like the following:
 
@@ -34,6 +41,12 @@ file that looks like the following:
     # if you are writing a buildpack that needs to use the dotnet core runtime during
     # its build process, this flag should be set to true.
     build = true
+
+    # Setting the launch flag to true will ensure that the Dotnet Core Runtime
+    # dependency is available on the $DOTNET_ROOT for the running application. If you are
+    # writing an application that needs to run Dotnet Core Runtime at runtime, this flag should
+    # be set to true.
+    launch = true
 ```
 
 ### Specifying runtime versions
