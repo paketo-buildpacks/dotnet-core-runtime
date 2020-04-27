@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/cloudfoundry/dotnet-core-runtime-cnb/runtime"
 	"github.com/cloudfoundry/libcfbuildpack/test"
+	"github.com/paketo-buildpacks/dotnet-core-runtime/runtime"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
 

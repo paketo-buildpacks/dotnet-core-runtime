@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/buildpack/libbuildpack/buildplan"
-	"github.com/cloudfoundry/dotnet-core-runtime-cnb/runtime"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
-	. "github.com/onsi/gomega"
-
+	"github.com/buildpack/libbuildpack/buildplan"
 	"github.com/cloudfoundry/libcfbuildpack/detect"
 	"github.com/cloudfoundry/libcfbuildpack/test"
+	"github.com/paketo-buildpacks/dotnet-core-runtime/runtime"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestUnitDetect(t *testing.T) {

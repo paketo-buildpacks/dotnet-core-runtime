@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cloudfoundry/dotnet-core-runtime-cnb/runtime"
-
 	"github.com/cloudfoundry/libcfbuildpack/build"
+	"github.com/paketo-buildpacks/dotnet-core-runtime/runtime"
 )
 
 func main() {
