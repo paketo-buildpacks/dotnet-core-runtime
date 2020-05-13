@@ -10,15 +10,6 @@ api = "0.2"
   pre_package = "./scripts/build.sh"
 
   [[metadata.dependencies]]
-    id = "dotnet-runtime"
-    sha256 = "1753f11d02f864c0f5eba8de3fa4e954dffe4b9dfe6376b304d0e708d546290e"
-    source = "https://download.visualstudio.microsoft.com/download/pr/bf08e56f-f5bb-4a11-80e6-f3e663f1d2ae/b589c7600042c20ca48de32bb388f145/dotnet-runtime-2.1.16-linux-x64.tar.gz"
-    source_sha256 = "71c575e2eb1843b5015fba50d19743b605ef446712247c1d725c4d202fbf49e2"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime.2.1.16.linux-amd64-any-stack-1753f11d.tar.xz"
-    version = "2.1.16"
-
-  [[metadata.dependencies]]
     deprecation_date = "2021-08-21T00:00:00Z"
     id = "dotnet-runtime"
     sha256 = "34d99c794df6aaf55d491f9c9b6faa3e5e94cac9da1f08674af53f1c251d55f3"
@@ -27,6 +18,16 @@ api = "0.2"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.17_linux_x64_any-stack_34d99c79.tar.xz"
     version = "2.1.17"
+
+  [[metadata.dependencies]]
+    deprecation_date = "2021-08-21T00:00:00Z"
+    id = "dotnet-runtime"
+    sha256 = "a914a3c5977ed0cfe4c6fb1da3e6ead69366c33d0c75ee400b9f9135610a4a57"
+    source = "https://download.visualstudio.microsoft.com/download/pr/6e807a9b-e080-4daa-9224-9c12a8a3a673/fb96d3545590177aecf9feec1ff07876/dotnet-runtime-2.1.18-linux-x64.tar.gz"
+    source_sha256 = "6c8c3aab15ee99fc2f5f71cb4ed5c1693677e5b651c6428bf5bae13aa3411ef4"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.18_linux_x64_any-stack_a914a3c5.tar.xz"
+    version = "2.1.18"
 
   [[metadata.dependencies]]
     deprecation_date = "2022-12-04T00:00:00Z"

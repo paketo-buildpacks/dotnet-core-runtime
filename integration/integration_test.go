@@ -120,7 +120,7 @@ dotnet-framework:
 
 		Expect(app.StartWithCommand("./source_code")).To(Succeed())
 
-		Expect(app.BuildLogs()).To(ContainSubstring(fmt.Sprintf("dotnet-runtime.%s", version)))
+		Expect(app.BuildLogs()).To(ContainSubstring(fmt.Sprintf("dotnet-runtime_%s", version)))
 
 		body, _, err := app.HTTPGet("/")
 		Expect(err).NotTo(HaveOccurred())
