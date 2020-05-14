@@ -4,6 +4,7 @@ api = "0.2"
   id = "paketo-buildpacks/dotnet-core-runtime"
   name = ".NETCore Runtime Buildpack"
   version = "{{ .Version }}"
+  homepage = "https://github.com/paketo-buildpacks/dotnet-core-runtime"
 
 [metadata]
   include_files = ["bin/build", "bin/detect", "buildpack.toml", "go.mod", "go.sum"]
