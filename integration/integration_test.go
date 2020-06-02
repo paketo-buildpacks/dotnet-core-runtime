@@ -68,7 +68,7 @@ func testIntegration(t *testing.T, _ spec.G, it spec.S) {
 	})
 	it.After(func() {
 		if app != nil {
-			app.Destroy()
+			Expect(app.Destroy()).To(Succeed())
 		}
 	})
 

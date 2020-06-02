@@ -120,6 +120,9 @@ func LoadBuildpackYAML(appRoot string) (BuildpackYAML, error) {
 		return BuildpackYAML{}, err
 	} else if exists {
 		err = helper.ReadBuildpackYaml(bpYamlPath, &buildpackYAML)
+		if err != nil {
+			return BuildpackYAML{}, err
+		}
 	}
 	return buildpackYAML, err
 }
