@@ -3,6 +3,8 @@ package integration
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -22,10 +24,34 @@ var (
 
 const testBuildpack = "test-buildpack"
 
+func Package(root, version string, cached bool) (string, error) {
+	var cmd *exec.Cmd
+
+	bpPath := filepath.Join(root, "artifact")
+	if cached {
+		cmd = exec.Command(".bin/packager", "--archive", "--version", version, fmt.Sprintf("%s-cached", bpPath))
+	} else {
+		cmd = exec.Command(".bin/packager", "--archive", "--uncached", "--version", version, bpPath)
+	}
+
+	cmd.Env = append(os.Environ(), fmt.Sprintf("PACKAGE_DIR=%s", bpPath))
+	cmd.Dir = root
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+
+	if cached {
+		return fmt.Sprintf("%s-cached.tgz", bpPath), err
+	}
+
+	return fmt.Sprintf("%s.tgz", bpPath), err
+}
+
 func BeforeSuite() {
-	root, err := dagger.FindBPRoot()
+	root, err := filepath.Abs("./..")
 	Expect(err).ToNot(HaveOccurred())
-	runtimeURI, err = dagger.PackageBuildpack(root)
+
+	runtimeURI, err = Package(root, "1.2.3", false)
 	Expect(err).NotTo(HaveOccurred())
 
 	config, err := dagger.ParseConfig("config.json")
@@ -50,6 +76,7 @@ func AfterSuite() {
 		Expect(dagger.DeleteBuildpack(bp)).To(Succeed())
 	}
 }
+
 func TestIntegration(t *testing.T) {
 	RegisterTestingT(t)
 	BeforeSuite()
