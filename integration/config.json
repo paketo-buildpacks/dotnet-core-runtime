@@ -1,8 +1,8 @@
 {
-  "builder" : "cflinuxfs3",
+  "builder" : "bionic",
 	"buildpackOrder" : {
-		"bionic": ["icu-cnb", "test-buildpack", "dotnet-core-conf-cnb"],
-		"cflinuxfs3": ["test-buildpack", "dotnet-core-conf-cnb"]
+		"bionic": ["icu", "test-buildpack", "dotnet-execute"],
+		"cflinuxfs3": ["test-buildpack", "dotnet-execute"]
 	}
 }
 
