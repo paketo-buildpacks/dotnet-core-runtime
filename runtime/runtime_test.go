@@ -35,6 +35,7 @@ func testDotnet(t *testing.T, when spec.G, it spec.S) {
 		when("when there is no buildpack.yml", func() {
 			it("returns true if a build plan exists and matching version is found", func() {
 				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.2.5"})
+				factory.AddPlan(buildpackplan.Plan{Name: DotnetRuntime, Version: "2.2.5"})
 
 				_, willContribute, err := NewContributor(factory.Build)
 				Expect(err).NotTo(HaveOccurred())
