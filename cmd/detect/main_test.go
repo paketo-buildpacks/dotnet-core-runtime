@@ -53,7 +53,7 @@ func testDetect(t *testing.T, when spec.G, it spec.S) {
 				Requires: []buildplan.Required{{
 					Name:     runtime.DotnetRuntime,
 					Version:  "2.2.5",
-					Metadata: buildplan.Metadata{"launch": true},
+					Metadata: buildplan.Metadata{"build": true, "launch": true},
 				}},
 			}))
 		})
