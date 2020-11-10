@@ -50,6 +50,15 @@ api = "0.2"
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.10_linux_x64_any-stack_c241f236.tar.xz"
     version = "3.1.10"
 
+  [[metadata.dependencies]]
+    id = "dotnet-runtime"
+    sha256 = "e684505482712c3c2edc689d2619a5460d0c0842f606d2809c97363b0d60a66d"
+    source = "https://download.visualstudio.microsoft.com/download/pr/c84d49aa-200c-4400-a517-87cce5b7516d/94c89b00380eb212e19538b05f8cb968/dotnet-runtime-5.0.0-linux-x64.tar.gz"
+    source_sha256 = "8d1b27cc293cc706a6852508405b803a50c8898a0f1e901ded16baa88d2d463f"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_5.0.0_linux_x64_any-stack_e6845054.tar.xz"
+    version = "5.0.0"
+
   [[metadata.dependency_deprecation_dates]]
     date = 2021-08-21T00:00:00Z
     link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
