@@ -33,22 +33,22 @@ api = "0.2"
   [[metadata.dependencies]]
     deprecation_date = "2022-12-04T00:00:00Z"
     id = "dotnet-runtime"
-    sha256 = "a1e739c553f61337bcd642ba3077047628f104023116c4eac1587fd00426ea3f"
-    source = "https://download.visualstudio.microsoft.com/download/pr/e4e47a0a-132e-416a-b8eb-f3373ad189d9/43af4412e27696c3c16e50f496f6c7af/dotnet-runtime-3.1.8-linux-x64.tar.gz"
-    source_sha256 = "c50800e02cea23609ec6a009b1fbfe6b1f7ec4634c54bee089f918fca8fe2323"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.8_linux_x64_any-stack_a1e739c5.tar.xz"
-    version = "3.1.8"
-
-  [[metadata.dependencies]]
-    deprecation_date = "2022-12-04T00:00:00Z"
-    id = "dotnet-runtime"
     sha256 = "45c52c881bd6c9cbe8bd0b48fb4f2f71dd9ad9ae2124ce2ccc74efc82ad09064"
     source = "https://download.visualstudio.microsoft.com/download/pr/fb8a9fd4-c015-4c0e-a478-6da0b590bc39/d831b206c30e0aa23501b4a210dec9b1/dotnet-runtime-3.1.9-linux-x64.tar.gz"
     source_sha256 = "72417009bb23a7eaba88af4844d9e2aec6ce3ed8cdb5c14480c861fd417aaac5"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.9_linux_x64_any-stack_45c52c88.tar.xz"
     version = "3.1.9"
+
+  [[metadata.dependencies]]
+    deprecation_date = "2022-12-04T00:00:00Z"
+    id = "dotnet-runtime"
+    sha256 = "c241f236fccf8813f8d3be92ef26e06b695dc8d4305e480f74e76f8c1dd3c62b"
+    source = "https://download.visualstudio.microsoft.com/download/pr/9ca38d86-ce96-4647-8f27-a5807ac42d6a/081194806997d3152be461259cb0bdd2/dotnet-runtime-3.1.10-linux-x64.tar.gz"
+    source_sha256 = "991183e5551037d76f71910059e3e0b74e0806dfdbcf068e0c15cb46c0ae3349"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.10_linux_x64_any-stack_c241f236.tar.xz"
+    version = "3.1.10"
 
   [[metadata.dependency_deprecation_dates]]
     date = 2021-08-21T00:00:00Z
