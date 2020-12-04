@@ -1,0 +1,13 @@
+[[requires]]
+  name = "dotnet-core-runtime"
+
+  [requires.metadata]
+    launch = true
+    build = true
+
+[[requires]]
+  name = "icu"
+
+  [requires.metadata]
+    launch = true
+    build = true
