@@ -1,88 +1,53 @@
 #!/usr/bin/env bash
 
-set -eu
+set -e
+set -u
 set -o pipefail
 
 readonly PROGDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BUILDPACKDIR="$(cd "${PROGDIR}/.." && pwd)"
 
 function main() {
-  while [[ "${#}" != 0 ]]; do
-    case "${1}" in
-      --help|-h)
-        shift 1
-        usage
-        exit 0
-        ;;
+    mkdir -p "${BUILDPACKDIR}/bin"
 
-      "")
-        # skip if the argument is empty
-        shift 1
-        ;;
+    if [[ -f "${BUILDPACKDIR}/run/main.go" ]]; then
+        pushd "${BUILDPACKDIR}/bin" > /dev/null || return
+            printf "%s" "Building run..."
 
-      *)
-        util::print::error "unknown argument \"${1}\""
-    esac
-  done
+            GOOS=linux \
+              go build \
+                -ldflags="-s -w" \
+                -o "run" \
+                  "${BUILDPACKDIR}/run"
 
-  mkdir -p "${BUILDPACKDIR}/bin"
+            echo "Success!"
 
-  run::build
-  cmd::build
-}
+            for name in detect build; do
+              printf "%s" "Linking ${name}..."
 
-function usage() {
-  cat <<-USAGE
-build.sh [OPTIONS]
+              ln -sf "run" "${name}"
 
-Builds the buildpack executables.
+              echo "Success!"
+            done
+        popd > /dev/null || return
+    fi
 
-OPTIONS
-  --help  -h  prints the command usage
-USAGE
-}
+    if [[ -d "${BUILDPACKDIR}/cmd" ]]; then
+        local name
+        for src in "${BUILDPACKDIR}"/cmd/*; do
+            name="$(basename "${src}")"
 
-function run::build() {
-  if [[ -f "${BUILDPACKDIR}/run/main.go" ]]; then
-    pushd "${BUILDPACKDIR}/bin" > /dev/null || return
-      printf "%s" "Building run... "
+            printf "%s" "Building ${name}..."
 
-      GOOS=linux \
-        go build \
-          -ldflags="-s -w" \
-          -o "run" \
-            "${BUILDPACKDIR}/run"
+            GOOS="linux" \
+                go build \
+                    -ldflags="-s -w" \
+                    -o "${BUILDPACKDIR}/bin/${name}" \
+                        "${src}/main.go"
 
-      echo "Success!"
-
-      for name in detect build; do
-        printf "%s" "Linking ${name}... "
-
-        ln -sf "run" "${name}"
-
-        echo "Success!"
-      done
-    popd > /dev/null || return
-  fi
-}
-
-function cmd::build() {
-  if [[ -d "${BUILDPACKDIR}/cmd" ]]; then
-    local name
-    for src in "${BUILDPACKDIR}"/cmd/*; do
-      name="$(basename "${src}")"
-
-      printf "%s" "Building ${name}... "
-
-      GOOS="linux" \
-        go build \
-          -ldflags="-s -w" \
-          -o "${BUILDPACKDIR}/bin/${name}" \
-            "${src}/main.go"
-
-      echo "Success!"
-    done
-  fi
+            echo "Success!"
+        done
+    fi
 }
 
 main "${@:-}"
