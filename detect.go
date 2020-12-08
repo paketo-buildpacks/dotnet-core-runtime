@@ -21,7 +21,7 @@ func Detect(buildpackYMLParser VersionParser) packit.DetectFunc {
 
 		if version != "" {
 			requirements = append(requirements, packit.BuildPlanRequirement{
-				Name: "dotnet-core-runtime",
+				Name: "dotnet-runtime",
 				Metadata: map[string]interface{}{
 					"version-source": "buildpack.yml",
 					"version":        version,
@@ -32,7 +32,7 @@ func Detect(buildpackYMLParser VersionParser) packit.DetectFunc {
 		return packit.DetectResult{
 			Plan: packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
-					{Name: "dotnet-core-runtime"},
+					{Name: "dotnet-runtime"},
 				},
 				Requires: requirements,
 			},

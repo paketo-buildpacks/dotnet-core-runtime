@@ -45,7 +45,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Plan).To(Equal(packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
 					{
-						Name: "dotnet-core-runtime",
+						Name: "dotnet-runtime",
 					},
 				},
 			}))
@@ -65,12 +65,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Plan).To(Equal(packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
 					{
-						Name: "dotnet-core-runtime",
+						Name: "dotnet-runtime",
 					},
 				},
 				Requires: []packit.BuildPlanRequirement{
 					{
-						Name: "dotnet-core-runtime",
+						Name: "dotnet-runtime",
 						Metadata: map[string]interface{}{
 							"version-source": "buildpack.yml",
 							"version":        "1.2.3",
