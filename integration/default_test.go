@@ -2,8 +2,6 @@ package integration_test
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,7 +10,6 @@ import (
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
-	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
 func testDefault(t *testing.T, context spec.G, it spec.S) {
@@ -49,7 +46,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
-		it("builds an oci image has the correct behavior", func() {
+		it("installs the dotnet runtime into a layer", func() {
 			var err error
 			source, err = occam.Source(filepath.Join("testdata", "simple_app"))
 			Expect(err).NotTo(HaveOccurred())
@@ -66,19 +63,20 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
 			container, err = docker.Container.Run.
-				WithCommand("./source_code --url 0.0.0.0:8080").
+				WithCommand("ls -al $DOTNET_ROOT").
 				Execute(image.ID)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(container).Should(BeAvailable())
-
-			response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
-			Expect(err).NotTo(HaveOccurred())
-			Expect(response.StatusCode).To(Equal(http.StatusOK))
-
-			content, err := ioutil.ReadAll(response.Body)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(string(content)).To(ContainSubstring("Hello world"))
+			Eventually(func() string {
+				cLogs, err := docker.Container.Logs.Execute(container.ID)
+				Expect(err).NotTo(HaveOccurred())
+				return cLogs.String()
+			}).Should(
+				And(
+					MatchRegexp(`drwxr-xr-x \d+ cnb cnb  \d+ .* host`),
+					MatchRegexp(`drwxr-xr-x \d+ cnb cnb  \d+ .* shared`),
+				),
+			)
 		})
 	})
 }
