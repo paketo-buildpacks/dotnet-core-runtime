@@ -44,6 +44,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		cnbDir, err = ioutil.TempDir("", "cnb")
 		Expect(err).NotTo(HaveOccurred())
 
+		workingDir, err = ioutil.TempDir("", "working-dir")
+		Expect(err).NotTo(HaveOccurred())
+
 		err = ioutil.WriteFile(filepath.Join(cnbDir, "buildpack.toml"), []byte(`api = "0.2"
 [buildpack]
   id = "org.some-org.some-buildpack"
@@ -155,7 +158,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					Name: "dotnet-core-runtime",
 					Path: filepath.Join(layersDir, "dotnet-core-runtime"),
 					SharedEnv: packit.Environment{
-						"DOTNET_ROOT.override": filepath.Join(layersDir, "dotnet-core-runtime"),
+						"DOTNET_ROOT.override": filepath.Join(workingDir, ".dotnet_root"),
 					},
 					BuildEnv: packit.Environment{
 						"RUNTIME_VERSION.override": "2.5.x",
@@ -172,7 +175,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}))
 
-		Expect(filepath.Join(layersDir, "dotnet-core-runtime")).To(BeADirectory())
+		Expect(filepath.Join(workingDir, ".dotnet_root")).To(BeADirectory())
 
 		Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
 			{
