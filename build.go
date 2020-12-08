@@ -1,6 +1,7 @@
 package dotnetcoreruntime
 
 import (
+	"os"
 	"path/filepath"
 	"time"
 
@@ -45,10 +46,6 @@ func Build(entries EntryResolver, dependencies DependencyManager, planRefinery B
 			return packit.BuildResult{}, err
 		}
 
-		dotnetCoreRuntimeLayer.Launch = entry.Metadata["launch"] == true
-		dotnetCoreRuntimeLayer.Build = entry.Metadata["build"] == true
-		dotnetCoreRuntimeLayer.Cache = entry.Metadata["build"] == true
-
 		bom := planRefinery.BillOfMaterial(postal.Dependency{
 			ID:      dependency.ID,
 			Name:    dependency.Name,
@@ -64,6 +61,10 @@ func Build(entries EntryResolver, dependencies DependencyManager, planRefinery B
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
+
+		dotnetCoreRuntimeLayer.Launch = entry.Metadata["launch"] == true
+		dotnetCoreRuntimeLayer.Build = entry.Metadata["build"] == true
+		dotnetCoreRuntimeLayer.Cache = entry.Metadata["build"] == true
 
 		logger.Subprocess("Installing Dotnet Core Runtime %s", dependency.Version)
 		duration, err := clock.Measure(func() error {
@@ -81,7 +82,18 @@ func Build(entries EntryResolver, dependencies DependencyManager, planRefinery B
 			"built_at":       clock.Now().Format(time.RFC3339Nano),
 		}
 
-		dotnetCoreRuntimeLayer.SharedEnv.Override("DOTNET_ROOT", dotnetCoreRuntimeLayer.Path)
+		// Create .dotnet_root directory in working dir which will contain a symlink to the dotnetCoreRuntimeLayer.Path
+		err = os.Mkdir(filepath.Join(context.WorkingDir, ".dotnet_root"), os.ModePerm)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		if err := SymlinkSharedFolder(dotnetCoreRuntimeLayer.Path, filepath.Join(context.WorkingDir, ".dotnet_root")); err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		// Set DOTNET_ROOT to the symlink directory in the working directory, instead of setting it to  the layer path itself.
+		dotnetCoreRuntimeLayer.SharedEnv.Override("DOTNET_ROOT", filepath.Join(context.WorkingDir, ".dotnet_root"))
 		logger.Environment(dotnetCoreRuntimeLayer.SharedEnv)
 
 		dotnetCoreRuntimeLayer.BuildEnv.Override("RUNTIME_VERSION", version)

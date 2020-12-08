@@ -73,8 +73,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(
 				And(
-					MatchRegexp(`drwxr-xr-x \d+ cnb cnb  \d+ .* host`),
-					MatchRegexp(`drwxr-xr-x \d+ cnb cnb  \d+ .* shared`),
+					MatchRegexp(`lrwxrwxrwx \d+ cnb cnb   \d+ .* host -> \/layers\/paketo-buildpacks_dotnet-core-runtime\/dotnet-core-runtime\/host`),
+					MatchRegexp(`lrwxrwxrwx \d+ cnb cnb   \d+ .* shared -> \/layers\/paketo-buildpacks_dotnet-core-runtime\/dotnet-core-runtime\/shared`),
 				),
 			)
 		})
