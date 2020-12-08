@@ -1,13 +1,12 @@
 [[requires]]
-  name = "dotnet-core-runtime"
+  name = "dotnet-runtime"
 
   [requires.metadata]
     launch = true
-    build = true
+    version = "2.1.23"
 
 [[requires]]
   name = "icu"
 
   [requires.metadata]
     launch = true
-    build = true

@@ -67,12 +67,10 @@ func TestIntegration(t *testing.T) {
 	Expect(err).ToNot(HaveOccurred())
 
 	settings.Buildpacks.ICU.Online, err = buildpackStore.Get.
-		WithVersion("1.2.3").
 		Execute(settings.Config.ICU)
 	Expect(err).NotTo(HaveOccurred())
 
 	settings.Buildpacks.BuildPlan.Online, err = buildpackStore.Get.
-		WithVersion("1.2.3").
 		Execute(settings.Config.BuildPlan)
 	Expect(err).NotTo(HaveOccurred())
 

@@ -1,6 +1,8 @@
 package dotnetcoreruntime_test
 
 import (
+	"bytes"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -29,7 +31,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		clock             chronos.Clock
 		timeStamp         time.Time
 		planRefinery      *fakes.BuildPlanRefinery
-		// timestamp  time.Time
+		buffer            *bytes.Buffer
 
 		build packit.BuildFunc
 	)
@@ -50,7 +52,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 [metadata]
   [metadata.default-versions]
-    mri = "2.5.x"
+		dotnet-runtime = "2.5.x"
 
   [[metadata.dependencies]]
     id = "some-dep"
@@ -64,45 +66,44 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		entryResolver = &fakes.EntryResolver{}
 		entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
-			Name: "dotnet-core-runtime",
+			Name: "dotnet-runtime",
 			Metadata: map[string]interface{}{
 				"version-source": "buildpack.yml",
-				"version":        "1.2.3",
+				"version":        "2.5.x",
 				"launch":         true,
-				"build":          true,
 			},
 		}
 
 		dependencyManager = &fakes.DependencyManager{}
-		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{ID: "dotnet-runtime", Name: "Dotnet Core Runtime"}
+		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
+			ID:   "dotnet-runtime",
+			Name: "Dotnet Core Runtime",
+		}
 
 		planRefinery = &fakes.BuildPlanRefinery{}
+
+		planRefinery.BillOfMaterialCall.Returns.BuildpackPlan = packit.BuildpackPlan{
+			Entries: []packit.BuildpackPlanEntry{
+				{
+					Name: "dotnet-runtime",
+					Metadata: map[string]interface{}{
+						"version-source": "buildpack.yml",
+						"version":        "2.5.x",
+						"launch":         true,
+					},
+				},
+			},
+		}
+
+		buffer = bytes.NewBuffer(nil)
+		logEmitter := dotnetcoreruntime.NewLogEmitter(buffer)
 
 		timeStamp = time.Now()
 		clock = chronos.NewClock(func() time.Time {
 			return timeStamp
 		})
 
-		planRefinery.BillOfMaterialCall.Returns.BuildpackPlan = packit.BuildpackPlan{
-			Entries: []packit.BuildpackPlanEntry{
-				{
-					Name: "dotnet-core-runtime",
-					Metadata: map[string]interface{}{
-						"version-source": "buildpack.yml",
-						"version":        "1.2.3",
-						"launch":         true,
-						"build":          true,
-					},
-				},
-			},
-		}
-
-		// timestamp = time.Now()
-		// clock := chronos.NewClock(func() time.Time {
-		// 	return timestamp
-		// })
-
-		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, planRefinery)
+		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, planRefinery, logEmitter, clock)
 	})
 
 	it.After(func() {
@@ -111,7 +112,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
-	it.Focus("returns a result that installs the dotnet runtime libraries", func() {
+	it("returns a result that installs the dotnet runtime libraries", func() {
 		result, err := build(packit.BuildContext{
 			WorkingDir: workingDir,
 			CNBPath:    cnbDir,
@@ -123,7 +124,12 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Plan: packit.BuildpackPlan{
 				Entries: []packit.BuildpackPlanEntry{
 					{
-						Name: "dotnet-core-runtime",
+						Name: "dotnet-runtime",
+						Metadata: map[string]interface{}{
+							"version-source": "buildpack.yml",
+							"version":        "2.5.x",
+							"launch":         true,
+						},
 					},
 				},
 			},
@@ -135,32 +141,180 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Plan: packit.BuildpackPlan{
 				Entries: []packit.BuildpackPlanEntry{
 					{
-						Name: "dotnet-core-runtime",
+						Name: "dotnet-runtime",
 						Metadata: map[string]interface{}{
-							"name":   "dotnet-core-runtime-dependency-name",
-							"sha256": "dotnet-core-runtime-dependency-sha",
-							"stacks": []string{"some-stack"},
-							"uri":    "dotnet-core-runtime-dependency-uri",
+							"version-source": "buildpack.yml",
+							"version":        "2.5.x",
+							"launch":         true,
 						},
 					},
 				},
 			},
 			Layers: []packit.Layer{
 				{
-					Name:      "dotnet-core-runtime",
-					Path:      filepath.Join(layersDir, "dotnet-core-runtime"),
-					SharedEnv: packit.Environment{},
-					BuildEnv:  packit.Environment{},
+					Name: "dotnet-core-runtime",
+					Path: filepath.Join(layersDir, "dotnet-core-runtime"),
+					SharedEnv: packit.Environment{
+						"DOTNET_ROOT.override": filepath.Join(layersDir, "dotnet-core-runtime"),
+					},
+					BuildEnv: packit.Environment{
+						"RUNTIME_VERSION.override": "2.5.x",
+					},
 					LaunchEnv: packit.Environment{},
 					Build:     false,
-					Launch:    false,
+					Launch:    true,
 					Cache:     false,
-					Metadata:  map[string]interface{}{
-						// dotnetcoreruntime.DependencyCacheKey: "dotnet-core-runtime",
-						// "built_at":                           timestamp.Format(time.RFC3339Nano),
+					Metadata: map[string]interface{}{
+						"dependency-sha": "",
+						"built_at":       timeStamp.Format(time.RFC3339Nano),
 					},
 				},
 			},
 		}))
+
+		Expect(filepath.Join(layersDir, "dotnet-core-runtime")).To(BeADirectory())
+
+		Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
+			{
+				Name: "dotnet-runtime",
+				Metadata: map[string]interface{}{
+					"version-source": "buildpack.yml",
+					"version":        "2.5.x",
+					"launch":         true,
+				},
+			},
+		}))
+
+		Expect(dependencyManager.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
+		Expect(dependencyManager.ResolveCall.Receives.Id).To(Equal("dotnet-runtime"))
+		Expect(dependencyManager.ResolveCall.Receives.Version).To(Equal("2.5.x"))
+		Expect(dependencyManager.ResolveCall.Receives.Stack).To(Equal("some-stack"))
+
+		Expect(planRefinery.BillOfMaterialCall.CallCount).To(Equal(1))
+		Expect(planRefinery.BillOfMaterialCall.Receives.Dependency).To(Equal(postal.Dependency{ID: "dotnet-runtime", Name: "Dotnet Core Runtime"}))
+
+		Expect(dependencyManager.InstallCall.Receives.Dependency).To(Equal(postal.Dependency{ID: "dotnet-runtime", Name: "Dotnet Core Runtime"}))
+		Expect(dependencyManager.InstallCall.Receives.CnbPath).To(Equal(cnbDir))
+		Expect(dependencyManager.InstallCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
+
+		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
+		Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
+		Expect(buffer.String()).To(ContainSubstring("Selected Dotnet Core Runtime version (using buildpack.yml): "))
+		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
+		Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
+	})
+
+	context("failure cases", func() {
+		context("when a dependency cannot be resolved", func() {
+			it.Before(func() {
+				dependencyManager.ResolveCall.Returns.Error = errors.New("failed to resolve dependency")
+			})
+
+			it("returns an error", func() {
+				_, err := build(packit.BuildContext{
+					CNBPath: cnbDir,
+					Plan: packit.BuildpackPlan{
+						Entries: []packit.BuildpackPlanEntry{
+							{
+								Name: "dotnet-runtime",
+								Metadata: map[string]interface{}{
+									"version-source": "buildpack.yml",
+									"version":        "2.5.x",
+								},
+							},
+						},
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).To(MatchError("failed to resolve dependency"))
+			})
+		})
+
+		context("when a dependency cannot be written to", func() {
+			it.Before(func() {
+				Expect(os.Chmod(layersDir, 0000)).To(Succeed())
+			})
+
+			it.After(func() {
+				Expect(os.Chmod(layersDir, os.ModePerm)).To(Succeed())
+			})
+
+			it("returns an error", func() {
+				_, err := build(packit.BuildContext{
+					CNBPath: cnbDir,
+					Plan: packit.BuildpackPlan{
+						Entries: []packit.BuildpackPlanEntry{
+							{
+								Name: "dotnet-runtime",
+								Metadata: map[string]interface{}{
+									"version-source": "buildpack.yml",
+									"version":        "2.5.x",
+								},
+							},
+						},
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).To(MatchError(ContainSubstring("permission denied")))
+			})
+		})
+
+		context("when the layer directory cannot be removed", func() {
+			var layerDir string
+			it.Before(func() {
+				layerDir = filepath.Join(layersDir, "dotnet-core-runtime")
+				Expect(os.MkdirAll(filepath.Join(layerDir, "dotnet-core-runtime"), os.ModePerm)).To(Succeed())
+				Expect(os.Chmod(layerDir, 0000)).To(Succeed())
+			})
+
+			it.After(func() {
+				Expect(os.Chmod(layerDir, os.ModePerm)).To(Succeed())
+				Expect(os.RemoveAll(layerDir)).To(Succeed())
+			})
+
+			it("returns an error", func() {
+				_, err := build(packit.BuildContext{
+					CNBPath: cnbDir,
+					Plan: packit.BuildpackPlan{
+						Entries: []packit.BuildpackPlanEntry{
+							{
+								Name: "dotnet-core-runtime",
+								Metadata: map[string]interface{}{
+									"version-source": "buildpack.yml",
+									"version":        "2.5.x",
+								},
+							},
+						},
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).To(MatchError(ContainSubstring("permission denied")))
+			})
+		})
+
+		context("when the executable errors", func() {
+			it.Before(func() {
+				dependencyManager.InstallCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns an error", func() {
+				_, err := build(packit.BuildContext{
+					CNBPath: cnbDir,
+					Plan: packit.BuildpackPlan{
+						Entries: []packit.BuildpackPlanEntry{
+							{
+								Name: "dotnet-core-runtime",
+								Metadata: map[string]interface{}{
+									"version-source": "buildpack.yml",
+									"version":        "2.5.x",
+								},
+							},
+						},
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).To(MatchError(ContainSubstring("some-error")))
+			})
+		})
 	})
 }

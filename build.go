@@ -2,8 +2,10 @@ package dotnetcoreruntime
 
 import (
 	"path/filepath"
+	"time"
 
 	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/chronos"
 	"github.com/paketo-buildpacks/packit/postal"
 )
 
@@ -23,8 +25,10 @@ type BuildPlanRefinery interface {
 	BillOfMaterial(dependency postal.Dependency) packit.BuildpackPlan
 }
 
-func Build(entries EntryResolver, dependencies DependencyManager, planRefinery BuildPlanRefinery) packit.BuildFunc {
+func Build(entries EntryResolver, dependencies DependencyManager, planRefinery BuildPlanRefinery, logger LogEmitter, clock chronos.Clock) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
+		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
+		logger.Process("Resolving Dotnet Core Runtime version")
 
 		entry := entries.Resolve(context.Plan.Entries)
 		version, _ := entry.Metadata["version"].(string)
@@ -34,10 +38,16 @@ func Build(entries EntryResolver, dependencies DependencyManager, planRefinery B
 			return packit.BuildResult{}, err
 		}
 
-		dotnetcoreruntimelayer, err := context.Layers.Get("dotnet-core-runtime")
+		logger.SelectedDependency(entry, dependency, clock.Now())
+
+		dotnetCoreRuntimeLayer, err := context.Layers.Get("dotnet-core-runtime")
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
+
+		dotnetCoreRuntimeLayer.Launch = entry.Metadata["launch"] == true
+		dotnetCoreRuntimeLayer.Build = entry.Metadata["build"] == true
+		dotnetCoreRuntimeLayer.Cache = entry.Metadata["build"] == true
 
 		bom := planRefinery.BillOfMaterial(postal.Dependency{
 			ID:      dependency.ID,
@@ -48,9 +58,38 @@ func Build(entries EntryResolver, dependencies DependencyManager, planRefinery B
 			Version: dependency.Version,
 		})
 
+		logger.Process("Executing build process")
+
+		err = dotnetCoreRuntimeLayer.Reset()
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		logger.Subprocess("Installing Dotnet Core Runtime %s", dependency.Version)
+		duration, err := clock.Measure(func() error {
+			return dependencies.Install(dependency, context.CNBPath, dotnetCoreRuntimeLayer.Path)
+		})
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		logger.Action("Completed in %s", duration.Round(time.Millisecond))
+		logger.Break()
+
+		dotnetCoreRuntimeLayer.Metadata = map[string]interface{}{
+			"dependency-sha": dependency.SHA256,
+			"built_at":       clock.Now().Format(time.RFC3339Nano),
+		}
+
+		dotnetCoreRuntimeLayer.SharedEnv.Override("DOTNET_ROOT", dotnetCoreRuntimeLayer.Path)
+		logger.Environment(dotnetCoreRuntimeLayer.SharedEnv)
+
+		dotnetCoreRuntimeLayer.BuildEnv.Override("RUNTIME_VERSION", version)
+		logger.Environment(dotnetCoreRuntimeLayer.BuildEnv)
+
 		return packit.BuildResult{
 			Plan:   bom,
-			Layers: []packit.Layer{dotnetcoreruntimelayer},
+			Layers: []packit.Layer{dotnetCoreRuntimeLayer},
 		}, nil
 	}
 }
