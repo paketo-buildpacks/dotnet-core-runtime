@@ -31,6 +31,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		clock             chronos.Clock
 		timeStamp         time.Time
 		planRefinery      *fakes.BuildPlanRefinery
+		dotnetSymlinker   *fakes.DotnetSymlinker
 		buffer            *bytes.Buffer
 
 		build packit.BuildFunc
@@ -98,6 +99,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}
 
+		dotnetSymlinker = &fakes.DotnetSymlinker{}
+
 		buffer = bytes.NewBuffer(nil)
 		logEmitter := dotnetcoreruntime.NewLogEmitter(buffer)
 
@@ -106,7 +109,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			return timeStamp
 		})
 
-		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, planRefinery, logEmitter, clock)
+		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, planRefinery, dotnetSymlinker, logEmitter, clock)
 	})
 
 	it.After(func() {
@@ -199,6 +202,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(dependencyManager.InstallCall.Receives.Dependency).To(Equal(postal.Dependency{ID: "dotnet-runtime", Name: "Dotnet Core Runtime"}))
 		Expect(dependencyManager.InstallCall.Receives.CnbPath).To(Equal(cnbDir))
 		Expect(dependencyManager.InstallCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
+
+		Expect(dotnetSymlinker.LinkCall.CallCount).To(Equal(1))
+		Expect(dotnetSymlinker.LinkCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
+		Expect(dotnetSymlinker.LinkCall.Receives.DotnetRoot).To(Equal(filepath.Join(workingDir, ".dotnet_root")))
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))

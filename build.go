@@ -26,7 +26,12 @@ type BuildPlanRefinery interface {
 	BillOfMaterial(dependency postal.Dependency) packit.BuildpackPlan
 }
 
-func Build(entries EntryResolver, dependencies DependencyManager, planRefinery BuildPlanRefinery, logger LogEmitter, clock chronos.Clock) packit.BuildFunc {
+//go:generate faux --interface DotnetSymlinker --output fakes/dotnet_symlinker.go
+type DotnetSymlinker interface {
+	Link(layerPath, dotnetRoot string) (Err error)
+}
+
+func Build(entries EntryResolver, dependencies DependencyManager, planRefinery BuildPlanRefinery, dotnetSymlinker DotnetSymlinker, logger LogEmitter, clock chronos.Clock) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 		logger.Process("Resolving Dotnet Core Runtime version")
@@ -88,7 +93,8 @@ func Build(entries EntryResolver, dependencies DependencyManager, planRefinery B
 			return packit.BuildResult{}, err
 		}
 
-		if err := SymlinkSharedFolder(dotnetCoreRuntimeLayer.Path, filepath.Join(context.WorkingDir, ".dotnet_root")); err != nil {
+		err = dotnetSymlinker.Link(dotnetCoreRuntimeLayer.Path, filepath.Join(context.WorkingDir, ".dotnet_root"))
+		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
