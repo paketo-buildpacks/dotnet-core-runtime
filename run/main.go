@@ -16,6 +16,7 @@ func main() {
 	entryResolver := dotnetcoreruntime.NewPlanEntryResolver(logEmitter)
 	dependencyManager := postal.NewService(cargo.NewTransport())
 	planRefinery := dotnetcoreruntime.NewPlanRefinery()
+	symlinker := dotnetcoreruntime.NewSymlinker()
 
 	packit.Run(
 		dotnetcoreruntime.Detect(bpYMLParser),
@@ -23,6 +24,7 @@ func main() {
 			entryResolver,
 			dependencyManager,
 			planRefinery,
+			symlinker,
 			logEmitter,
 			chronos.DefaultClock,
 		),
