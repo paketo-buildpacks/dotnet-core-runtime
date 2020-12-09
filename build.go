@@ -1,7 +1,6 @@
 package dotnetcoreruntime
 
 import (
-	"os"
 	"path/filepath"
 	"time"
 
@@ -28,7 +27,7 @@ type BuildPlanRefinery interface {
 
 //go:generate faux --interface DotnetSymlinker --output fakes/dotnet_symlinker.go
 type DotnetSymlinker interface {
-	Link(layerPath, dotnetRoot string) (Err error)
+	Link(workingDir, layerPath string) (Err error)
 }
 
 func Build(entries EntryResolver, dependencies DependencyManager, planRefinery BuildPlanRefinery, dotnetSymlinker DotnetSymlinker, logger LogEmitter, clock chronos.Clock) packit.BuildFunc {
@@ -87,13 +86,7 @@ func Build(entries EntryResolver, dependencies DependencyManager, planRefinery B
 			"built_at":       clock.Now().Format(time.RFC3339Nano),
 		}
 
-		// Create .dotnet_root directory in working dir which will contain a symlink to the dotnetCoreRuntimeLayer.Path
-		err = os.Mkdir(filepath.Join(context.WorkingDir, ".dotnet_root"), os.ModePerm)
-		if err != nil {
-			return packit.BuildResult{}, err
-		}
-
-		err = dotnetSymlinker.Link(dotnetCoreRuntimeLayer.Path, filepath.Join(context.WorkingDir, ".dotnet_root"))
+		err = dotnetSymlinker.Link(context.WorkingDir, dotnetCoreRuntimeLayer.Path)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}

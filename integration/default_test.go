@@ -63,7 +63,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
 			container, err = docker.Container.Run.
-				WithCommand("ls -al $DOTNET_ROOT").
+				WithCommand("ls -al $DOTNET_ROOT && ls -al $DOTNET_ROOT/shared").
 				Execute(image.ID)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -74,7 +74,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			}).Should(
 				And(
 					MatchRegexp(`lrwxrwxrwx \d+ cnb cnb   \d+ .* host -> \/layers\/paketo-buildpacks_dotnet-core-runtime\/dotnet-core-runtime\/host`),
-					MatchRegexp(`lrwxrwxrwx \d+ cnb cnb   \d+ .* shared -> \/layers\/paketo-buildpacks_dotnet-core-runtime\/dotnet-core-runtime\/shared`),
+					MatchRegexp(`drwxr-xr-x \d+ cnb cnb \d+ .* shared`),
+					MatchRegexp(`lrwxrwxrwx \d+ cnb cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/paketo-buildpacks_dotnet-core-runtime\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`),
 				),
 			)
 		})

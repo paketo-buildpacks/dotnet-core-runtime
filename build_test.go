@@ -48,26 +48,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = ioutil.TempDir("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		err = ioutil.WriteFile(filepath.Join(cnbDir, "buildpack.toml"), []byte(`api = "0.2"
-[buildpack]
-  id = "org.some-org.some-buildpack"
-  name = "Some Buildpack"
-  version = "some-version"
-
-[metadata]
-  [metadata.default-versions]
-		dotnet-runtime = "2.5.x"
-
-  [[metadata.dependencies]]
-    id = "some-dep"
-    name = "Some Dep"
-    sha256 = "some-sha"
-    stacks = ["some-stack"]
-    uri = "some-uri"
-    version = "some-dep-version"
-`), 0600)
-		Expect(err).NotTo(HaveOccurred())
-
 		entryResolver = &fakes.EntryResolver{}
 		entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
 			Name: "dotnet-runtime",
@@ -178,8 +158,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}))
 
-		Expect(filepath.Join(workingDir, ".dotnet_root")).To(BeADirectory())
-
 		Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
 			{
 				Name: "dotnet-runtime",
@@ -204,8 +182,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(dependencyManager.InstallCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
 
 		Expect(dotnetSymlinker.LinkCall.CallCount).To(Equal(1))
+		Expect(dotnetSymlinker.LinkCall.Receives.WorkingDir).To(Equal(workingDir))
 		Expect(dotnetSymlinker.LinkCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
-		Expect(dotnetSymlinker.LinkCall.Receives.DotnetRoot).To(Equal(filepath.Join(workingDir, ".dotnet_root")))
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
