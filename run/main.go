@@ -17,6 +17,7 @@ func main() {
 	dependencyManager := postal.NewService(cargo.NewTransport())
 	planRefinery := dotnetcoreruntime.NewPlanRefinery()
 	symlinker := dotnetcoreruntime.NewSymlinker()
+	runtimeVersionResolver := dotnetcoreruntime.NewRuntimeVersionResolver()
 
 	packit.Run(
 		dotnetcoreruntime.Detect(bpYMLParser),
@@ -25,6 +26,7 @@ func main() {
 			dependencyManager,
 			planRefinery,
 			symlinker,
+			runtimeVersionResolver,
 			logEmitter,
 			chronos.DefaultClock,
 		),

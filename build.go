@@ -16,7 +16,6 @@ type EntryResolver interface {
 
 //go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 type DependencyManager interface {
-	Resolve(path, id, version, stack string) (postal.Dependency, error)
 	Install(dependency postal.Dependency, cnbPath, layerPath string) error
 }
 
@@ -30,7 +29,20 @@ type DotnetSymlinker interface {
 	Link(workingDir, layerPath string) (Err error)
 }
 
-func Build(entries EntryResolver, dependencies DependencyManager, planRefinery BuildPlanRefinery, dotnetSymlinker DotnetSymlinker, logger LogEmitter, clock chronos.Clock) packit.BuildFunc {
+//go:generate faux --interface VersionResolver --output fakes/version_resolver.go
+type VersionResolver interface {
+	Resolve(path, id, version, stack string) (postal.Dependency, error)
+}
+
+func Build(
+	entries EntryResolver,
+	dependencies DependencyManager,
+	planRefinery BuildPlanRefinery,
+	dotnetSymlinker DotnetSymlinker,
+	versionResolver VersionResolver,
+	logger LogEmitter,
+	clock chronos.Clock,
+) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 		logger.Process("Resolving Dotnet Core Runtime version")
@@ -38,7 +50,7 @@ func Build(entries EntryResolver, dependencies DependencyManager, planRefinery B
 		entry := entries.Resolve(context.Plan.Entries)
 		version, _ := entry.Metadata["version"].(string)
 
-		dependency, err := dependencies.Resolve(filepath.Join(context.CNBPath, "buildpack.toml"), entry.Name, version, context.Stack)
+		dependency, err := versionResolver.Resolve(filepath.Join(context.CNBPath, "buildpack.toml"), entry.Name, version, context.Stack)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
