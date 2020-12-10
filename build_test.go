@@ -23,16 +23,18 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		layersDir         string
-		workingDir        string
-		cnbDir            string
+		layersDir  string
+		workingDir string
+		cnbDir     string
+		clock      chronos.Clock
+		timeStamp  time.Time
+		buffer     *bytes.Buffer
+
 		entryResolver     *fakes.EntryResolver
 		dependencyManager *fakes.DependencyManager
-		clock             chronos.Clock
-		timeStamp         time.Time
 		planRefinery      *fakes.BuildPlanRefinery
 		dotnetSymlinker   *fakes.DotnetSymlinker
-		buffer            *bytes.Buffer
+		versionResolver   *fakes.VersionResolver
 
 		build packit.BuildFunc
 	)
@@ -59,10 +61,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}
 
 		dependencyManager = &fakes.DependencyManager{}
-		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
-			ID:   "dotnet-runtime",
-			Name: "Dotnet Core Runtime",
-		}
 
 		planRefinery = &fakes.BuildPlanRefinery{}
 
@@ -81,6 +79,12 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		dotnetSymlinker = &fakes.DotnetSymlinker{}
 
+		versionResolver = &fakes.VersionResolver{}
+		versionResolver.ResolveCall.Returns.Dependency = postal.Dependency{
+			ID:   "dotnet-runtime",
+			Name: "Dotnet Core Runtime",
+		}
+
 		buffer = bytes.NewBuffer(nil)
 		logEmitter := dotnetcoreruntime.NewLogEmitter(buffer)
 
@@ -89,7 +93,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			return timeStamp
 		})
 
-		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, planRefinery, dotnetSymlinker, logEmitter, clock)
+		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, planRefinery, dotnetSymlinker, versionResolver, logEmitter, clock)
 	})
 
 	it.After(func() {
@@ -169,13 +173,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}))
 
-		Expect(dependencyManager.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
-		Expect(dependencyManager.ResolveCall.Receives.Id).To(Equal("dotnet-runtime"))
-		Expect(dependencyManager.ResolveCall.Receives.Version).To(Equal("2.5.x"))
-		Expect(dependencyManager.ResolveCall.Receives.Stack).To(Equal("some-stack"))
-
 		Expect(planRefinery.BillOfMaterialCall.CallCount).To(Equal(1))
 		Expect(planRefinery.BillOfMaterialCall.Receives.Dependency).To(Equal(postal.Dependency{ID: "dotnet-runtime", Name: "Dotnet Core Runtime"}))
+
+		Expect(versionResolver.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
+		Expect(versionResolver.ResolveCall.Receives.Id).To(Equal("dotnet-runtime"))
+		Expect(versionResolver.ResolveCall.Receives.Version).To(Equal("2.5.x"))
+		Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
 
 		Expect(dependencyManager.InstallCall.Receives.Dependency).To(Equal(postal.Dependency{ID: "dotnet-runtime", Name: "Dotnet Core Runtime"}))
 		Expect(dependencyManager.InstallCall.Receives.CnbPath).To(Equal(cnbDir))
@@ -195,7 +199,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	context("failure cases", func() {
 		context("when a dependency cannot be resolved", func() {
 			it.Before(func() {
-				dependencyManager.ResolveCall.Returns.Error = errors.New("failed to resolve dependency")
+				versionResolver.ResolveCall.Returns.Error = errors.New("failed to resolve version")
 			})
 
 			it("returns an error", func() {
@@ -214,7 +218,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					},
 					Layers: packit.Layers{Path: layersDir},
 				})
-				Expect(err).To(MatchError("failed to resolve dependency"))
+				Expect(err).To(MatchError("failed to resolve version"))
 			})
 		})
 
