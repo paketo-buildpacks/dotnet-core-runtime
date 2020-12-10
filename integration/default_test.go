@@ -10,6 +10,7 @@ import (
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
+	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
 func testDefault(t *testing.T, context spec.G, it spec.S) {
@@ -25,7 +26,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 		docker = occam.NewDocker()
 	})
 
-	context("when building a simple app", func() {
+	context("when building a container with dotnet-runtime", func() {
 		var (
 			image     occam.Image
 			container occam.Container
@@ -48,19 +49,36 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 		it("installs the dotnet runtime into a layer", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "simple_app"))
+			source, err = occam.Source(filepath.Join("testdata", "default"))
 			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
 			image, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.ICU.Online,
 					settings.Buildpacks.DotnetCoreRuntime.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
+
+			Expect(logs).To(ContainLines(
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
+				"  Resolving Dotnet Core Runtime version",
+				"    Candidate version sources (in priority order):",
+				"      <unknown> -> \"*\"",
+				"",
+				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
+				"",
+				"  Executing build process",
+				MatchRegexp(`    Installing Dotnet Core Runtime \d+\.\d+\.\d+`),
+				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
+				"",
+				"  Configuring environment",
+				`    DOTNET_ROOT -> "/workspace/.dotnet_root"`,
+				"",
+				MatchRegexp(`    RUNTIME_VERSION -> "\d+\.\d+\.\d+"`),
+			))
 
 			container, err = docker.Container.Run.
 				WithCommand("ls -al $DOTNET_ROOT && ls -al $DOTNET_ROOT/shared").

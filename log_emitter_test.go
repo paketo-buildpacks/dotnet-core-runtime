@@ -34,23 +34,23 @@ func testLogEmitter(t *testing.T, context spec.G, it spec.S) {
 				},
 			}
 			dependency := postal.Dependency{
-				Name:    "Dotnet Core Runtime",
+				ID:      "dotnet-runtime",
 				Version: "some-version",
 			}
 
 			emitter.SelectedDependency(entry, dependency, time.Now())
-			Expect(buffer.String()).To(Equal("    Selected Dotnet Core Runtime version (using some-source): some-version\n\n"))
+			Expect(buffer.String()).To(Equal("    Selected dotnet-runtime version (using some-source): some-version\n\n"))
 		})
 
 		context("when the version source is missing", func() {
 			it("prints details about the selected dependency", func() {
 				dependency := postal.Dependency{
-					Name:    "Dotnet Core Runtime",
+					ID:      "dotnet-runtime",
 					Version: "some-version",
 				}
 
 				emitter.SelectedDependency(packit.BuildpackPlanEntry{}, dependency, time.Now())
-				Expect(buffer.String()).To(Equal("    Selected Dotnet Core Runtime version (using <unknown>): some-version\n\n"))
+				Expect(buffer.String()).To(Equal("    Selected dotnet-runtime version (using <unknown>): some-version\n\n"))
 			})
 		})
 
@@ -65,14 +65,14 @@ func testLogEmitter(t *testing.T, context spec.G, it spec.S) {
 				}
 				dependency := postal.Dependency{
 					DeprecationDate: deprecationDate,
-					Name:            "Dotnet Core Runtime",
+					ID:              "dotnet-runtime",
 					Version:         "some-version",
 				}
 
 				emitter.SelectedDependency(entry, dependency, now)
-				Expect(buffer.String()).To(ContainSubstring("    Selected Dotnet Core Runtime version (using some-source): some-version\n"))
-				Expect(buffer.String()).To(ContainSubstring("      Version some-version of Dotnet Core Runtime will be deprecated after 2021-04-01.\n"))
-				Expect(buffer.String()).To(ContainSubstring("      Migrate your application to a supported version of Dotnet Core Runtime before this time.\n\n"))
+				Expect(buffer.String()).To(ContainSubstring("    Selected dotnet-runtime version (using some-source): some-version\n"))
+				Expect(buffer.String()).To(ContainSubstring("      Version some-version of dotnet-runtime will be deprecated after 2021-04-01.\n"))
+				Expect(buffer.String()).To(ContainSubstring("      Migrate your application to a supported version of dotnet-runtime before this time.\n\n"))
 			})
 		})
 
@@ -87,14 +87,14 @@ func testLogEmitter(t *testing.T, context spec.G, it spec.S) {
 				}
 				dependency := postal.Dependency{
 					DeprecationDate: deprecationDate,
-					Name:            "Dotnet Core Runtime",
+					ID:              "dotnet-runtime",
 					Version:         "some-version",
 				}
 
 				emitter.SelectedDependency(entry, dependency, now)
-				Expect(buffer.String()).To(ContainSubstring("    Selected Dotnet Core Runtime version (using some-source): some-version\n"))
-				Expect(buffer.String()).To(ContainSubstring("      Version some-version of Dotnet Core Runtime is deprecated.\n"))
-				Expect(buffer.String()).To(ContainSubstring("      Migrate your application to a supported version of Dotnet Core Runtime.\n\n"))
+				Expect(buffer.String()).To(ContainSubstring("    Selected dotnet-runtime version (using some-source): some-version\n"))
+				Expect(buffer.String()).To(ContainSubstring("      Version some-version of dotnet-runtime is deprecated.\n"))
+				Expect(buffer.String()).To(ContainSubstring("      Migrate your application to a supported version of dotnet-runtime.\n\n"))
 			})
 		})
 
@@ -109,14 +109,14 @@ func testLogEmitter(t *testing.T, context spec.G, it spec.S) {
 				}
 				dependency := postal.Dependency{
 					DeprecationDate: deprecationDate,
-					Name:            "Dotnet Core Runtime",
+					ID:              "dotnet-runtime",
 					Version:         "some-version",
 				}
 
 				emitter.SelectedDependency(entry, dependency, now)
-				Expect(buffer.String()).To(ContainSubstring("    Selected Dotnet Core Runtime version (using some-source): some-version\n"))
-				Expect(buffer.String()).To(ContainSubstring("      Version some-version of Dotnet Core Runtime is deprecated.\n"))
-				Expect(buffer.String()).To(ContainSubstring("      Migrate your application to a supported version of Dotnet Core Runtime.\n\n"))
+				Expect(buffer.String()).To(ContainSubstring("    Selected dotnet-runtime version (using some-source): some-version\n"))
+				Expect(buffer.String()).To(ContainSubstring("      Version some-version of dotnet-runtime is deprecated.\n"))
+				Expect(buffer.String()).To(ContainSubstring("      Migrate your application to a supported version of dotnet-runtime.\n\n"))
 			})
 		})
 	})
@@ -162,7 +162,6 @@ func testLogEmitter(t *testing.T, context spec.G, it spec.S) {
 				"GEM_PATH.override": "/some/path",
 			})
 
-			Expect(buffer.String()).To(ContainSubstring("  Configuring environment"))
 			Expect(buffer.String()).To(ContainSubstring("    GEM_PATH -> \"/some/path\""))
 		})
 	})

@@ -28,27 +28,39 @@ func (r RuntimeVersionResolver) Resolve(path, id, version, stack string) (postal
 		return postal.Dependency{}, err
 	}
 
-	runtimeVersion, err := semver.NewVersion(version)
-	if err != nil {
-		return postal.Dependency{}, err
+	if version == "" || version == "default" {
+		version = "*"
 	}
 
 	runtimeConstraint, err := semver.NewConstraint(version)
 	if err != nil {
 		return postal.Dependency{}, err
 	}
+	constraints := []semver.Constraints{*runtimeConstraint}
 
-	minorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.%d.*", runtimeVersion.Major(), runtimeVersion.Minor()))
-	if err != nil {
-		return postal.Dependency{}, err
+	// Check to see if the version given is a semantic version. If it is not like
+	// "*" then there would be a failure in parsing. Anything that is a
+	// non-semver we try and form a constraint and use that as the sole
+	// constraint.
+	splitVersion := strings.Split(version, ".")
+	if len(splitVersion) == 3 && splitVersion[len(splitVersion)-1] != "*" {
+		runtimeVersion, err := semver.NewVersion(version)
+		if err != nil {
+			return postal.Dependency{}, err
+		}
+
+		minorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.%d.*", runtimeVersion.Major(), runtimeVersion.Minor()))
+		if err != nil {
+			return postal.Dependency{}, err
+		}
+		constraints = append(constraints, *minorConstraint)
+
+		majorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.*", runtimeVersion.Major()))
+		if err != nil {
+			return postal.Dependency{}, err
+		}
+		constraints = append(constraints, *majorConstraint)
 	}
-
-	majorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.*", runtimeVersion.Major()))
-	if err != nil {
-		return postal.Dependency{}, err
-	}
-
-	constraints := []semver.Constraints{*runtimeConstraint, *minorConstraint, *majorConstraint}
 
 	var supportedVersions []string
 	var filteredDependencies []postal.Dependency
