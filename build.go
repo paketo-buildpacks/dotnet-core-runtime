@@ -104,10 +104,11 @@ func Build(
 		}
 
 		// Set DOTNET_ROOT to the symlink directory in the working directory, instead of setting it to  the layer path itself.
+		logger.Process("Configuring environment")
 		dotnetCoreRuntimeLayer.SharedEnv.Override("DOTNET_ROOT", filepath.Join(context.WorkingDir, ".dotnet_root"))
 		logger.Environment(dotnetCoreRuntimeLayer.SharedEnv)
 
-		dotnetCoreRuntimeLayer.BuildEnv.Override("RUNTIME_VERSION", version)
+		dotnetCoreRuntimeLayer.BuildEnv.Override("RUNTIME_VERSION", dependency.Version)
 		logger.Environment(dotnetCoreRuntimeLayer.BuildEnv)
 
 		return packit.BuildResult{

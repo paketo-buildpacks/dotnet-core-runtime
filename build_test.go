@@ -81,8 +81,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		versionResolver = &fakes.VersionResolver{}
 		versionResolver.ResolveCall.Returns.Dependency = postal.Dependency{
-			ID:   "dotnet-runtime",
-			Name: "Dotnet Core Runtime",
+			ID:      "dotnet-runtime",
+			Version: "2.5.x",
+			Name:    "Dotnet Core Runtime",
 		}
 
 		buffer = bytes.NewBuffer(nil)
@@ -174,14 +175,22 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}))
 
 		Expect(planRefinery.BillOfMaterialCall.CallCount).To(Equal(1))
-		Expect(planRefinery.BillOfMaterialCall.Receives.Dependency).To(Equal(postal.Dependency{ID: "dotnet-runtime", Name: "Dotnet Core Runtime"}))
+		Expect(planRefinery.BillOfMaterialCall.Receives.Dependency).To(Equal(postal.Dependency{
+			ID:      "dotnet-runtime",
+			Version: "2.5.x",
+			Name:    "Dotnet Core Runtime",
+		}))
 
 		Expect(versionResolver.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
 		Expect(versionResolver.ResolveCall.Receives.Id).To(Equal("dotnet-runtime"))
 		Expect(versionResolver.ResolveCall.Receives.Version).To(Equal("2.5.x"))
 		Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
 
-		Expect(dependencyManager.InstallCall.Receives.Dependency).To(Equal(postal.Dependency{ID: "dotnet-runtime", Name: "Dotnet Core Runtime"}))
+		Expect(dependencyManager.InstallCall.Receives.Dependency).To(Equal(postal.Dependency{
+			ID:      "dotnet-runtime",
+			Version: "2.5.x",
+			Name:    "Dotnet Core Runtime",
+		}))
 		Expect(dependencyManager.InstallCall.Receives.CnbPath).To(Equal(cnbDir))
 		Expect(dependencyManager.InstallCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
 
@@ -191,7 +200,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
-		Expect(buffer.String()).To(ContainSubstring("Selected Dotnet Core Runtime version (using buildpack.yml): "))
+		Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using buildpack.yml): "))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
 		Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
 	})

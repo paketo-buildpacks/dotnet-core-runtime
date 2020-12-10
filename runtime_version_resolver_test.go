@@ -123,6 +123,51 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
+	context("when the version is not a valid semver version", func() {
+		it("attempts to turn the given versions into the only constraint", func() {
+			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), "dotnet-runtime", "1.2.*", "some-stack")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(dependency).To(Equal(postal.Dependency{
+				ID:      "dotnet-runtime",
+				Version: "1.2.4",
+				URI:     "some-uri",
+				SHA256:  "some-sha",
+				Stacks:  []string{"some-stack"},
+			}))
+		})
+	})
+
+	context("when the version is empty", func() {
+		it("returns the latest version", func() {
+			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), "dotnet-runtime", "", "some-stack")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(dependency).To(Equal(postal.Dependency{
+				ID:      "dotnet-runtime",
+				Version: "1.2.4",
+				URI:     "some-uri",
+				SHA256:  "some-sha",
+				Stacks:  []string{"some-stack"},
+			}))
+		})
+	})
+
+	context("when the version is default", func() {
+		it("returns the latest version", func() {
+			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), "dotnet-runtime", "default", "some-stack")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(dependency).To(Equal(postal.Dependency{
+				ID:      "dotnet-runtime",
+				Version: "1.2.4",
+				URI:     "some-uri",
+				SHA256:  "some-sha",
+				Stacks:  []string{"some-stack"},
+			}))
+		})
+	})
+
 	context("failure cases", func() {
 		context("when the buildpack.toml cannot be parsed", func() {
 			it.Before(func() {
@@ -138,7 +183,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		context("when the version is not semver compatible", func() {
 			it("returns an error", func() {
 				_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), "dotnet-runtime", "invalid-version", "some-stack")
-				Expect(err).To(MatchError(ContainSubstring("Invalid Semantic Version")))
+				Expect(err).To(MatchError(ContainSubstring("improper constraint")))
 			})
 		})
 

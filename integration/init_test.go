@@ -23,15 +23,11 @@ var settings struct {
 	}
 
 	Config struct {
-		ICU       string `json:"icu"`
 		BuildPlan string `json:"build-plan"`
 	}
 
 	Buildpacks struct {
 		DotnetCoreRuntime struct {
-			Online string
-		}
-		ICU struct {
 			Online string
 		}
 		BuildPlan struct {
@@ -65,10 +61,6 @@ func TestIntegration(t *testing.T) {
 		WithVersion("1.2.3").
 		Execute(root)
 	Expect(err).ToNot(HaveOccurred())
-
-	settings.Buildpacks.ICU.Online, err = buildpackStore.Get.
-		Execute(settings.Config.ICU)
-	Expect(err).NotTo(HaveOccurred())
 
 	settings.Buildpacks.BuildPlan.Online, err = buildpackStore.Get.
 		Execute(settings.Config.BuildPlan)
