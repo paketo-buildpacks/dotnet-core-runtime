@@ -28,7 +28,8 @@ var settings struct {
 
 	Buildpacks struct {
 		DotnetCoreRuntime struct {
-			Online string
+			Online  string
+			Offline string
 		}
 		BuildPlan struct {
 			Online string
@@ -62,6 +63,12 @@ func TestIntegration(t *testing.T) {
 		Execute(root)
 	Expect(err).ToNot(HaveOccurred())
 
+	settings.Buildpacks.DotnetCoreRuntime.Offline, err = buildpackStore.Get.
+		WithOfflineDependencies().
+		WithVersion("1.2.3").
+		Execute(root)
+	Expect(err).ToNot(HaveOccurred())
+
 	settings.Buildpacks.BuildPlan.Online, err = buildpackStore.Get.
 		Execute(settings.Config.BuildPlan)
 	Expect(err).NotTo(HaveOccurred())
@@ -70,5 +77,7 @@ func TestIntegration(t *testing.T) {
 
 	suite := spec.New("Integration", spec.Report(report.Terminal{}), spec.Parallel())
 	suite("Default", testDefault)
+	suite("Offline", testOffline)
+	suite("LayerReuse", testLayerReuse)
 	suite.Run(t)
 }

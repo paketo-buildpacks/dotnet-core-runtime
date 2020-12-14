@@ -1,6 +1,7 @@
 package dotnetcoreruntime
 
 import (
+	"fmt"
 	"path/filepath"
 	"time"
 
@@ -70,6 +71,23 @@ func Build(
 			URI:     dependency.URI,
 			Version: dependency.Version,
 		})
+
+		cachedDependencySHA, ok := dotnetCoreRuntimeLayer.Metadata["dependency-sha"]
+		if ok && cachedDependencySHA == dependency.SHA256 {
+			logger.Process(fmt.Sprintf("Reusing cached layer %s", dotnetCoreRuntimeLayer.Path))
+			logger.Break()
+
+			err = dotnetSymlinker.Link(context.WorkingDir, dotnetCoreRuntimeLayer.Path)
+			if err != nil {
+				return packit.BuildResult{}, err
+			}
+
+			return packit.BuildResult{
+				Plan:   bom,
+				Layers: []packit.Layer{dotnetCoreRuntimeLayer},
+			}, nil
+
+		}
 
 		logger.Process("Executing build process")
 
