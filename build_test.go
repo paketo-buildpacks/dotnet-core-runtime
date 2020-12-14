@@ -84,6 +84,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			ID:      "dotnet-runtime",
 			Version: "2.5.x",
 			Name:    "Dotnet Core Runtime",
+			SHA256:  "some-sha",
 		}
 
 		buffer = bytes.NewBuffer(nil)
@@ -156,7 +157,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					Launch:    true,
 					Cache:     false,
 					Metadata: map[string]interface{}{
-						"dependency-sha": "",
+						"dependency-sha": "some-sha",
 						"built_at":       timeStamp.Format(time.RFC3339Nano),
 					},
 				},
@@ -179,6 +180,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			ID:      "dotnet-runtime",
 			Version: "2.5.x",
 			Name:    "Dotnet Core Runtime",
+			SHA256:  "some-sha",
 		}))
 
 		Expect(versionResolver.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
@@ -190,6 +192,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			ID:      "dotnet-runtime",
 			Version: "2.5.x",
 			Name:    "Dotnet Core Runtime",
+			SHA256:  "some-sha",
 		}))
 		Expect(dependencyManager.InstallCall.Receives.CnbPath).To(Equal(cnbDir))
 		Expect(dependencyManager.InstallCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
@@ -203,6 +206,75 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using buildpack.yml): "))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
 		Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
+	})
+
+	context("when there is a dependency cache match", func() {
+		it.Before(func() {
+			err := ioutil.WriteFile(filepath.Join(layersDir, "dotnet-core-runtime.toml"), []byte("[metadata]\ndependency-sha = \"some-sha\"\n"), 0600)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		it("returns a result that installs the dotnet runtime libraries", func() {
+			_, err := build(packit.BuildContext{
+				WorkingDir: workingDir,
+				CNBPath:    cnbDir,
+				Stack:      "some-stack",
+				BuildpackInfo: packit.BuildpackInfo{
+					Name:    "Some Buildpack",
+					Version: "some-version",
+				},
+				Plan: packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: "dotnet-runtime",
+							Metadata: map[string]interface{}{
+								"version-source": "buildpack.yml",
+								"version":        "2.5.x",
+								"launch":         true,
+							},
+						},
+					},
+				},
+				Layers: packit.Layers{Path: layersDir},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
+				{
+					Name: "dotnet-runtime",
+					Metadata: map[string]interface{}{
+						"version-source": "buildpack.yml",
+						"version":        "2.5.x",
+						"launch":         true,
+					},
+				},
+			}))
+
+			Expect(planRefinery.BillOfMaterialCall.CallCount).To(Equal(1))
+			Expect(planRefinery.BillOfMaterialCall.Receives.Dependency).To(Equal(postal.Dependency{
+				ID:      "dotnet-runtime",
+				Version: "2.5.x",
+				Name:    "Dotnet Core Runtime",
+				SHA256:  "some-sha",
+			}))
+
+			Expect(versionResolver.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
+			Expect(versionResolver.ResolveCall.Receives.Id).To(Equal("dotnet-runtime"))
+			Expect(versionResolver.ResolveCall.Receives.Version).To(Equal("2.5.x"))
+			Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
+
+			Expect(dependencyManager.InstallCall.CallCount).To(Equal(0))
+
+			Expect(dotnetSymlinker.LinkCall.CallCount).To(Equal(1))
+			Expect(dotnetSymlinker.LinkCall.Receives.WorkingDir).To(Equal(workingDir))
+			Expect(dotnetSymlinker.LinkCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
+
+			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
+			Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
+			Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using buildpack.yml): "))
+			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
+			Expect(buffer.String()).NotTo(ContainSubstring("Executing build process"))
+		})
 	})
 
 	context("failure cases", func() {
