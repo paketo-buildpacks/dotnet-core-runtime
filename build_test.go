@@ -184,8 +184,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}))
 
 		Expect(versionResolver.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
-		Expect(versionResolver.ResolveCall.Receives.Id).To(Equal("dotnet-runtime"))
-		Expect(versionResolver.ResolveCall.Receives.Version).To(Equal("2.5.x"))
+		Expect(versionResolver.ResolveCall.Receives.Entry).To(Equal(entryResolver.ResolveCall.Returns.BuildpackPlanEntry))
 		Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
 
 		Expect(dependencyManager.InstallCall.Receives.Dependency).To(Equal(postal.Dependency{
@@ -259,8 +258,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}))
 
 			Expect(versionResolver.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
-			Expect(versionResolver.ResolveCall.Receives.Id).To(Equal("dotnet-runtime"))
-			Expect(versionResolver.ResolveCall.Receives.Version).To(Equal("2.5.x"))
+			Expect(versionResolver.ResolveCall.Receives.Entry).To(Equal(entryResolver.ResolveCall.Returns.BuildpackPlanEntry))
 			Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
 
 			Expect(dependencyManager.InstallCall.CallCount).To(Equal(0))

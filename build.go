@@ -32,7 +32,7 @@ type DotnetSymlinker interface {
 
 //go:generate faux --interface VersionResolver --output fakes/version_resolver.go
 type VersionResolver interface {
-	Resolve(path, id, version, stack string) (postal.Dependency, error)
+	Resolve(path string, entry packit.BuildpackPlanEntry, stack string) (postal.Dependency, error)
 }
 
 func Build(
@@ -49,9 +49,8 @@ func Build(
 		logger.Process("Resolving Dotnet Core Runtime version")
 
 		entry := entries.Resolve(context.Plan.Entries)
-		version, _ := entry.Metadata["version"].(string)
 
-		dependency, err := versionResolver.Resolve(filepath.Join(context.CNBPath, "buildpack.toml"), entry.Name, version, context.Stack)
+		dependency, err := versionResolver.Resolve(filepath.Join(context.CNBPath, "buildpack.toml"), entry, context.Stack)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}

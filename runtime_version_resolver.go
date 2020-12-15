@@ -7,6 +7,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/Masterminds/semver"
+	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/postal"
 )
 
@@ -16,7 +17,7 @@ func NewRuntimeVersionResolver() RuntimeVersionResolver {
 	return RuntimeVersionResolver{}
 }
 
-func (r RuntimeVersionResolver) Resolve(path, id, version, stack string) (postal.Dependency, error) {
+func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanEntry, stack string) (postal.Dependency, error) {
 	var buildpackTOML struct {
 		Metadata struct {
 			Dependencies []postal.Dependency `toml:"dependencies"`
@@ -26,6 +27,12 @@ func (r RuntimeVersionResolver) Resolve(path, id, version, stack string) (postal
 	_, err := toml.DecodeFile(path, &buildpackTOML)
 	if err != nil {
 		return postal.Dependency{}, err
+	}
+
+	version := ""
+	_, ok := entry.Metadata["version"]
+	if ok {
+		version = entry.Metadata["version"].(string)
 	}
 
 	if version == "" || version == "default" {
@@ -38,32 +45,43 @@ func (r RuntimeVersionResolver) Resolve(path, id, version, stack string) (postal
 	}
 	constraints := []semver.Constraints{*runtimeConstraint}
 
-	// Check to see if the version given is a semantic version. If it is not like
-	// "*" then there would be a failure in parsing. Anything that is a
-	// non-semver we try and form a constraint and use that as the sole
-	// constraint.
-	splitVersion := strings.Split(version, ".")
-	if len(splitVersion) == 3 && splitVersion[len(splitVersion)-1] != "*" {
-		runtimeVersion, err := semver.NewVersion(version)
-		if err != nil {
-			return postal.Dependency{}, err
-		}
+	versionSource := ""
+	_, ok = entry.Metadata["version-source"]
+	if ok {
+		versionSource = entry.Metadata["version-source"].(string)
+	}
 
-		minorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.%d.*", runtimeVersion.Major(), runtimeVersion.Minor()))
-		if err != nil {
-			return postal.Dependency{}, err
-		}
-		constraints = append(constraints, *minorConstraint)
+	// If the version source is buildpack.yml, we will only look for the version itself
+	// Only do roll forward logic for other version sources.
+	if versionSource != "buildpack.yml" {
+		// Check to see if the version given is a semantic version. If it is not like
+		// "*" then there would be a failure in parsing. Anything that is a
+		// non-semver we try and form a constraint and use that as the sole
+		// constraint.
+		splitVersion := strings.Split(version, ".")
+		if len(splitVersion) == 3 && splitVersion[len(splitVersion)-1] != "*" {
+			runtimeVersion, err := semver.NewVersion(version)
+			if err != nil {
+				return postal.Dependency{}, err
+			}
 
-		majorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.*", runtimeVersion.Major()))
-		if err != nil {
-			return postal.Dependency{}, err
+			minorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.%d.*", runtimeVersion.Major(), runtimeVersion.Minor()))
+			if err != nil {
+				return postal.Dependency{}, err
+			}
+			constraints = append(constraints, *minorConstraint)
+
+			majorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.*", runtimeVersion.Major()))
+			if err != nil {
+				return postal.Dependency{}, err
+			}
+			constraints = append(constraints, *majorConstraint)
 		}
-		constraints = append(constraints, *majorConstraint)
 	}
 
 	var supportedVersions []string
 	var filteredDependencies []postal.Dependency
+	var id = entry.Name
 	for _, dependency := range buildpackTOML.Metadata.Dependencies {
 		if dependency.ID == id && containsStack(dependency.Stacks, stack) {
 			filteredDependencies = append(filteredDependencies, dependency)
