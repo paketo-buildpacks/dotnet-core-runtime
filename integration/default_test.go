@@ -32,10 +32,10 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			container occam.Container
 			name      string
 			source    string
+			err       error
 		)
 
 		it.Before(func() {
-			var err error
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -48,7 +48,6 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("installs the dotnet runtime into a layer", func() {
-			var err error
 			source, err = occam.Source(filepath.Join("testdata", "default"))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -96,6 +95,49 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 					MatchRegexp(`lrwxrwxrwx \d+ cnb cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/paketo-buildpacks_dotnet-core-runtime\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`),
 				),
 			)
+		})
+	})
+
+	context("when the app contains a buildpack.yml that specifies an unsupported version ", func() {
+		var (
+			name   string
+			source string
+			err    error
+		)
+
+		it.Before(func() {
+			name, err = occam.RandomName()
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		it.After(func() {
+			Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
+			Expect(os.RemoveAll(source)).To(Succeed())
+		})
+
+		it("fails to build instead of rolling the version", func() {
+			source, err = occam.Source(filepath.Join("testdata", "with_buildpack_yml"))
+			Expect(err).NotTo(HaveOccurred())
+
+			var logs fmt.Stringer
+			_, logs, err = pack.WithNoColor().Build.
+				WithPullPolicy("never").
+				WithBuildpacks(
+					settings.Buildpacks.DotnetCoreRuntime.Online,
+					settings.Buildpacks.BuildPlan.Online,
+				).
+				Execute(name, source)
+			Expect(err).To(HaveOccurred(), logs.String())
+
+			Expect(logs).To(ContainLines(
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
+				"  Resolving Dotnet Core Runtime version",
+				"    Candidate version sources (in priority order):",
+				"      buildpack.yml -> \"2.0.0\"",
+				"      <unknown>     -> \"*\"",
+				"",
+				MatchRegexp(`failed to satisfy "dotnet-runtime" dependency for stack "io.buildpacks.stacks.bionic" with version constraint "2.0.0": no compatible versions. Supported versions are: \[(\d+\.\d+\.\d+(, )?)*\]`),
+			))
 		})
 	})
 }
