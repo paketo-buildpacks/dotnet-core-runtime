@@ -136,8 +136,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				"      buildpack.yml -> \"2.0.0\"",
 				"      <unknown>     -> \"*\"",
 				"",
-				MatchRegexp(`failed to satisfy "dotnet-runtime" dependency for stack "io.buildpacks.stacks.bionic" with version constraint "2.0.0": no compatible versions. Supported versions are: \[(\d+\.\d+\.\d+(, )?)*\]`),
 			))
+			Expect(logs).To(ContainLines(MatchRegexp(`failed to satisfy "dotnet-runtime" dependency for stack "io.buildpacks.stacks.bionic" with version constraint "2.0.0": no compatible versions. Supported versions are: \[(\d+\.\d+\.\d+(, )?)*\]`)))
 		})
 	})
 }

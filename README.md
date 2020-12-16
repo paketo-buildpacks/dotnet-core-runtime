@@ -4,13 +4,16 @@ The Dotnet Core Runtime CNB provides a version of the [Dotnet Core
 Runtime](https://github.com/dotnet/runtime) and sets the initial `$DOTNET_ROOT`
 location.
 
+A usage example can be found in the
+[`samples` repository under the `dotnet-core/runtime`
+directory](https://github.com/paketo-buildpacks/samples/tree/main/dotnet-core/runtime).
+
 ## Integration
 
 The Dotnet Core Runtime CNB provides dotnet-runtime as a dependency.
-Downstream buildpacks, like [Dotnet Core
-Build](https://github.com/paketo-buildpacks/dotnet-core-build), [Dotnet Core
-ASPNet](https://github.com/paketo-buildpacks/dotnet-core-aspnet) and [Dotnet
-Core SDK](https://github.com/paketo-buildpacks/dotnet-core-sdk) can require the
+Downstream buildpacks, like [Dotnet
+Publish](https://github.com/paketo-buildpacks/dotnet-publish) and [Dotnet
+Execute](https://github.com/paketo-buildpacks/dotnet-execute) can require the
 dotnet-runtime dependency by generating a [Build Plan
 TOML](https://github.com/buildpacks/spec/blob/master/buildpack.md#build-plan-toml)
 file that looks like the following:
@@ -59,7 +62,7 @@ selected runtimes do not match those used to build the application.
 #### Source based applications
 We do not recommend specifying a runtime version for source based workflows.
 Doing so could result in an incompatibility between the dotnet-sdk and
-it's internal dotnet-runtime.
+its internal dotnet-runtime.
 
 ## Usage
 
@@ -77,6 +80,9 @@ supply another value as the first argument to `package.sh`.
 ```yaml
 dotnet-framework:
   # this allows you to specify a version constaint for the dotnet-runtime dependency
-  # any valid semver constaints (e.g. 2.* and 2.1.*) are also acceptable
+  # any valid semver constaints (e.g. 2.* and 2.1.*) are also acceptable. Specifying
+  # a version this way will prevent the buildpack from running version roll-forward logic
   version: "2.1.14"
 ```
+For more information about version roll-forward logic, see [the .NET
+documentation.](https://docs.microsoft.com/en-us/dotnet/core/versions/selection#framework-dependent-apps-roll-forward)

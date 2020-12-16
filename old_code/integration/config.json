@@ -1,8 +1,0 @@
-{
-  "builder" : "bionic",
-	"buildpackOrder" : {
-		"bionic": ["icu", "test-buildpack", "dotnet-execute"],
-		"cflinuxfs3": ["test-buildpack", "dotnet-execute"]
-	}
-}
-
