@@ -2,6 +2,7 @@ package dotnetcoreruntime
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -11,117 +12,78 @@ import (
 	"github.com/paketo-buildpacks/packit/postal"
 )
 
-type RuntimeVersionResolver struct{}
-
-func NewRuntimeVersionResolver() RuntimeVersionResolver {
-	return RuntimeVersionResolver{}
+type RuntimeVersionResolver struct {
+	logger LogEmitter
 }
 
-func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanEntry, stack string, logger LogEmitter) (postal.Dependency, error) {
-	var buildpackTOML struct {
-		Metadata struct {
-			Dependencies []postal.Dependency `toml:"dependencies"`
-		} `toml:"metadata"`
-	}
+func NewRuntimeVersionResolver(logger LogEmitter) RuntimeVersionResolver {
+	return RuntimeVersionResolver{logger: logger}
+}
 
-	_, err := toml.DecodeFile(path, &buildpackTOML)
-	if err != nil {
-		return postal.Dependency{}, err
-	}
-
-	version := ""
-	_, ok := entry.Metadata["version"]
-	if ok {
-		version = entry.Metadata["version"].(string)
+func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanEntry, stack string) (postal.Dependency, error) {
+	var version string
+	if versionStruct, ok := entry.Metadata["version"]; ok {
+		version = versionStruct.(string)
 	}
 
 	if version == "" || version == "default" {
 		version = "*"
 	}
 
-	runtimeConstraint, err := semver.NewConstraint(version)
+	var versionSource string
+	if versionSourceStruct, ok := entry.Metadata["version-source"]; ok {
+		versionSource = versionSourceStruct.(string)
+	}
+
+	constraints, err := gatherVersionConstraints(version, versionSource)
 	if err != nil {
 		return postal.Dependency{}, err
 	}
-	constraints := []semver.Constraints{*runtimeConstraint}
 
-	versionSource := ""
-	_, ok = entry.Metadata["version-source"]
-	if ok {
-		versionSource = entry.Metadata["version-source"].(string)
-	}
-
-	// If the version source is buildpack.yml, we will only look for the version itself
-	// Only do roll forward logic for other version sources.
-	if versionSource != "buildpack.yml" {
-		// Check to see if the version given is a semantic version. If it is not like
-		// "*" then there would be a failure in parsing. Anything that is a
-		// non-semver we try and form a constraint and use that as the sole
-		// constraint.
-		splitVersion := strings.Split(version, ".")
-		if len(splitVersion) == 3 && splitVersion[len(splitVersion)-1] != "*" {
-			runtimeVersion, err := semver.NewVersion(version)
-			if err != nil {
-				return postal.Dependency{}, err
-			}
-
-			minorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.%d.*", runtimeVersion.Major(), runtimeVersion.Minor()))
-			if err != nil {
-				return postal.Dependency{}, err
-			}
-			constraints = append(constraints, *minorConstraint)
-
-			majorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.*", runtimeVersion.Major()))
-			if err != nil {
-				return postal.Dependency{}, err
-			}
-			constraints = append(constraints, *majorConstraint)
-		}
-	}
-
-	var supportedVersions []string
-	var filteredDependencies []postal.Dependency
-	var id = entry.Name
-	for _, dependency := range buildpackTOML.Metadata.Dependencies {
-		if dependency.ID == id && containsStack(dependency.Stacks, stack) {
-			filteredDependencies = append(filteredDependencies, dependency)
-			supportedVersions = append(supportedVersions, dependency.Version)
-		}
+	dotnetRuntimeDependencies, err := gatherDependenciesFromBuildpackTOML(path, entry.Name, stack)
+	if err != nil {
+		return postal.Dependency{}, err
 	}
 
 	var compatibleDependencies []postal.Dependency
 	for i, constraint := range constraints {
-		if i == 1 {
-			logger.Subprocess("No exact version match found; attempting version roll-forward")
-			logger.Break()
+		if i == 1 { // if 0th constraint not satisfied, no exact match avail
+			r.logger.Subprocess("No exact version match found; attempting version roll-forward")
+			r.logger.Break()
 		}
-		for _, dependency := range filteredDependencies {
-			sVersion, err := semver.NewVersion(dependency.Version)
+		for _, dependency := range dotnetRuntimeDependencies {
+			depVersion, err := semver.NewVersion(dependency.Version)
 			if err != nil {
 				return postal.Dependency{}, err
 			}
 
-			if constraint.Check(sVersion) {
+			if constraint.Check(depVersion) {
 				compatibleDependencies = append(compatibleDependencies, dependency)
 			}
 		}
 
-		// on first constraint iteration, this is what stops on an exact match
+		// if this constraint can be satisfied, look no further
 		if len(compatibleDependencies) > 0 {
 			break
 		}
 	}
 
 	if len(compatibleDependencies) == 0 {
+		var supportedVersions []string
+		for _, dependency := range dotnetRuntimeDependencies {
+			supportedVersions = append(supportedVersions, dependency.Version)
+		}
+
 		return postal.Dependency{}, fmt.Errorf(
 			"failed to satisfy %q dependency for stack %q with version constraint %q: no compatible versions. Supported versions are: [%s]",
-			id,
+			entry.Name,
 			stack,
 			version,
 			strings.Join(supportedVersions, ", "),
 		)
 	}
 
+	// makes sure latest version is first in slice
 	sort.Slice(compatibleDependencies, func(i, j int) bool {
 		iVersion := semver.MustParse(compatibleDependencies[i].Version)
 		jVersion := semver.MustParse(compatibleDependencies[j].Version)
@@ -138,4 +100,58 @@ func containsStack(stacks []string, stack string) bool {
 		}
 	}
 	return false
+}
+
+func gatherVersionConstraints(version string, versionSource string) ([]semver.Constraints, error) {
+	var constraints []semver.Constraints
+	runtimeConstraint, err := semver.NewConstraint(version)
+	if err != nil {
+		return nil, err
+	}
+	constraints = append(constraints, *runtimeConstraint)
+
+	// Don't add roll forward constraints if the version source is buildpack.yml
+	if versionSource != "buildpack.yml" {
+		// If version is 1.2.3 but not 1.2.* or 1.2 or 1.*
+		if match, _ := regexp.MatchString(`\d+\.\d+\.\d+`, version); match {
+			runtimeVersion, err := semver.NewVersion(version)
+			if err != nil {
+				return []semver.Constraints{}, err
+			}
+
+			minorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.%d.*", runtimeVersion.Major(), runtimeVersion.Minor()))
+			if err != nil {
+				return []semver.Constraints{}, err
+			}
+			constraints = append(constraints, *minorConstraint)
+
+			majorConstraint, err := semver.NewConstraint(fmt.Sprintf("%d.*", runtimeVersion.Major()))
+			if err != nil {
+				return []semver.Constraints{}, err
+			}
+			constraints = append(constraints, *majorConstraint)
+		}
+	}
+	return constraints, nil
+}
+
+func gatherDependenciesFromBuildpackTOML(path, dependencyID, stack string) ([]postal.Dependency, error) {
+	var buildpackTOML struct {
+		Metadata struct {
+			Dependencies []postal.Dependency `toml:"dependencies"`
+		} `toml:"metadata"`
+	}
+
+	_, err := toml.DecodeFile(path, &buildpackTOML)
+	if err != nil {
+		return []postal.Dependency{}, err
+	}
+
+	var filteredDependencies []postal.Dependency
+	for _, dependency := range buildpackTOML.Metadata.Dependencies {
+		if dependency.ID == dependencyID && containsStack(dependency.Stacks, stack) {
+			filteredDependencies = append(filteredDependencies, dependency)
+		}
+	}
+	return filteredDependencies, nil
 }
