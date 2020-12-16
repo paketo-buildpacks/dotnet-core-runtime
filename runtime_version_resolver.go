@@ -17,7 +17,7 @@ func NewRuntimeVersionResolver() RuntimeVersionResolver {
 	return RuntimeVersionResolver{}
 }
 
-func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanEntry, stack string) (postal.Dependency, error) {
+func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanEntry, stack string, logger LogEmitter) (postal.Dependency, error) {
 	var buildpackTOML struct {
 		Metadata struct {
 			Dependencies []postal.Dependency `toml:"dependencies"`
@@ -90,7 +90,11 @@ func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanE
 	}
 
 	var compatibleDependencies []postal.Dependency
-	for _, constraint := range constraints {
+	for i, constraint := range constraints {
+		if i == 1 {
+			logger.Subprocess("No exact version match found; attempting version roll-forward")
+			logger.Break()
+		}
 		for _, dependency := range filteredDependencies {
 			sVersion, err := semver.NewVersion(dependency.Version)
 			if err != nil {
@@ -102,6 +106,7 @@ func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanE
 			}
 		}
 
+		// on first constraint iteration, this is what stops on an exact match
 		if len(compatibleDependencies) > 0 {
 			break
 		}
