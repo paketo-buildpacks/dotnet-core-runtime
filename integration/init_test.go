@@ -10,6 +10,7 @@ import (
 	"github.com/BurntSushi/toml"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/occam"
+	"github.com/paketo-buildpacks/packit/postal"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
 )
@@ -20,6 +21,9 @@ var settings struct {
 			ID   string
 			Name string
 		}
+		Metadata struct {
+			Dependencies []postal.Dependency `toml:"dependencies"`
+		} `toml:"metadata"`
 	}
 
 	Config struct {

@@ -16,26 +16,14 @@ import (
 
 func testRollForwardLogging(t *testing.T, context spec.G, it spec.S) {
 	var (
-		Expect                = NewWithT(t).Expect
-		pack                  occam.Pack
-		docker                occam.Docker
-		runtimeConfigTemplate string
+		Expect = NewWithT(t).Expect
+		pack   occam.Pack
+		docker occam.Docker
 	)
 
 	it.Before(func() {
 		pack = occam.NewPack()
 		docker = occam.NewDocker()
-
-		runtimeConfigTemplate = `
-{
-  "runtimeOptions": {
-    "tfm": "netcoreapp2.1",
-    "framework": {
-      "name": "Microsoft.NETCore.App",
-			"version": "%s"
-    }
-  }
-}`
 	})
 
 	context("the buildpack is run with pack build and rolls forward runtime version", func() {
@@ -57,9 +45,7 @@ func testRollForwardLogging(t *testing.T, context spec.G, it spec.S) {
 
 		context("when version requested does not have an exact match", func() {
 			it.Before(func() {
-				testVersion := "2.0.0"
 				source, err = occam.Source(filepath.Join("testdata", "rollforward"))
-				ioutil.WriteFile(filepath.Join(source, "app.runtimeconfig.json"), []byte(fmt.Sprintf(runtimeConfigTemplate, testVersion)), 0600)
 			})
 			it("logs useful information about rolling forward the version", func() {
 				Expect(err).NotTo(HaveOccurred())
@@ -93,6 +79,41 @@ func testRollForwardLogging(t *testing.T, context spec.G, it spec.S) {
 					"",
 					MatchRegexp(`    RUNTIME_VERSION -> "\d+\.\d+\.\d+"`),
 				))
+			})
+		})
+
+		context("when version requested in a runtimeconfig.json has an exact match", func() {
+			var availableVersion string
+			it.Before(func() {
+				source, err = occam.Source(filepath.Join("testdata", "rollforward"))
+				availableVersion = settings.BuildpackInfo.Metadata.Dependencies[0].Version
+				err = ioutil.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
+			name = "dotnet-runtime"
+
+				[requires.metadata]
+					launch = true
+					version-source = "runtimeconfig.json"
+					version = "%s"
+			`, availableVersion)), os.ModePerm)
+				Expect(err).NotTo(HaveOccurred())
+			})
+			it("does not log about rolling forward the version", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				var logs fmt.Stringer
+				_, logs, err = pack.WithNoColor().Build.
+					WithPullPolicy("never").
+					WithBuildpacks(
+						settings.Buildpacks.DotnetCoreRuntime.Online,
+						settings.Buildpacks.BuildPlan.Online,
+					).
+					Execute(name, source)
+				Expect(err).NotTo(HaveOccurred(), logs.String())
+
+				Expect(logs).To(ContainLines(
+					MatchRegexp(fmt.Sprintf(`    Selected dotnet-runtime version \(using runtimeconfig.json\): %s`, availableVersion)),
+				))
+				Expect(logs).NotTo(ContainSubstring("No exact version match found; attempting version roll-forward"))
 			})
 		})
 	})
