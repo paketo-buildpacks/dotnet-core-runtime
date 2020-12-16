@@ -1,0 +1,7 @@
+[[requires]]
+  name = "dotnet-runtime"
+
+  [requires.metadata]
+    launch = true
+    version = "2.0.0"
+    version-source = "runtimeconfig.json"
