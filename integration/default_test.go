@@ -73,9 +73,10 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				MatchRegexp(`    Installing Dotnet Core Runtime \d+\.\d+\.\d+`),
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 				"",
-				"  Configuring environment",
+				"  Configuring environment for build and launch",
 				`    DOTNET_ROOT -> "/workspace/.dotnet_root"`,
 				"",
+				"  Configuring environment for build",
 				MatchRegexp(`    RUNTIME_VERSION -> "\d+\.\d+\.\d+"`),
 			))
 
