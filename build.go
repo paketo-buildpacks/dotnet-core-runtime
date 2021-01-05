@@ -90,7 +90,7 @@ func Build(
 
 		logger.Process("Executing build process")
 
-		err = dotnetCoreRuntimeLayer.Reset()
+		dotnetCoreRuntimeLayer, err = dotnetCoreRuntimeLayer.Reset()
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
