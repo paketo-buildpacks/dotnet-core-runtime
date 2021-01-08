@@ -11,37 +11,20 @@ import (
 )
 
 type LogEmitter struct {
-	// Logger is embedded and therefore delegates all of its functions to the
+	// Emitter is embedded and therefore delegates all of its functions to the
 	// LogEmitter.
-	scribe.Logger
+	scribe.Emitter
 }
 
 func NewLogEmitter(output io.Writer) LogEmitter {
 	return LogEmitter{
-		Logger: scribe.NewLogger(output),
+		Emitter: scribe.NewEmitter(output),
 	}
 }
 
 func (e LogEmitter) SelectedDependency(entry packit.BuildpackPlanEntry, dependency postal.Dependency, now time.Time) {
-	source, ok := entry.Metadata["version-source"].(string)
-	if !ok {
-		source = "<unknown>"
-	}
-
-	e.Subprocess("Selected %s version (using %s): %s", dependency.ID, source, dependency.Version)
-
-	if (dependency.DeprecationDate != time.Time{}) {
-		deprecationDate := dependency.DeprecationDate
-		switch {
-		case (deprecationDate.Add(-30*24*time.Hour).Before(now) && deprecationDate.After(now)):
-			e.Action("Version %s of %s will be deprecated after %s.", dependency.Version, dependency.ID, dependency.DeprecationDate.Format("2006-01-02"))
-			e.Action("Migrate your application to a supported version of %s before this time.", dependency.ID)
-		case (deprecationDate == now || deprecationDate.Before(now)):
-			e.Action("Version %s of %s is deprecated.", dependency.Version, dependency.ID)
-			e.Action("Migrate your application to a supported version of %s.", dependency.ID)
-		}
-	}
-	e.Break()
+	dependency.Name = dependency.ID
+	e.Emitter.SelectedDependency(entry, dependency, now)
 }
 
 func (e LogEmitter) Candidates(entries []packit.BuildpackPlanEntry) {
