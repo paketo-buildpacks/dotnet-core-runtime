@@ -56,7 +56,7 @@ file that looks like the following:
 
 #### Self contained applications & Framework dependent applications
 Be aware that specifying a dotnet runtime version for both framework dependent
-deployments and self contained deployments  may result in errors if the
+deployments and self contained deployments may result in errors if the
 selected runtimes do not match those used to build the application.
 
 #### Source based applications
@@ -80,8 +80,9 @@ supply another value as the first argument to `package.sh`.
 ```yaml
 dotnet-framework:
   # this allows you to specify a version constaint for the dotnet-runtime dependency
-  # any valid semver constaints (e.g. 2.* and 2.1.*) are also acceptable. Specifying
-  # a version this way will prevent the buildpack from running version roll-forward logic
+  # any valid semver constaints (e.g. 2.* and 2.1.*) are also acceptable. Including
+  # **any** dotnet-framework version entry in the buildpack.yml will prevent the
+  # buildpack from running version roll-forward logic
   version: "2.1.14"
 ```
 For more information about version roll-forward logic, see [the .NET
