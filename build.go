@@ -62,14 +62,7 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
-		bom := planRefinery.BillOfMaterial(postal.Dependency{
-			ID:      dependency.ID,
-			Name:    dependency.Name,
-			SHA256:  dependency.SHA256,
-			Stacks:  dependency.Stacks,
-			URI:     dependency.URI,
-			Version: dependency.Version,
-		})
+		bom := planRefinery.BillOfMaterial(dependency)
 
 		cachedDependencySHA, ok := dotnetCoreRuntimeLayer.Metadata["dependency-sha"]
 		if ok && cachedDependencySHA == dependency.SHA256 {
