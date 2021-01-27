@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/occam"
 	"github.com/paketo-buildpacks/packit/postal"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
+
+	. "github.com/onsi/gomega"
 )
 
 var settings struct {

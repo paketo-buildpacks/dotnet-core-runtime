@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
-	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/occam"
-	. "github.com/paketo-buildpacks/occam/matchers"
 	"github.com/sclevine/spec"
+
+	. "github.com/onsi/gomega"
+	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
 func testOffline(t *testing.T, context spec.G, it spec.S) {
@@ -92,9 +94,9 @@ func testOffline(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(
 				And(
-					MatchRegexp(`lrwxrwxrwx \d+ cnb cnb   \d+ .* host -> \/layers\/paketo-buildpacks_dotnet-core-runtime\/dotnet-core-runtime\/host`),
+					MatchRegexp(fmt.Sprintf(`lrwxrwxrwx \d+ cnb cnb   \d+ .* host -> \/layers\/%s\/dotnet-core-runtime\/host`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
 					MatchRegexp(`drwxr-xr-x \d+ cnb cnb \d+ .* shared`),
-					MatchRegexp(`lrwxrwxrwx \d+ cnb cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/paketo-buildpacks_dotnet-core-runtime\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`),
+					MatchRegexp(fmt.Sprintf(`lrwxrwxrwx \d+ cnb cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/%s\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
 				),
 			)
 		})
