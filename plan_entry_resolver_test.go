@@ -55,7 +55,7 @@ func testPlanEntryResolver(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
-	context("when a buildpack.yml and *proj are both included", func() {
+	context("when a buildpack.yml and proj file are both included", func() {
 		it("resolves the best plan entry", func() {
 			entry := resolver.Resolve([]packit.BuildpackPlanEntry{
 				{
@@ -74,7 +74,7 @@ func testPlanEntryResolver(t *testing.T, context spec.G, it spec.S) {
 				{
 					Name: "dotnet-core-runtime",
 					Metadata: map[string]interface{}{
-						"version-source": "**proj",
+						"version-source": "my-app.csproj",
 						"version":        "project-file-version",
 					},
 				},
@@ -89,7 +89,7 @@ func testPlanEntryResolver(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(buffer.String()).To(ContainSubstring("    Candidate version sources (in priority order):"))
 			Expect(buffer.String()).To(ContainSubstring("      buildpack.yml -> \"buildpack-yml-version\""))
-			Expect(buffer.String()).To(ContainSubstring("      **proj        -> \"project-file-version\""))
+			Expect(buffer.String()).To(ContainSubstring("      my-app.csproj -> \"project-file-version\""))
 			Expect(buffer.String()).To(ContainSubstring("      <unknown>     -> \"other-version\""))
 		})
 	})
@@ -133,7 +133,7 @@ func testPlanEntryResolver(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
-	context("when a *proj file and unknown are both included", func() {
+	context("when a proj file and unknown are both included", func() {
 		it("resolves the best plan entry", func() {
 			entry := resolver.Resolve([]packit.BuildpackPlanEntry{
 				{
@@ -146,7 +146,7 @@ func testPlanEntryResolver(t *testing.T, context spec.G, it spec.S) {
 				{
 					Name: "dotnet-core-runtime",
 					Metadata: map[string]interface{}{
-						"version-source": "**proj",
+						"version-source": "my-app.vbproj",
 						"version":        "project-file-version",
 					},
 				},
@@ -154,13 +154,13 @@ func testPlanEntryResolver(t *testing.T, context spec.G, it spec.S) {
 			Expect(entry).To(Equal(packit.BuildpackPlanEntry{
 				Name: "dotnet-core-runtime",
 				Metadata: map[string]interface{}{
-					"version-source": "**proj",
+					"version-source": "my-app.vbproj",
 					"version":        "project-file-version",
 				},
 			}))
 
 			Expect(buffer.String()).To(ContainSubstring("    Candidate version sources (in priority order):"))
-			Expect(buffer.String()).To(ContainSubstring("      **proj         -> \"project-file-version\""))
+			Expect(buffer.String()).To(ContainSubstring("      my-app.vbproj  -> \"project-file-version\""))
 			Expect(buffer.String()).To(ContainSubstring("      unknown source -> \"other-version\""))
 		})
 	})
