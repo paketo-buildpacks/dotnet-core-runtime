@@ -51,20 +51,15 @@ func (r PlanEntryResolver) Resolve(entries []packit.BuildpackPlanEntry) packit.B
 func getPriority(source string) int {
 	var (
 		priorities = map[string]int{
-			"buildpack.yml":          3,
-			"runtimeconfig.json":     2,
-			`.*\.(cs)|(fs)|(vb)proj`: 2, // matches filename.(cs/fs/vb)proj
-			"":                       -1,
+			"buildpack.yml":      3,
+			"runtimeconfig.json": 2,
+			"":                   -1,
 		}
 	)
-	if priority, ok := priorities[source]; ok {
-		return priority
+
+	if match, _ := regexp.MatchString(`.*\.(cs)|(fs)|(vb)proj`, source); match {
+		return 2
 	}
 
-	for key, priority := range priorities {
-		if match, _ := regexp.MatchString(key, source); match {
-			return priority
-		}
-	}
-	return -1
+	return priorities[source]
 }
