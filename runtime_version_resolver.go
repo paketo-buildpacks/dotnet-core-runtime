@@ -57,7 +57,13 @@ func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanE
 				return postal.Dependency{}, err
 			}
 
-			if constraint.Check(depVersion) {
+			// create a constraint that the depVersion must be >= requested version to prevent against rolling backwards
+			preventRollback, err := semver.NewConstraint(fmt.Sprintf(">= %s", version))
+			if err != nil {
+				return postal.Dependency{}, err
+			}
+
+			if constraint.Check(depVersion) && preventRollback.Check(depVersion) {
 				compatibleDependencies = append(compatibleDependencies, dependency)
 			}
 		}
