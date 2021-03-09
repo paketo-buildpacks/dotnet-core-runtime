@@ -336,7 +336,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			it.Before(func() {
 				layerDir = filepath.Join(layersDir, "dotnet-core-runtime")
 				Expect(os.MkdirAll(filepath.Join(layerDir, "dotnet-core-runtime"), os.ModePerm)).To(Succeed())
-				Expect(os.Chmod(layerDir, 0000)).To(Succeed())
+				Expect(os.Chmod(layerDir, 0500)).To(Succeed())
 			})
 
 			it.After(func() {
