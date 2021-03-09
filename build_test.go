@@ -152,10 +152,11 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					BuildEnv: packit.Environment{
 						"RUNTIME_VERSION.override": "2.5.x",
 					},
-					LaunchEnv: packit.Environment{},
-					Build:     false,
-					Launch:    true,
-					Cache:     false,
+					LaunchEnv:        packit.Environment{},
+					ProcessLaunchEnv: map[string]packit.Environment{},
+					Build:            false,
+					Launch:           true,
+					Cache:            false,
 					Metadata: map[string]interface{}{
 						"dependency-sha": "some-sha",
 						"built_at":       timeStamp.Format(time.RFC3339Nano),
