@@ -3,8 +3,10 @@ package dotnetcoreruntime
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"time"
 
+	"github.com/Masterminds/semver"
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
 	"github.com/paketo-buildpacks/packit/postal"
@@ -12,7 +14,8 @@ import (
 
 //go:generate faux --interface EntryResolver --output fakes/entry_resolver.go
 type EntryResolver interface {
-	Resolve([]packit.BuildpackPlanEntry) packit.BuildpackPlanEntry
+	Resolve(string, []packit.BuildpackPlanEntry, []interface{}) (packit.BuildpackPlanEntry, []packit.BuildpackPlanEntry)
+	MergeLayerTypes(string, []packit.BuildpackPlanEntry) (launch, build bool)
 }
 
 //go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
@@ -48,7 +51,22 @@ func Build(
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 		logger.Process("Resolving Dotnet Core Runtime version")
 
-		entry := entries.Resolve(context.Plan.Entries)
+		priorities := []interface{}{
+			"BP_DOTNET_FRAMEWORK_VERSION",
+			"buildpack.yml",
+			regexp.MustCompile(`.*\.(cs)|(fs)|(vb)proj`),
+			"runtimeconfig.json",
+		}
+		entry, sortedEntries := entries.Resolve("dotnet-runtime", context.Plan.Entries, priorities)
+		logger.Candidates(sortedEntries)
+
+		source, _ := entry.Metadata["version-source"].(string)
+		if source == "buildpack.yml" {
+			nextMajorVersion := semver.MustParse(context.BuildpackInfo.Version).IncMajor()
+			logger.Subprocess("WARNING: Setting the .NET Framework version through buildpack.yml will be deprecated soon in Dotnet Core Runtime Buildpack v%s.", nextMajorVersion.String())
+			logger.Subprocess("Please specify the version through the $BP_DOTNET_FRAMEWORK_VERSION environment variable instead. See docs for more information.")
+			logger.Break()
+		}
 
 		dependency, err := versionResolver.Resolve(filepath.Join(context.CNBPath, "buildpack.toml"), entry, context.Stack)
 		if err != nil {
@@ -88,9 +106,8 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
-		dotnetCoreRuntimeLayer.Launch = entry.Metadata["launch"] == true
-		dotnetCoreRuntimeLayer.Build = entry.Metadata["build"] == true
-		dotnetCoreRuntimeLayer.Cache = entry.Metadata["build"] == true
+		dotnetCoreRuntimeLayer.Launch, dotnetCoreRuntimeLayer.Build = entries.MergeLayerTypes("dotnet-runtime", context.Plan.Entries)
+		dotnetCoreRuntimeLayer.Cache = dotnetCoreRuntimeLayer.Build
 
 		logger.Subprocess("Installing Dotnet Core Runtime %s", dependency.Version)
 		duration, err := clock.Measure(func() error {

@@ -54,11 +54,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
 			Name: "dotnet-runtime",
 			Metadata: map[string]interface{}{
-				"version-source": "buildpack.yml",
+				"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 				"version":        "2.5.x",
 				"launch":         true,
 			},
 		}
+
+		entryResolver.MergeLayerTypesCall.Returns.Launch = true
 
 		dependencyManager = &fakes.DependencyManager{}
 
@@ -69,7 +71,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				{
 					Name: "dotnet-runtime",
 					Metadata: map[string]interface{}{
-						"version-source": "buildpack.yml",
+						"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 						"version":        "2.5.x",
 						"launch":         true,
 					},
@@ -118,7 +120,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					{
 						Name: "dotnet-runtime",
 						Metadata: map[string]interface{}{
-							"version-source": "buildpack.yml",
+							"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 							"version":        "2.5.x",
 							"launch":         true,
 						},
@@ -135,7 +137,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					{
 						Name: "dotnet-runtime",
 						Metadata: map[string]interface{}{
-							"version-source": "buildpack.yml",
+							"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 							"version":        "2.5.x",
 							"launch":         true,
 						},
@@ -169,7 +171,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			{
 				Name: "dotnet-runtime",
 				Metadata: map[string]interface{}{
-					"version-source": "buildpack.yml",
+					"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 					"version":        "2.5.x",
 					"launch":         true,
 				},
@@ -203,7 +205,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
-		Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using buildpack.yml): "))
+		Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using BP_DOTNET_FRAMEWORK_VERSION): "))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
 		Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
 	})
@@ -228,7 +230,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						{
 							Name: "dotnet-runtime",
 							Metadata: map[string]interface{}{
-								"version-source": "buildpack.yml",
+								"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 								"version":        "2.5.x",
 								"launch":         true,
 							},
@@ -243,7 +245,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				{
 					Name: "dotnet-runtime",
 					Metadata: map[string]interface{}{
-						"version-source": "buildpack.yml",
+						"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 						"version":        "2.5.x",
 						"launch":         true,
 					},
@@ -270,9 +272,106 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 			Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
-			Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using buildpack.yml): "))
+			Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using BP_DOTNET_FRAMEWORK_VERSION): "))
 			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
 			Expect(buffer.String()).NotTo(ContainSubstring("Executing build process"))
+		})
+	})
+
+	context("when version-source of the selected entry is buildpack.yml", func() {
+		it.Before(func() {
+			entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
+				Name: "dotnet-runtime",
+				Metadata: map[string]interface{}{
+					"version-source": "buildpack.yml",
+					"version":        "2.5.x",
+					"launch":         true,
+				},
+			}
+
+			planRefinery.BillOfMaterialCall.Returns.BuildpackPlan = packit.BuildpackPlan{
+				Entries: []packit.BuildpackPlanEntry{
+					{
+						Name: "dotnet-runtime",
+						Metadata: map[string]interface{}{
+							"version-source": "buildpack.yml",
+							"version":        "2.5.x",
+							"launch":         true,
+						},
+					},
+				},
+			}
+		})
+
+		it("prints a deprecation warning", func() {
+			result, err := build(packit.BuildContext{
+				WorkingDir: workingDir,
+				CNBPath:    cnbDir,
+				Stack:      "some-stack",
+				BuildpackInfo: packit.BuildpackInfo{
+					Name:    "Some Buildpack",
+					Version: "0.1.2",
+				},
+				Plan: packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: "dotnet-runtime",
+							Metadata: map[string]interface{}{
+								"version-source": "buildpack.yml",
+								"version":        "2.5.x",
+								"launch":         true,
+							},
+						},
+					},
+				},
+				Layers: packit.Layers{Path: layersDir},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result).To(Equal(packit.BuildResult{
+				Plan: packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: "dotnet-runtime",
+							Metadata: map[string]interface{}{
+								"version-source": "buildpack.yml",
+								"version":        "2.5.x",
+								"launch":         true,
+							},
+						},
+					},
+				},
+				Layers: []packit.Layer{
+					{
+						Name: "dotnet-core-runtime",
+						Path: filepath.Join(layersDir, "dotnet-core-runtime"),
+						SharedEnv: packit.Environment{
+							"DOTNET_ROOT.override": filepath.Join(workingDir, ".dotnet_root"),
+						},
+						BuildEnv: packit.Environment{
+							"RUNTIME_VERSION.override": "2.5.x",
+						},
+						LaunchEnv:        packit.Environment{},
+						ProcessLaunchEnv: map[string]packit.Environment{},
+						Build:            false,
+						Launch:           true,
+						Cache:            false,
+						Metadata: map[string]interface{}{
+							"dependency-sha": "some-sha",
+							"built_at":       timeStamp.Format(time.RFC3339Nano),
+						},
+					},
+				},
+			}))
+
+			Expect(buffer.String()).To(ContainSubstring("Some Buildpack 0.1.2"))
+			Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
+			Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using buildpack.yml): "))
+			// v1.0.0 because that's the next major after input version v0.1.2
+			Expect(buffer.String()).To(ContainSubstring("WARNING: Setting the .NET Framework version through buildpack.yml will be deprecated soon in Dotnet Core Runtime Buildpack v1.0.0."))
+			Expect(buffer.String()).To(ContainSubstring("Please specify the version through the $BP_DOTNET_FRAMEWORK_VERSION environment variable instead. See docs for more information."))
+			Expect(buffer.String()).To(ContainSubstring("Executing build process"))
+			Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
 		})
 	})
 
@@ -290,7 +389,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 							{
 								Name: "dotnet-runtime",
 								Metadata: map[string]interface{}{
-									"version-source": "buildpack.yml",
+									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 									"version":        "2.5.x",
 								},
 							},
@@ -319,7 +418,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 							{
 								Name: "dotnet-runtime",
 								Metadata: map[string]interface{}{
-									"version-source": "buildpack.yml",
+									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 									"version":        "2.5.x",
 								},
 							},
@@ -352,7 +451,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 							{
 								Name: "dotnet-core-runtime",
 								Metadata: map[string]interface{}{
-									"version-source": "buildpack.yml",
+									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 									"version":        "2.5.x",
 								},
 							},
@@ -377,7 +476,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 							{
 								Name: "dotnet-core-runtime",
 								Metadata: map[string]interface{}{
-									"version-source": "buildpack.yml",
+									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
 									"version":        "2.5.x",
 								},
 							},

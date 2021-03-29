@@ -8,12 +8,11 @@ import (
 )
 
 func TestUnitDotnetCoreRuntime(t *testing.T) {
-	suite := spec.New("dotnet-core-runtime", spec.Report(report.Terminal{}), spec.Parallel())
+	suite := spec.New("dotnet-core-runtime", spec.Report(report.Terminal{}))
 	suite("Build", testBuild)
 	suite("BuildpackYMLParser", testBuildpackYMLParser)
 	suite("Detect", testDetect)
 	suite("LogEmitter", testLogEmitter)
-	suite("PlanEntryResolver", testPlanEntryResolver)
 	suite("PlanRefinery", testPlanRefinery)
 	suite("RuntimeVersionResolver", testRuntimeVersionResolver)
 	suite("Symlinker", testSymlinker)

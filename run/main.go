@@ -7,13 +7,14 @@ import (
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/cargo"
 	"github.com/paketo-buildpacks/packit/chronos"
+	"github.com/paketo-buildpacks/packit/draft"
 	"github.com/paketo-buildpacks/packit/postal"
 )
 
 func main() {
 	bpYMLParser := dotnetcoreruntime.NewBuildpackYMLParser()
 	logEmitter := dotnetcoreruntime.NewLogEmitter(os.Stdout)
-	entryResolver := dotnetcoreruntime.NewPlanEntryResolver(logEmitter)
+	entryResolver := draft.NewPlanner()
 	dependencyManager := postal.NewService(cargo.NewTransport())
 	planRefinery := dotnetcoreruntime.NewPlanRefinery()
 	symlinker := dotnetcoreruntime.NewSymlinker()
