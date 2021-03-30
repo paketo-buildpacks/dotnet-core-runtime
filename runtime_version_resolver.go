@@ -116,8 +116,8 @@ func gatherVersionConstraints(version string, versionSource string) ([]semver.Co
 	}
 	constraints = append(constraints, *runtimeConstraint)
 
-	// Don't add roll forward constraints if the version source is buildpack.yml
-	if versionSource != "buildpack.yml" {
+	// Don't add roll forward constraints if the version source is BP_DOTNET_FRAMEWORK_VERSION or buildpack.yml
+	if versionSource != "BP_DOTNET_FRAMEWORK_VERSION" && versionSource != "buildpack.yml" {
 		// If version is 1.2.3 but not 1.2.* or 1.2 or 1.*
 		if match, _ := regexp.MatchString(`\d+\.\d+\.\d+`, version); match {
 			runtimeVersion, err := semver.NewVersion(version)
