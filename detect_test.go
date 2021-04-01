@@ -36,7 +36,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
-	context("when there is no buildpack.yml", func() {
+	context("when there is no buildpack.yml and BP_DOTNET_FRAMEWORK_VERSION is unset", func() {
 		it("provides dotnet core runtime", func() {
 			result, err := detect(packit.DetectContext{
 				WorkingDir: workingDir,
