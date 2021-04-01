@@ -304,7 +304,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("prints a deprecation warning", func() {
-			result, err := build(packit.BuildContext{
+			_, err := build(packit.BuildContext{
 				WorkingDir: workingDir,
 				CNBPath:    cnbDir,
 				Stack:      "some-stack",
@@ -327,43 +327,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Layers: packit.Layers{Path: layersDir},
 			})
 			Expect(err).NotTo(HaveOccurred())
-
-			Expect(result).To(Equal(packit.BuildResult{
-				Plan: packit.BuildpackPlan{
-					Entries: []packit.BuildpackPlanEntry{
-						{
-							Name: "dotnet-runtime",
-							Metadata: map[string]interface{}{
-								"version-source": "buildpack.yml",
-								"version":        "2.5.x",
-								"launch":         true,
-							},
-						},
-					},
-				},
-				Layers: []packit.Layer{
-					{
-						Name: "dotnet-core-runtime",
-						Path: filepath.Join(layersDir, "dotnet-core-runtime"),
-						SharedEnv: packit.Environment{
-							"DOTNET_ROOT.override": filepath.Join(workingDir, ".dotnet_root"),
-						},
-						BuildEnv: packit.Environment{
-							"RUNTIME_VERSION.override": "2.5.x",
-						},
-						LaunchEnv:        packit.Environment{},
-						ProcessLaunchEnv: map[string]packit.Environment{},
-						Build:            false,
-						Launch:           true,
-						Cache:            false,
-						Metadata: map[string]interface{}{
-							"dependency-sha": "some-sha",
-							"built_at":       timeStamp.Format(time.RFC3339Nano),
-						},
-					},
-				},
-			}))
-
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack 0.1.2"))
 			Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
 			Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using buildpack.yml): "))
