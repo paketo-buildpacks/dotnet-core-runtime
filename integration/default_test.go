@@ -66,7 +66,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
 				"  Resolving Dotnet Core Runtime version",
 				"    Candidate version sources (in priority order):",
-				"      <unknown> -> \"*\"",
+				"      <unknown> -> \"\"",
 				"",
 				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
 				"",
@@ -97,6 +97,61 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 					MatchRegexp(fmt.Sprintf(`lrwxrwxrwx \d+ cnb cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/%s\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
 				),
 			)
+		})
+	})
+
+	context("image is built with BP_DOTNET_FRAMEWORK_VERSION set", func() {
+		var (
+			image  occam.Image
+			name   string
+			source string
+			err    error
+		)
+
+		it.Before(func() {
+			name, err = occam.RandomName()
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		it.After(func() {
+			Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
+			Expect(os.RemoveAll(source)).To(Succeed())
+		})
+
+		it("installs the version from $BP_DOTNET_FRAMEWORK_VERSION", func() {
+			source, err = occam.Source(filepath.Join("testdata", "default"))
+			Expect(err).NotTo(HaveOccurred())
+
+			var logs fmt.Stringer
+			image, logs, err = pack.WithNoColor().Build.
+				WithPullPolicy("never").
+				WithBuildpacks(
+					settings.Buildpacks.DotnetCoreRuntime.Online,
+					settings.Buildpacks.BuildPlan.Online,
+				).
+				WithEnv(map[string]string{"BP_DOTNET_FRAMEWORK_VERSION": "3.1.*"}).
+				Execute(name, source)
+			Expect(err).NotTo(HaveOccurred(), logs.String())
+
+			Expect(logs).To(ContainLines(
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
+				"  Resolving Dotnet Core Runtime version",
+				"    Candidate version sources (in priority order):",
+				"      BP_DOTNET_FRAMEWORK_VERSION -> \"3.1.*\"",
+				"      <unknown>                   -> \"\"",
+				"",
+				MatchRegexp(`    Selected dotnet-runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): 3\.1\.\d+`),
+				"",
+				"  Executing build process",
+				MatchRegexp(`    Installing Dotnet Core Runtime 3\.1\.\d+`),
+				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
+				"",
+				"  Configuring environment for build and launch",
+				`    DOTNET_ROOT -> "/workspace/.dotnet_root"`,
+				"",
+				"  Configuring environment for build",
+				MatchRegexp(`    RUNTIME_VERSION -> "3\.1\.\d+"`),
+			))
 		})
 	})
 
@@ -131,15 +186,19 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				Execute(name, source)
 			Expect(err).To(HaveOccurred(), logs.String())
 
+			Expect(logs).To(ContainLines(MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name))))
 			Expect(logs).To(ContainLines(
-				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
 				"  Resolving Dotnet Core Runtime version",
 				"    Candidate version sources (in priority order):",
 				"      buildpack.yml -> \"2.0.0\"",
-				"      <unknown>     -> \"*\"",
+				"      <unknown>     -> \"\"",
 				"",
 			))
 			Expect(logs).To(ContainLines(MatchRegexp(`failed to satisfy "dotnet-runtime" dependency for stack "io.buildpacks.stacks.bionic" with version constraint "2.0.0": no compatible versions. Supported versions are: \[(\d+\.\d+\.\d+(, )?)*\]`)))
+			Expect(logs).To(ContainLines(
+				"    WARNING: Setting the .NET Framework version through buildpack.yml will be deprecated soon in Dotnet Core Runtime Buildpack v2.0.0.",
+				"    Please specify the version through the $BP_DOTNET_FRAMEWORK_VERSION environment variable instead. See docs for more information.",
+			))
 		})
 	})
 }

@@ -69,21 +69,30 @@ its internal dotnet-runtime.
 To package this buildpack for consumption
 
 ```
-$ ./scripts/package.sh
+$ ./scripts/package.sh -v <version>
 ```
 
-This builds the buildpack's Go source using `GOOS=linux` by default. You can
-supply another value as the first argument to `package.sh`.
+## Configuration
 
-## `buildpack.yml` Configurations
+Specifying the .NET Framework Version through `buildpack.yml` configuration
+will be deprecated in .NET Core Runtime Buildpack v1.0.0.
 
+To migrate from using `buildpack.yml` please set the following environment
+variables at build time either directly (ex. `pack build my-app --env
+BP_ENVIRONMENT_VARIABLE=some-value`) or through a [`project.toml`
+file](https://github.com/buildpacks/spec/blob/main/extensions/project-descriptor.md)
+
+### `BP_DOTNET_FRAMEWORK_VERSION`
+The `BP_DOTNET_FRAMEWORK_VERSION` variable allows you to specify the version of .NET Core Runtime that is installed.
+
+```shell
+BP_DOTNET_FRAMEWORK_VERSION=5.0.4
+```
+
+This will replace the following structure in `buildpack.yml`:
 ```yaml
 dotnet-framework:
-  # this allows you to specify a version constaint for the dotnet-runtime dependency
-  # any valid semver constaints (e.g. 2.* and 2.1.*) are also acceptable. Including
-  # **any** dotnet-framework version entry in the buildpack.yml will prevent the
-  # buildpack from running version roll-forward logic
-  version: "2.1.14"
+  version: "5.0.4"
 ```
 For more information about version roll-forward logic, see [the .NET
 documentation.](https://docs.microsoft.com/en-us/dotnet/core/versions/selection#framework-dependent-apps-roll-forward)

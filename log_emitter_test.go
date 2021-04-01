@@ -24,41 +24,6 @@ func testLogEmitter(t *testing.T, context spec.G, it spec.S) {
 		emitter = dotnetcoreruntime.NewLogEmitter(buffer)
 	})
 
-	context("Candidates", func() {
-		it("prints a formatted map of version source inputs", func() {
-			emitter.Candidates([]packit.BuildpackPlanEntry{
-				{
-					Name: "dotnet-runtime",
-					Metadata: map[string]interface{}{
-						"version-source": "package.json",
-						"version":        "package-json-version",
-					},
-				},
-				{
-					Name: "dotnet-runtime",
-					Metadata: map[string]interface{}{
-						"version": "other-version",
-					},
-				},
-				{
-					Name: "dotnet-runtime",
-					Metadata: map[string]interface{}{
-						"version-source": "buildpack.yml",
-						"version":        "buildpack-yml-version",
-					},
-				},
-				{
-					Name: "dotnet-runtime",
-				},
-			})
-
-			Expect(buffer.String()).To(ContainSubstring("    Candidate version sources (in priority order):"))
-			Expect(buffer.String()).To(ContainSubstring("      buildpack.yml -> \"buildpack-yml-version\""))
-			Expect(buffer.String()).To(ContainSubstring("      <unknown>     -> \"other-version\""))
-			Expect(buffer.String()).To(ContainSubstring("      <unknown>     -> \"*\""))
-		})
-	})
-
 	context("Environment", func() {
 		it("prints details about the environment", func() {
 			emitter.Environment(packit.Environment{

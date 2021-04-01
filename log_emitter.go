@@ -2,7 +2,6 @@ package dotnetcoreruntime
 
 import (
 	"io"
-	"strconv"
 	"time"
 
 	"github.com/paketo-buildpacks/packit"
@@ -25,39 +24,6 @@ func NewLogEmitter(output io.Writer) LogEmitter {
 func (e LogEmitter) SelectedDependency(entry packit.BuildpackPlanEntry, dependency postal.Dependency, now time.Time) {
 	dependency.Name = dependency.ID
 	e.Emitter.SelectedDependency(entry, dependency, now)
-}
-
-func (e LogEmitter) Candidates(entries []packit.BuildpackPlanEntry) {
-	e.Subprocess("Candidate version sources (in priority order):")
-
-	var (
-		sources [][2]string
-		maxLen  int
-	)
-
-	for _, entry := range entries {
-		versionSource, ok := entry.Metadata["version-source"].(string)
-		if !ok {
-			versionSource = "<unknown>"
-		}
-
-		if len(versionSource) > maxLen {
-			maxLen = len(versionSource)
-		}
-
-		version, ok := entry.Metadata["version"].(string)
-		if version == "" || !ok {
-			version = "*"
-		}
-
-		sources = append(sources, [2]string{versionSource, version})
-	}
-
-	for _, source := range sources {
-		e.Action(("%-" + strconv.Itoa(maxLen) + "s -> %q"), source[0], source[1])
-	}
-
-	e.Break()
 }
 
 func (l LogEmitter) Environment(env packit.Environment) {
