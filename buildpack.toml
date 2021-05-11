@@ -51,21 +51,21 @@ api = "0.2"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
-    sha256 = "1220363ce93341b84952504c4c2a7c9d1b5d8ef3f8f59d6757f044789b71447a"
-    source = "https://download.visualstudio.microsoft.com/download/pr/66db1966-cbe4-4c6c-9e73-80305c555aba/faabab630f9f56e28e9dc30691bda72c/dotnet-runtime-5.0.4-linux-x64.tar.gz"
-    source_sha256 = "33d0918098b8261cb7c95604cc3dd05cc8ea1a79fbcf5630ebc9082adfb2e880"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_5.0.4_linux_x64_any-stack_1220363c.tar.xz"
-    version = "5.0.4"
-
-  [[metadata.dependencies]]
-    id = "dotnet-runtime"
     sha256 = "e4c3d01f6eff1a442023841c309a4c8f2e9091eddb3bcefb4c7de98c7653a3ca"
     source = "https://download.visualstudio.microsoft.com/download/pr/6f26a190-5979-4fc4-b67a-df4e5b263e39/39e43561651183bb731ee6f3290fdcff/dotnet-runtime-5.0.5-linux-x64.tar.gz"
     source_sha256 = "64d33c50065e071205f6ef3b26d3c28eaecbeade2bdc3e96ed34d53e329b51ea"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_5.0.5_linux_x64_any-stack_e4c3d01f.tar.xz"
     version = "5.0.5"
+
+  [[metadata.dependencies]]
+    id = "dotnet-runtime"
+    sha256 = "17fe758015e669e32ef02ac23dd7d2746a3ef32e957c033dd547a09da90a0d0c"
+    source = "https://download.visualstudio.microsoft.com/download/pr/24b0e058-613e-415a-b624-09fb716cc129/91a51ddfd832aaa94cec5b117bf4db23/dotnet-runtime-5.0.6-linux-x64.tar.gz"
+    source_sha256 = "944210e3dd120ec0f38f0f82d69f891cd76fd83c1c255673157a8dabee2c5580"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_5.0.6_linux_x64_any-stack_17fe7580.tar.xz"
+    version = "5.0.6"
 
   [[metadata.dependency_deprecation_dates]]
     date = 2021-08-21T00:00:00Z
