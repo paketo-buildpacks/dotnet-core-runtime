@@ -12,22 +12,22 @@ api = "0.2"
   [[metadata.dependencies]]
     deprecation_date = "2021-08-21T00:00:00Z"
     id = "dotnet-runtime"
-    sha256 = "841c94bf12c0f6410c30191c7d647c2459704c6393fc0d94734748c61766e57d"
-    source = "https://download.visualstudio.microsoft.com/download/pr/5c00bafe-4ead-4e9a-82b6-884a9727e751/fdb7f6701e556d89b6884037cc9983cb/dotnet-runtime-2.1.26-linux-x64.tar.gz"
-    source_sha256 = "2a7e4d28c9ab479570e5d351257796db8fa1d13a95092eeebf3934260b9a7a6e"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.26_linux_x64_any-stack_841c94bf.tar.xz"
-    version = "2.1.26"
-
-  [[metadata.dependencies]]
-    deprecation_date = "2021-08-21T00:00:00Z"
-    id = "dotnet-runtime"
     sha256 = "7f73229433859bbe1e383969e8db07ce8fef1ec1bea53507484fa606600fc66b"
     source = "https://download.visualstudio.microsoft.com/download/pr/f7eb39c4-484d-4e01-bd41-b4fe6794cd82/ff5c2799f30ea6dd19964c5c90780dba/dotnet-runtime-2.1.27-linux-x64.tar.gz"
     source_sha256 = "9d4e8c6c65939dd755e51e11f855f09c187d756b8bb6476ffb0419e539e57f5a"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.27_linux_x64_any-stack_7f732294.tar.xz"
     version = "2.1.27"
+
+  [[metadata.dependencies]]
+    deprecation_date = "2021-08-21T00:00:00Z"
+    id = "dotnet-runtime"
+    sha256 = "9c20974f100ad5f8938b3658636d48d84b07391ee66a76c3ae4a47d0b6b32d79"
+    source = "https://download.visualstudio.microsoft.com/download/pr/95e68908-4a59-4adb-a44f-116914572423/7f8ee037851be82c8a583f47ee2969a7/dotnet-runtime-2.1.28-linux-x64.tar.gz"
+    source_sha256 = "b952518ec11e7992a4c22989154c16356def3ffdb3bf9b2ae8681c6968e41777"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.28_linux_x64_any-stack_9c20974f.tar.xz"
+    version = "2.1.28"
 
   [[metadata.dependencies]]
     deprecation_date = "2022-12-04T00:00:00Z"
