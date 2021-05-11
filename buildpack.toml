@@ -32,22 +32,22 @@ api = "0.2"
   [[metadata.dependencies]]
     deprecation_date = "2022-12-04T00:00:00Z"
     id = "dotnet-runtime"
-    sha256 = "e154e5658ed1ea7d48df7313c5305cd90a46ffbade29431c1827dc098c92cfe5"
-    source = "https://download.visualstudio.microsoft.com/download/pr/6880db3b-a4fe-4801-8e80-bbbec045f7c0/283b70d5e263c0341f011adf5a2ea5b1/dotnet-runtime-3.1.13-linux-x64.tar.gz"
-    source_sha256 = "4e8e308934a56f8e9b55f895642ac39297465facbd2154651bd69fdbd50db996"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.13_linux_x64_any-stack_e154e565.tar.xz"
-    version = "3.1.13"
-
-  [[metadata.dependencies]]
-    deprecation_date = "2022-12-04T00:00:00Z"
-    id = "dotnet-runtime"
     sha256 = "9fef5f6bd7643acacf99271b03436253d10004308b94f1f5e39e48a6181477d9"
     source = "https://download.visualstudio.microsoft.com/download/pr/4e5f17fa-fa56-40bc-bf3d-fd6abc91d0ad/08bd80f3751c0ac602dd41dc2534265e/dotnet-runtime-3.1.14-linux-x64.tar.gz"
     source_sha256 = "666cb2148c1096d95339d1732f4420b633d1bb5532b9f3b1d2f8cfc15930e670"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.14_linux_x64_any-stack_9fef5f6b.tar.xz"
     version = "3.1.14"
+
+  [[metadata.dependencies]]
+    deprecation_date = "2022-12-04T00:00:00Z"
+    id = "dotnet-runtime"
+    sha256 = "9d15c9f97da76f0d37d106e3ffa82d1ecc1c239a822d8fd6d4c24d8d12630702"
+    source = "https://download.visualstudio.microsoft.com/download/pr/692284f9-e1e7-4b31-9191-cd8043441024/ac45c17d4327b1f992b7fe3956a99129/dotnet-runtime-3.1.15-linux-x64.tar.gz"
+    source_sha256 = "cf8017acab943d8ad048b5891bdd4acd041440ecfc5b468707cc7d987740098a"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.15_linux_x64_any-stack_9d15c9f9.tar.xz"
+    version = "3.1.15"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
