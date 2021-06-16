@@ -1,9 +1,9 @@
 api = "0.2"
 
 [buildpack]
+  homepage = "https://github.com/paketo-buildpacks/dotnet-core-runtime"
   id = "paketo-buildpacks/dotnet-core-runtime"
   name = "Paketo .NET Core Runtime Buildpack"
-  homepage = "https://github.com/paketo-buildpacks/dotnet-core-runtime"
 
 [metadata]
   include-files = ["bin/build", "bin/detect", "bin/run", "buildpack.toml"]
@@ -68,13 +68,13 @@ api = "0.2"
     version = "5.0.7"
 
   [[metadata.dependency_deprecation_dates]]
-    date = 2021-08-21T00:00:00Z
+    date = "2021-08-21T00:00:00Z"
     link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
     name = "dotnet-runtime"
     version_line = "2.1.x"
 
   [[metadata.dependency_deprecation_dates]]
-    date = 2022-12-04T00:00:00Z
+    date = "2022-12-04T00:00:00Z"
     link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
     name = "dotnet-runtime"
     version_line = "3.1.x"
