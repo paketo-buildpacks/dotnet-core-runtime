@@ -1,9 +1,9 @@
 api = "0.2"
 
 [buildpack]
+  homepage = "https://github.com/paketo-buildpacks/dotnet-core-runtime"
   id = "paketo-buildpacks/dotnet-core-runtime"
   name = "Paketo .NET Core Runtime Buildpack"
-  homepage = "https://github.com/paketo-buildpacks/dotnet-core-runtime"
 
 [metadata]
   include-files = ["bin/build", "bin/detect", "bin/run", "buildpack.toml"]
