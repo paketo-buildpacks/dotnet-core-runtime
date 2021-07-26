@@ -64,7 +64,7 @@ func testRollForwardLogging(t *testing.T, context spec.G, it spec.S) {
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
 					"  Resolving Dotnet Core Runtime version",
 					"    Candidate version sources (in priority order):",
-					"      runtimeconfig.json -> \"2.0.0\"",
+					"      runtimeconfig.json -> \"3.0.0\"",
 					"",
 					"    No exact version match found; attempting version roll-forward",
 					"",
