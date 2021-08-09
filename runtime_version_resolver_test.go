@@ -327,7 +327,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 			it("returns an error", func() {
 				_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
-				Expect(err).To(MatchError(ContainSubstring("bare keys cannot contain '%'")))
+				Expect(err).To(MatchError(ContainSubstring("expected '.' or '=', but got '%' instead")))
 			})
 		})
 
