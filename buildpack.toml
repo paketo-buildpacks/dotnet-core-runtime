@@ -1,23 +1,13 @@
 api = "0.2"
 
 [buildpack]
-  homepage = "https://github.com/paketo-buildpacks/dotnet-core-runtime"
   id = "paketo-buildpacks/dotnet-core-runtime"
   name = "Paketo .NET Core Runtime Buildpack"
+  homepage = "https://github.com/paketo-buildpacks/dotnet-core-runtime"
 
 [metadata]
   include-files = ["bin/build", "bin/detect", "bin/run", "buildpack.toml"]
   pre-package = "./scripts/build.sh"
-
-  [[metadata.dependencies]]
-    deprecation_date = "2021-08-21T00:00:00Z"
-    id = "dotnet-runtime"
-    sha256 = "9c20974f100ad5f8938b3658636d48d84b07391ee66a76c3ae4a47d0b6b32d79"
-    source = "https://download.visualstudio.microsoft.com/download/pr/95e68908-4a59-4adb-a44f-116914572423/7f8ee037851be82c8a583f47ee2969a7/dotnet-runtime-2.1.28-linux-x64.tar.gz"
-    source_sha256 = "b952518ec11e7992a4c22989154c16356def3ffdb3bf9b2ae8681c6968e41777"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.28_linux_x64_any-stack_9c20974f.tar.xz"
-    version = "2.1.28"
 
   [[metadata.dependencies]]
     deprecation_date = "2021-08-21T00:00:00Z"
@@ -28,6 +18,16 @@ api = "0.2"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.29_linux_x64_any-stack_aa73aafa.tar.xz"
     version = "2.1.29"
+
+  [[metadata.dependencies]]
+    deprecation_date = "2021-08-21T00:00:00Z"
+    id = "dotnet-runtime"
+    sha256 = "a8c49dfa3e21a69fd5c162a925094d66a71680d8bc93750ffb0ad0403f1e1a33"
+    source = "https://download.visualstudio.microsoft.com/download/pr/84904da8-51ea-4ff2-b816-a2a16442eb7c/ebc16d3a87af8002cd2b2ea63a351db1/dotnet-runtime-2.1.30-linux-x64.tar.gz"
+    source_sha256 = "24222e3bdd0d65eba02fc87f928d5912831b3dc6dd7b833d503d496f7bcb7ab2"
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.30_linux_x64_any-stack_a8c49dfa.tar.xz"
+    version = "2.1.30"
 
   [[metadata.dependencies]]
     deprecation_date = "2022-12-04T00:00:00Z"
