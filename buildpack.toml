@@ -10,26 +10,6 @@ api = "0.2"
   pre-package = "./scripts/build.sh"
 
   [[metadata.dependencies]]
-    deprecation_date = "2021-08-21T00:00:00Z"
-    id = "dotnet-runtime"
-    sha256 = "aa73aafac92d9e11762d0bdc5ac469af75461e26f36cf9dd7e61afc76e1c2390"
-    source = "https://download.visualstudio.microsoft.com/download/pr/4711027f-711a-4762-8892-6fe1e6082e31/40f6b6e973ace3f14d925e25074397a0/dotnet-runtime-2.1.29-linux-x64.tar.gz"
-    source_sha256 = "91f762ec7a999aa29f84e5ca91da4535fe58d0707a6fb6758254e485a0f89b95"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.29_linux_x64_any-stack_aa73aafa.tar.xz"
-    version = "2.1.29"
-
-  [[metadata.dependencies]]
-    deprecation_date = "2021-08-21T00:00:00Z"
-    id = "dotnet-runtime"
-    sha256 = "a8c49dfa3e21a69fd5c162a925094d66a71680d8bc93750ffb0ad0403f1e1a33"
-    source = "https://download.visualstudio.microsoft.com/download/pr/84904da8-51ea-4ff2-b816-a2a16442eb7c/ebc16d3a87af8002cd2b2ea63a351db1/dotnet-runtime-2.1.30-linux-x64.tar.gz"
-    source_sha256 = "24222e3bdd0d65eba02fc87f928d5912831b3dc6dd7b833d503d496f7bcb7ab2"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.30_linux_x64_any-stack_a8c49dfa.tar.xz"
-    version = "2.1.30"
-
-  [[metadata.dependencies]]
     deprecation_date = "2022-12-04T00:00:00Z"
     id = "dotnet-runtime"
     sha256 = "02a6437a9f97d12917c03a13f8040e644343b1704fd68b74af5be60e24c02405"
@@ -66,12 +46,6 @@ api = "0.2"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_5.0.9_linux_x64_any-stack_b605c2f7.tar.xz"
     version = "5.0.9"
-
-  [[metadata.dependency_deprecation_dates]]
-    date = "2021-08-21T00:00:00Z"
-    link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
-    name = "dotnet-runtime"
-    version_line = "2.1.x"
 
   [[metadata.dependency_deprecation_dates]]
     date = "2022-12-04T00:00:00Z"
