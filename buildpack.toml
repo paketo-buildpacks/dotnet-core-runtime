@@ -10,68 +10,54 @@ api = "0.2"
   pre-package = "./scripts/build.sh"
 
   [[metadata.dependencies]]
-    deprecation_date = "2021-08-21T00:00:00Z"
+    cpe = "cpe:2.3:a:microsoft:.net_core:3.1.17:*:*:*:*:*:*:*"
+    deprecation_date = "2022-12-03T00:00:00Z"
     id = "dotnet-runtime"
-    sha256 = "aa73aafac92d9e11762d0bdc5ac469af75461e26f36cf9dd7e61afc76e1c2390"
-    source = "https://download.visualstudio.microsoft.com/download/pr/4711027f-711a-4762-8892-6fe1e6082e31/40f6b6e973ace3f14d925e25074397a0/dotnet-runtime-2.1.29-linux-x64.tar.gz"
-    source_sha256 = "91f762ec7a999aa29f84e5ca91da4535fe58d0707a6fb6758254e485a0f89b95"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.29_linux_x64_any-stack_aa73aafa.tar.xz"
-    version = "2.1.29"
-
-  [[metadata.dependencies]]
-    deprecation_date = "2021-08-21T00:00:00Z"
-    id = "dotnet-runtime"
-    sha256 = "a8c49dfa3e21a69fd5c162a925094d66a71680d8bc93750ffb0ad0403f1e1a33"
-    source = "https://download.visualstudio.microsoft.com/download/pr/84904da8-51ea-4ff2-b816-a2a16442eb7c/ebc16d3a87af8002cd2b2ea63a351db1/dotnet-runtime-2.1.30-linux-x64.tar.gz"
-    source_sha256 = "24222e3bdd0d65eba02fc87f928d5912831b3dc6dd7b833d503d496f7bcb7ab2"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.30_linux_x64_any-stack_a8c49dfa.tar.xz"
-    version = "2.1.30"
-
-  [[metadata.dependencies]]
-    deprecation_date = "2022-12-04T00:00:00Z"
-    id = "dotnet-runtime"
-    sha256 = "02a6437a9f97d12917c03a13f8040e644343b1704fd68b74af5be60e24c02405"
+    licenses = ["MIT", "MIT-0"]
+    purl = "pkg:generic/dotnet-runtime@3.1.17?checksum=678154c84e1034a4b094a210a8e9dec08fb0dbc5cde3304a85d549d9e6762a75&download_url=https://download.visualstudio.microsoft.com/download/pr/7a4bfa73-e500-45aa-8e10-04dc4910d8ae/f8b74c973752d3ea095fe06aa625f7f7/dotnet-runtime-3.1.17-linux-x64.tar.gz"
+    sha256 = "0fe55c3b108138d38d138e660b4499af350ff780f621db5c266c44d9b7d85eb6"
     source = "https://download.visualstudio.microsoft.com/download/pr/7a4bfa73-e500-45aa-8e10-04dc4910d8ae/f8b74c973752d3ea095fe06aa625f7f7/dotnet-runtime-3.1.17-linux-x64.tar.gz"
     source_sha256 = "678154c84e1034a4b094a210a8e9dec08fb0dbc5cde3304a85d549d9e6762a75"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.17_linux_x64_any-stack_02a6437a.tar.xz"
+    stacks = ["io.buildpacks.stacks.bionic"]
+    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_3.1.17_linux_x64_bionic_0fe55c3b.tar.xz"
     version = "3.1.17"
 
   [[metadata.dependencies]]
-    deprecation_date = "2022-12-04T00:00:00Z"
+    cpe = "cpe:2.3:a:microsoft:.net_core:3.1.18:*:*:*:*:*:*:*"
+    deprecation_date = "2022-12-03T00:00:00Z"
     id = "dotnet-runtime"
-    sha256 = "fb39d01d2cebf4066903076b08921f6ddfbfb6f14bf6ff4c63564c5bca427549"
+    licenses = ["MIT", "MIT-0"]
+    purl = "pkg:generic/dotnet-runtime@3.1.18?checksum=0e529bdb5bb3ce686553cd39aae40007e688e734e1415297d94a4301a2fd3388&download_url=https://download.visualstudio.microsoft.com/download/pr/13a14c60-b4c7-4d48-bef5-8553bb28980d/7b8eb9f74577383064bfb3b02a5964f5/dotnet-runtime-3.1.18-linux-x64.tar.gz"
+    sha256 = "44c5b9109a7202eba00e761fbb26fb5717a2ab1eb867c8bff246f7a68614ed90"
     source = "https://download.visualstudio.microsoft.com/download/pr/13a14c60-b4c7-4d48-bef5-8553bb28980d/7b8eb9f74577383064bfb3b02a5964f5/dotnet-runtime-3.1.18-linux-x64.tar.gz"
     source_sha256 = "0e529bdb5bb3ce686553cd39aae40007e688e734e1415297d94a4301a2fd3388"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_3.1.18_linux_x64_any-stack_fb39d01d.tar.xz"
+    stacks = ["io.buildpacks.stacks.bionic"]
+    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_3.1.18_linux_x64_bionic_44c5b910.tar.xz"
     version = "3.1.18"
 
   [[metadata.dependencies]]
+    cpe = "cpe:2.3:a:microsoft:.net:5.0.8:*:*:*:*:*:*:*"
     id = "dotnet-runtime"
-    sha256 = "d746012f2ec580a151bef0fe1ea4bcebf5098b17487535089a00c3a331ec3217"
+    licenses = ["MIT", "MIT-0"]
+    purl = "pkg:generic/dotnet-runtime@5.0.8?checksum=2a729240c6518c7c995769b1be7757e2e0388a58dca65236561a300f60ef096a&download_url=https://download.visualstudio.microsoft.com/download/pr/50687c84-e120-4410-bd4a-b1e0869d03f4/6038576259f95ef61d4d103ee3967130/dotnet-runtime-5.0.8-linux-x64.tar.gz"
+    sha256 = "8d7adcd160cf51d1fab2cc2c41c4c1ca0871f86929cb1ff2675bb622dcd062fd"
     source = "https://download.visualstudio.microsoft.com/download/pr/50687c84-e120-4410-bd4a-b1e0869d03f4/6038576259f95ef61d4d103ee3967130/dotnet-runtime-5.0.8-linux-x64.tar.gz"
     source_sha256 = "2a729240c6518c7c995769b1be7757e2e0388a58dca65236561a300f60ef096a"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_5.0.8_linux_x64_any-stack_d746012f.tar.xz"
+    stacks = ["io.buildpacks.stacks.bionic"]
+    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_5.0.8_linux_x64_bionic_8d7adcd1.tar.xz"
     version = "5.0.8"
 
   [[metadata.dependencies]]
+    cpe = "cpe:2.3:a:microsoft:.net:5.0.9:*:*:*:*:*:*:*"
     id = "dotnet-runtime"
-    sha256 = "b605c2f7fbc88f97f98f2c5704dff6cebb934152754bed36b98c24a6c875fdc1"
+    licenses = ["MIT", "MIT-0"]
+    purl = "pkg:generic/dotnet-runtime@5.0.9?checksum=ca143ca29035ebd6acc2b7033d7cdd2b9ceb9e34465ecdb4a7947b92173772ec&download_url=https://download.visualstudio.microsoft.com/download/pr/0c1eabe6-32ef-4785-92d1-8f09a0951b9e/d90c850374a07505bd577d3cff5d7536/dotnet-runtime-5.0.9-linux-x64.tar.gz"
+    sha256 = "c3734d7694c701b8761d1ac56dbf24433b6a1d12990090eff3e58a41b3039f36"
     source = "https://download.visualstudio.microsoft.com/download/pr/0c1eabe6-32ef-4785-92d1-8f09a0951b9e/d90c850374a07505bd577d3cff5d7536/dotnet-runtime-5.0.9-linux-x64.tar.gz"
     source_sha256 = "ca143ca29035ebd6acc2b7033d7cdd2b9ceb9e34465ecdb4a7947b92173772ec"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_5.0.9_linux_x64_any-stack_b605c2f7.tar.xz"
+    stacks = ["io.buildpacks.stacks.bionic"]
+    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_5.0.9_linux_x64_bionic_c3734d76.tar.xz"
     version = "5.0.9"
-
-  [[metadata.dependency_deprecation_dates]]
-    date = "2022-12-04T00:00:00Z"
-    link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
-    name = "dotnet-runtime"
-    version_line = "3.1.x"
 
   [[metadata.dependency-constraints]]
     constraint = "3.1.*"
@@ -82,6 +68,12 @@ api = "0.2"
     constraint = "5.0.*"
     id = "dotnet-runtime"
     patches = 2
+
+  [[metadata.dependency_deprecation_dates]]
+    date = "2022-12-04T00:00:00Z"
+    link = "https://dotnet.microsoft.com/platform/support/policy/dotnet-core"
+    name = "dotnet-runtime"
+    version_line = "3.1.x"
 
 [[stacks]]
   id = "io.buildpacks.stacks.bionic"
