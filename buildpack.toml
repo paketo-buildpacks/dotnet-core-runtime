@@ -79,6 +79,21 @@ api = "0.2"
     name = "dotnet-runtime"
     version_line = "3.1.x"
 
+  [[metadata.dependency-constraints]]
+    constraint = "2.1.*"
+    id = "dotnet-runtime"
+    patches = 2
+
+  [[metadata.dependency-constraints]]
+    constraint = "3.1.*"
+    id = "dotnet-runtime"
+    patches = 2
+
+  [[metadata.dependency-constraints]]
+    constraint = "5.0.*"
+    id = "dotnet-runtime"
+    patches = 2
+
 [[stacks]]
   id = "io.buildpacks.stacks.bionic"
 
