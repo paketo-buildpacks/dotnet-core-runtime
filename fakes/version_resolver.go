@@ -9,7 +9,7 @@ import (
 
 type VersionResolver struct {
 	ResolveCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			Path  string
@@ -25,8 +25,8 @@ type VersionResolver struct {
 }
 
 func (f *VersionResolver) Resolve(param1 string, param2 packit.BuildpackPlanEntry, param3 string) (postal.Dependency, error) {
-	f.ResolveCall.Lock()
-	defer f.ResolveCall.Unlock()
+	f.ResolveCall.mutex.Lock()
+	defer f.ResolveCall.mutex.Unlock()
 	f.ResolveCall.CallCount++
 	f.ResolveCall.Receives.Path = param1
 	f.ResolveCall.Receives.Entry = param2

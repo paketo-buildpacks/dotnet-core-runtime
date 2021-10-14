@@ -21,11 +21,7 @@ type EntryResolver interface {
 //go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 type DependencyManager interface {
 	Install(dependency postal.Dependency, cnbPath, layerPath string) error
-}
-
-//go:generate faux --interface BuildPlanRefinery --output fakes/build_plan_refinery.go
-type BuildPlanRefinery interface {
-	BillOfMaterial(dependency postal.Dependency) packit.BuildpackPlan
+	GenerateBillOfMaterials(dependencies ...postal.Dependency) []packit.BOMEntry
 }
 
 //go:generate faux --interface DotnetSymlinker --output fakes/dotnet_symlinker.go
@@ -41,7 +37,6 @@ type VersionResolver interface {
 func Build(
 	entries EntryResolver,
 	dependencies DependencyManager,
-	planRefinery BuildPlanRefinery,
 	dotnetSymlinker DotnetSymlinker,
 	versionResolver VersionResolver,
 	logger LogEmitter,
@@ -80,7 +75,18 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
-		bom := planRefinery.BillOfMaterial(dependency)
+		bom := dependencies.GenerateBillOfMaterials(dependency)
+		launch, build := entries.MergeLayerTypes("dotnet-runtime", context.Plan.Entries)
+
+		var buildMetadata packit.BuildMetadata
+		if build {
+			buildMetadata.BOM = bom
+		}
+
+		var launchMetadata packit.LaunchMetadata
+		if launch {
+			launchMetadata.BOM = bom
+		}
 
 		cachedDependencySHA, ok := dotnetCoreRuntimeLayer.Metadata["dependency-sha"]
 		if ok && cachedDependencySHA == dependency.SHA256 {
@@ -93,8 +99,9 @@ func Build(
 			}
 
 			return packit.BuildResult{
-				Plan:   bom,
 				Layers: []packit.Layer{dotnetCoreRuntimeLayer},
+				Build:  buildMetadata,
+				Launch: launchMetadata,
 			}, nil
 
 		}
@@ -140,8 +147,9 @@ func Build(
 		logger.Environment(dotnetCoreRuntimeLayer.BuildEnv)
 
 		return packit.BuildResult{
-			Plan:   bom,
 			Layers: []packit.Layer{dotnetCoreRuntimeLayer},
+			Build:  buildMetadata,
+			Launch: launchMetadata,
 		}, nil
 	}
 }
