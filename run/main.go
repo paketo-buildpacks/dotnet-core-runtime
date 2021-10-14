@@ -16,7 +16,6 @@ func main() {
 	logEmitter := dotnetcoreruntime.NewLogEmitter(os.Stdout)
 	entryResolver := draft.NewPlanner()
 	dependencyManager := postal.NewService(cargo.NewTransport())
-	planRefinery := dotnetcoreruntime.NewPlanRefinery()
 	symlinker := dotnetcoreruntime.NewSymlinker()
 	runtimeVersionResolver := dotnetcoreruntime.NewRuntimeVersionResolver(logEmitter)
 
@@ -25,7 +24,6 @@ func main() {
 		dotnetcoreruntime.Build(
 			entryResolver,
 			dependencyManager,
-			planRefinery,
 			symlinker,
 			runtimeVersionResolver,
 			logEmitter,
