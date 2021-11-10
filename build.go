@@ -98,6 +98,8 @@ func Build(
 				return packit.BuildResult{}, err
 			}
 
+			dotnetCoreRuntimeLayer.Launch, dotnetCoreRuntimeLayer.Build, dotnetCoreRuntimeLayer.Cache = launch, build, build
+
 			return packit.BuildResult{
 				Layers: []packit.Layer{dotnetCoreRuntimeLayer},
 				Build:  buildMetadata,
@@ -113,8 +115,7 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
-		dotnetCoreRuntimeLayer.Launch, dotnetCoreRuntimeLayer.Build = entries.MergeLayerTypes("dotnet-runtime", context.Plan.Entries)
-		dotnetCoreRuntimeLayer.Cache = dotnetCoreRuntimeLayer.Build
+		dotnetCoreRuntimeLayer.Launch, dotnetCoreRuntimeLayer.Build, dotnetCoreRuntimeLayer.Cache = launch, build, build
 
 		logger.Subprocess("Installing Dotnet Core Runtime %s", dependency.Version)
 		duration, err := clock.Measure(func() error {
