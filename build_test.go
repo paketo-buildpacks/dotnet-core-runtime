@@ -213,12 +213,15 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when there is a dependency cache match", func() {
 		it.Before(func() {
+			entryResolver.MergeLayerTypesCall.Returns.Build = true
+			entryResolver.MergeLayerTypesCall.Returns.Launch = false
+
 			err := ioutil.WriteFile(filepath.Join(layersDir, "dotnet-core-runtime.toml"), []byte("[metadata]\ndependency-sha = \"some-sha\"\n"), 0600)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		it("returns a result that installs the dotnet runtime libraries", func() {
-			_, err := build(packit.BuildContext{
+			result, err := build(packit.BuildContext{
 				WorkingDir: workingDir,
 				CNBPath:    cnbDir,
 				Stack:      "some-stack",
@@ -241,6 +244,39 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Layers: packit.Layers{Path: layersDir},
 			})
 			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(packit.BuildResult{
+				Layers: []packit.Layer{
+					{
+						Name:             "dotnet-core-runtime",
+						Path:             filepath.Join(layersDir, "dotnet-core-runtime"),
+						SharedEnv:        packit.Environment{},
+						BuildEnv:         packit.Environment{},
+						LaunchEnv:        packit.Environment{},
+						ProcessLaunchEnv: map[string]packit.Environment{},
+						Build:            true,
+						Launch:           false,
+						Cache:            true,
+						Metadata: map[string]interface{}{
+							"dependency-sha": "some-sha",
+						},
+					},
+				},
+				Build: packit.BuildMetadata{
+					BOM: []packit.BOMEntry{
+						{
+							Name: "dotnet-runtime",
+							Metadata: packit.BOMMetadata{
+								Version: "dotnet-runtime-dep-version",
+								Checksum: packit.BOMChecksum{
+									Algorithm: packit.SHA256,
+									Hash:      "dotnet-runtime-dep-sha",
+								},
+								URI: "dotnet-runtime-dep-uri",
+							},
+						},
+					},
+				},
+			}))
 
 			Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
 				{
