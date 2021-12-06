@@ -21,12 +21,21 @@ func NewRuntimeVersionResolver(logger LogEmitter) RuntimeVersionResolver {
 }
 
 func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanEntry, stack string) (postal.Dependency, error) {
+	dotnetRuntimeDependencies, defaultVersion, err := filterBuildpackTOML(path, entry.Name, stack)
+	if err != nil {
+		return postal.Dependency{}, err
+	}
+
 	var version string
 	if versionStruct, ok := entry.Metadata["version"]; ok {
 		version = versionStruct.(string)
 	}
 
 	if version == "" || version == "default" {
+		version = defaultVersion
+	}
+
+	if version == "" {
 		version = "*"
 	}
 
@@ -36,11 +45,6 @@ func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanE
 	}
 
 	constraints, err := gatherVersionConstraints(version, versionSource)
-	if err != nil {
-		return postal.Dependency{}, err
-	}
-
-	dotnetRuntimeDependencies, err := gatherDependenciesFromBuildpackTOML(path, entry.Name, stack)
 	if err != nil {
 		return postal.Dependency{}, err
 	}
@@ -141,16 +145,17 @@ func gatherVersionConstraints(version string, versionSource string) ([]semver.Co
 	return constraints, nil
 }
 
-func gatherDependenciesFromBuildpackTOML(path, dependencyID, stack string) ([]postal.Dependency, error) {
+func filterBuildpackTOML(path, dependencyID, stack string) ([]postal.Dependency, string, error) {
 	var buildpackTOML struct {
 		Metadata struct {
-			Dependencies []postal.Dependency `toml:"dependencies"`
+			DefaultVersions map[string]string   `toml:"default-versions"`
+			Dependencies    []postal.Dependency `toml:"dependencies"`
 		} `toml:"metadata"`
 	}
 
 	_, err := toml.DecodeFile(path, &buildpackTOML)
 	if err != nil {
-		return []postal.Dependency{}, err
+		return []postal.Dependency{}, "", err
 	}
 
 	var filteredDependencies []postal.Dependency
@@ -159,5 +164,5 @@ func gatherDependenciesFromBuildpackTOML(path, dependencyID, stack string) ([]po
 			filteredDependencies = append(filteredDependencies, dependency)
 		}
 	}
-	return filteredDependencies, nil
+	return filteredDependencies, buildpackTOML.Metadata.DefaultVersions[dependencyID], nil
 }
