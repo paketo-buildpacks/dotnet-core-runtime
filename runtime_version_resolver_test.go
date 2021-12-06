@@ -44,19 +44,29 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 [metadata]
 
+	[metadata.default-versions]
+		dotnet-runtime = "1.2.0"
+	
   [[metadata.dependencies]]
     id = "dotnet-runtime"
     sha256 = "some-sha"
     stacks = ["some-stack"]
     uri = "some-uri"
-		version = "1.2.3"
+		version = "1.2.2"
+	
+  [[metadata.dependencies]]
+    id = "dotnet-runtime"
+    sha256 = "some-sha"
+    stacks = ["some-stack"]
+    uri = "some-uri"
+		version = "2.2.3"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
     sha256 = "some-sha"
     stacks = ["some-stack"]
     uri = "some-uri"
-		version = "1.2.4"
+		version = "2.2.4"
 `), 0600)
 		Expect(err).NotTo(HaveOccurred())
 
@@ -75,7 +85,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 	context("the buildpack.toml has the exact version", func() {
 		it.Before(func() {
-			entry.Metadata["version"] = "1.2.3"
+			entry.Metadata["version"] = "2.2.3"
 		})
 		it("returns a dependency with that version", func() {
 			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
@@ -83,7 +93,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(dependency).To(Equal(postal.Dependency{
 				ID:      "dotnet-runtime",
-				Version: "1.2.3",
+				Version: "2.2.3",
 				URI:     "some-uri",
 				SHA256:  "some-sha",
 				Stacks:  []string{"some-stack"},
@@ -93,7 +103,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 	context("the buildpack.toml only has a major minor version match", func() {
 		it.Before(func() {
-			entry.Metadata["version"] = "1.2.0"
+			entry.Metadata["version"] = "2.2.0"
 		})
 		it("returns a compatible version", func() {
 			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
@@ -101,7 +111,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(dependency).To(Equal(postal.Dependency{
 				ID:      "dotnet-runtime",
-				Version: "1.2.4",
+				Version: "2.2.4",
 				URI:     "some-uri",
 				SHA256:  "some-sha",
 				Stacks:  []string{"some-stack"},
@@ -111,7 +121,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 	context("the buildpack.toml only has a major version match", func() {
 		it.Before(func() {
-			entry.Metadata["version"] = "1.1.7"
+			entry.Metadata["version"] = "2.1.7"
 		})
 		it("returns a compatible version", func() {
 			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
@@ -119,7 +129,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(dependency).To(Equal(postal.Dependency{
 				ID:      "dotnet-runtime",
-				Version: "1.2.4",
+				Version: "2.2.4",
 				URI:     "some-uri",
 				SHA256:  "some-sha",
 				Stacks:  []string{"some-stack"},
@@ -130,59 +140,59 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 	context("the buildpack.toml does not have a version match", func() {
 		context("the requested version is a major version higher", func() {
 			it.Before(func() {
-				entry.Metadata["version"] = "2.0.0"
+				entry.Metadata["version"] = "3.0.0"
 			})
 			it("returns an error", func() {
 				_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
-				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"2.0.0\": no compatible versions. Supported versions are: [1.2.3, 1.2.4]")))
+				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"3.0.0\": no compatible versions. Supported versions are: [1.2.2, 2.2.3, 2.2.4]")))
 			})
 		})
 
 		context("the requested version is a minor version higher", func() {
 			it.Before(func() {
-				entry.Metadata["version"] = "1.3.0"
+				entry.Metadata["version"] = "2.3.0"
 			})
 			it("returns an error", func() {
 				_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
-				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"1.3.0\": no compatible versions. Supported versions are: [1.2.3, 1.2.4]")))
+				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"2.3.0\": no compatible versions. Supported versions are: [1.2.2, 2.2.3, 2.2.4]")))
 			})
 		})
 
 		context("the requested version is a patch version higher", func() {
 			it.Before(func() {
-				entry.Metadata["version"] = "1.2.5"
+				entry.Metadata["version"] = "2.2.5"
 			})
 			it("returns an error", func() {
 				_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
-				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"1.2.5\": no compatible versions. Supported versions are: [1.2.3, 1.2.4]")))
+				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"2.2.5\": no compatible versions. Supported versions are: [1.2.2, 2.2.3, 2.2.4]")))
 			})
 		})
 	})
 
 	context("the buildpack.toml does not have a dependency with a matching ID", func() {
 		it.Before(func() {
-			entry.Metadata["version"] = "1.2.3"
+			entry.Metadata["version"] = "2.2.3"
 			entry.Name = "random-ID"
 		})
 		it("returns an error", func() {
 			_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
-			Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"random-ID\" dependency for stack \"some-stack\" with version constraint \"1.2.3\": no compatible versions. Supported versions are: []")))
+			Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"random-ID\" dependency for stack \"some-stack\" with version constraint \"2.2.3\": no compatible versions. Supported versions are: []")))
 		})
 	})
 
 	context("the buildpack.toml does not have a dependency with a matching stack", func() {
 		it.Before(func() {
-			entry.Metadata["version"] = "1.2.3"
+			entry.Metadata["version"] = "2.2.3"
 		})
 		it("returns an error", func() {
 			_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "random-stack")
-			Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"random-stack\" with version constraint \"1.2.3\": no compatible versions. Supported versions are: []")))
+			Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"random-stack\" with version constraint \"2.2.3\": no compatible versions. Supported versions are: []")))
 		})
 	})
 
 	context("the version is not a valid semver version", func() {
 		it.Before(func() {
-			entry.Metadata["version"] = "1.2.*"
+			entry.Metadata["version"] = "2.2.*"
 		})
 		it("attempts to turn the given versions into the only constraint", func() {
 			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
@@ -190,7 +200,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(dependency).To(Equal(postal.Dependency{
 				ID:      "dotnet-runtime",
-				Version: "1.2.4",
+				Version: "2.2.4",
 				URI:     "some-uri",
 				SHA256:  "some-sha",
 				Stacks:  []string{"some-stack"},
@@ -199,13 +209,13 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("the version is empty", func() {
-		it("returns the latest version", func() {
+		it("returns the default version", func() {
 			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(dependency).To(Equal(postal.Dependency{
 				ID:      "dotnet-runtime",
-				Version: "1.2.4",
+				Version: "1.2.2",
 				URI:     "some-uri",
 				SHA256:  "some-sha",
 				Stacks:  []string{"some-stack"},
@@ -216,15 +226,16 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 	context("the version source is empty", func() {
 		it.Before(func() {
 			delete(entry.Metadata, "version-source")
-			entry.Metadata["version"] = "1.2.2"
+			entry.Metadata["version"] = "1.2.0"
 		})
-		it("returns the latest version", func() {
+
+		it("returns the default version", func() {
 			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(dependency).To(Equal(postal.Dependency{
 				ID:      "dotnet-runtime",
-				Version: "1.2.4",
+				Version: "1.2.2",
 				URI:     "some-uri",
 				SHA256:  "some-sha",
 				Stacks:  []string{"some-stack"},
@@ -236,13 +247,13 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		it.Before(func() {
 			entry.Metadata["version"] = "default"
 		})
-		it("returns the latest version", func() {
+		it("returns the default version", func() {
 			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(dependency).To(Equal(postal.Dependency{
 				ID:      "dotnet-runtime",
-				Version: "1.2.4",
+				Version: "1.2.2",
 				URI:     "some-uri",
 				SHA256:  "some-sha",
 				Stacks:  []string{"some-stack"},
@@ -257,17 +268,17 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 		context("the buildpack.toml only has a major minor version match", func() {
 			it.Before(func() {
-				entry.Metadata["version"] = "1.2.0"
+				entry.Metadata["version"] = "2.2.0"
 			})
 			it("returns an error", func() {
 				_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
-				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"1.2.0\": no compatible versions. Supported versions are: [1.2.3, 1.2.4]")))
+				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"2.2.0\": no compatible versions. Supported versions are: [1.2.2, 2.2.3, 2.2.4]")))
 			})
 		})
 
 		context("the version contains a `*`", func() {
 			it.Before(func() {
-				entry.Metadata["version"] = "1.2.*"
+				entry.Metadata["version"] = "2.2.*"
 			})
 			it("attempts to turn the given versions into the only constraint", func() {
 				dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
@@ -275,7 +286,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 				Expect(dependency).To(Equal(postal.Dependency{
 					ID:      "dotnet-runtime",
-					Version: "1.2.4",
+					Version: "2.2.4",
 					URI:     "some-uri",
 					SHA256:  "some-sha",
 					Stacks:  []string{"some-stack"},
@@ -291,17 +302,17 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 		context("the buildpack.toml only has a major minor version match", func() {
 			it.Before(func() {
-				entry.Metadata["version"] = "1.2.0"
+				entry.Metadata["version"] = "2.2.0"
 			})
 			it("returns an error", func() {
 				_, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
-				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"1.2.0\": no compatible versions. Supported versions are: [1.2.3, 1.2.4]")))
+				Expect(err).To(MatchError(ContainSubstring("failed to satisfy \"dotnet-runtime\" dependency for stack \"some-stack\" with version constraint \"2.2.0\": no compatible versions. Supported versions are: [1.2.2, 2.2.3, 2.2.4]")))
 			})
 		})
 
 		context("the version contains a `*`", func() {
 			it.Before(func() {
-				entry.Metadata["version"] = "1.2.*"
+				entry.Metadata["version"] = "2.2.*"
 			})
 			it("attempts to turn the given versions into the only constraint", func() {
 				dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
@@ -309,7 +320,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 				Expect(dependency).To(Equal(postal.Dependency{
 					ID:      "dotnet-runtime",
-					Version: "1.2.4",
+					Version: "2.2.4",
 					URI:     "some-uri",
 					SHA256:  "some-sha",
 					Stacks:  []string{"some-stack"},
@@ -322,7 +333,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		context("the buildpack.toml cannot be parsed", func() {
 			it.Before(func() {
 				Expect(ioutil.WriteFile(filepath.Join(cnbDir, "buildpack.toml"), []byte(`%%%`), 0600)).To(Succeed())
-				entry.Metadata["version"] = "1.2.3"
+				entry.Metadata["version"] = "2.2.3"
 			})
 
 			it("returns an error", func() {
@@ -363,7 +374,7 @@ id = "dotnet-runtime"
 sha256 = "some-sha"
 stacks = ["some-stack"]
 uri = "some-uri"
-version = "1.2.4"
+version = "2.2.4"
 `), 0600)
 				Expect(err).NotTo(HaveOccurred())
 				entry.Metadata["version"] = "1.2.0"

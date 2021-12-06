@@ -48,7 +48,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
-		it("installs the dotnet runtime into a layer", func() {
+		it("installs the default dotnet runtime version into a layer", func() {
 			source, err = occam.Source(filepath.Join("testdata", "default"))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -68,10 +68,10 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				"    Candidate version sources (in priority order):",
 				"      <unknown> -> \"\"",
 				"",
-				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
+				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): 5\.0\.\d+`),
 				"",
 				"  Executing build process",
-				MatchRegexp(`    Installing Dotnet Core Runtime \d+\.\d+\.\d+`),
+				MatchRegexp(`    Installing Dotnet Core Runtime 5\.0\.\d+`),
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 				"",
 				"  Configuring environment for build and launch",

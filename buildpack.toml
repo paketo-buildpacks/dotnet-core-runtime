@@ -8,6 +8,9 @@ api = "0.6"
 [metadata]
   include-files = ["bin/build", "bin/detect", "bin/run", "buildpack.toml"]
   pre-package = "./scripts/build.sh"
+  [metadata.default-versions]
+    dotnet-runtime = "5.0.*"
+
 
   [[metadata.dependencies]]
     cpe = "cpe:2.3:a:microsoft:.net_core:3.1.20:*:*:*:*:*:*:*"
