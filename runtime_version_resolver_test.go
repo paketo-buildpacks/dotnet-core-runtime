@@ -190,11 +190,11 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
-	context("the version is not a valid semver version", func() {
+	context("the version has a wildcard patch", func() {
 		it.Before(func() {
-			entry.Metadata["version"] = "2.2.*"
+			entry.Metadata["version"] = "2.1.*"
 		})
-		it("attempts to turn the given versions into the only constraint", func() {
+		it("allows patch and minor version rollforward", func() {
 			dependency, err := versionResolver.Resolve(filepath.Join(cnbDir, "buildpack.toml"), entry, "some-stack")
 			Expect(err).NotTo(HaveOccurred())
 
