@@ -54,21 +54,21 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
     sha256 = "some-sha"
     stacks = ["some-stack"]
     uri = "some-uri"
-	version = "1.2.2"
+    version = "1.2.2"
 	
   [[metadata.dependencies]]
     id = "dotnet-runtime"
     sha256 = "some-sha"
     stacks = ["some-stack"]
     uri = "some-uri"
-	version = "2.2.3"
+    version = "2.2.3"
 
   [[metadata.dependencies]]
     id = "dotnet-runtime"
     sha256 = "some-sha"
     stacks = ["some-stack"]
     uri = "some-uri"
-	version = "2.2.4"
+    version = "2.2.4"
 `), 0600)
 		Expect(err).NotTo(HaveOccurred())
 
@@ -146,6 +146,20 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 			})
 		})
 
+		context("the buildpack.toml only has a major minor version match with BP_DOTNET_ROLL_FORWARD=Disable", func() {
+			it.Before(func() {
+				entry.Metadata["version"] = "2.2.0"
+				Expect(os.Setenv("BP_DOTNET_ROLL_FORWARD", "Disable")).To(Succeed())
+			})
+			it.After(func() {
+				Expect(os.Unsetenv("BP_DOTNET_ROLL_FORWARD")).To(Succeed())
+			})
+			it("returns a compatible version", func() {
+				_, err := versionResolver.Resolve(buildpackToml, entry, "some-stack")
+				Expect(err).To(MatchError(ContainSubstring(`failed to satisfy "dotnet-runtime" dependency for stack "some-stack" with version constraint "2.2.0": no compatible versions. Supported versions are: [1.2.2, 2.2.3, 2.2.4]. This may be due to BP_DOTNET_ROLL_FORWARD=Disable`)))
+			})
+		})
+
 		context("the buildpack.toml only has a major version match", func() {
 			it.Before(func() {
 				entry.Metadata["version"] = "2.1.7"
@@ -172,6 +186,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 				it("returns an error", func() {
 					_, err := versionResolver.Resolve(buildpackToml, entry, "some-stack")
 					Expect(err).To(MatchError(ContainSubstring(`failed to satisfy "dotnet-runtime" dependency for stack "some-stack" with version constraint "3.0.0": no compatible versions. Supported versions are: [1.2.2, 2.2.3, 2.2.4]`)))
+					Expect(err).NotTo(MatchError(ContainSubstring(`. This may be due to BP_DOTNET_ROLL_FORWARD=Disable`)))
 				})
 			})
 

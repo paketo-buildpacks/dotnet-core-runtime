@@ -2,6 +2,7 @@ package dotnetcoreruntime
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -44,14 +45,20 @@ func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanE
 		versionSource = versionSourceStruct.(string)
 	}
 
-	constraints, err := gatherVersionConstraints(version, versionSource)
+	allowRollForward := allowRollForward()
+
+	if !allowRollForward {
+		r.logger.Subprocess("Roll Forward behavior is disabled")
+	}
+
+	constraints, err := gatherVersionConstraints(version, versionSource, allowRollForward)
 	if err != nil {
 		return postal.Dependency{}, err
 	}
 
 	var compatibleDependencies []postal.Dependency
 	for i, constraint := range constraints {
-		if i == 1 { // if 0th constraint not satisfied, no exact match avail
+		if i == 1 { // if 0th constraint not satisfied, no exact match available
 			r.logger.Subprocess("No exact version match found; attempting version roll-forward")
 			r.logger.Break()
 		}
@@ -84,13 +91,18 @@ func (r RuntimeVersionResolver) Resolve(path string, entry packit.BuildpackPlanE
 			supportedVersions = append(supportedVersions, dependency.Version)
 		}
 
-		return postal.Dependency{}, fmt.Errorf(
+		err := fmt.Errorf(
 			"failed to satisfy %q dependency for stack %q with version constraint %q: no compatible versions. Supported versions are: [%s]",
 			entry.Name,
 			stack,
 			version,
 			strings.Join(supportedVersions, ", "),
 		)
+
+		if !allowRollForward {
+			err = fmt.Errorf("%w. This may be due to BP_DOTNET_ROLL_FORWARD=Disable", err)
+		}
+		return postal.Dependency{}, err
 	}
 
 	// makes sure latest version is first in slice
@@ -112,7 +124,7 @@ func containsStack(stacks []string, stack string) bool {
 	return false
 }
 
-func gatherVersionConstraints(version string, versionSource string) ([]semver.Constraints, error) {
+func gatherVersionConstraints(version string, versionSource string, allowRollForward bool) ([]semver.Constraints, error) {
 	var constraints []semver.Constraints
 	runtimeConstraint, err := semver.NewConstraint(version)
 	if err != nil {
@@ -121,7 +133,8 @@ func gatherVersionConstraints(version string, versionSource string) ([]semver.Co
 	constraints = append(constraints, *runtimeConstraint)
 
 	// Don't add roll forward constraints if the version source is BP_DOTNET_FRAMEWORK_VERSION or buildpack.yml
-	if versionSource != "BP_DOTNET_FRAMEWORK_VERSION" && versionSource != "buildpack.yml" {
+	// Don't add roll forward constraints if roll forward is not allowed (via `BP_DOTNET_ROLL_FORWARD=Disable`)
+	if versionSource != "BP_DOTNET_FRAMEWORK_VERSION" && versionSource != "buildpack.yml" && allowRollForward {
 		// If version is 1.2.3 or 1.2.* but not 1.2 or 1.*
 		if match, _ := regexp.MatchString(`\d+\.\d+\.(\d+$|\*$)`, version); match {
 			runtimeVersion, err := semver.NewVersion(strings.TrimSuffix(version, `.*`))
@@ -143,6 +156,15 @@ func gatherVersionConstraints(version string, versionSource string) ([]semver.Co
 		}
 	}
 	return constraints, nil
+}
+
+func allowRollForward() bool {
+	if rollForward, ok := os.LookupEnv("BP_DOTNET_ROLL_FORWARD"); ok {
+		if rollForward == "Disable" {
+			return false
+		}
+	}
+	return true
 }
 
 func filterBuildpackTOML(path, dependencyID, stack string) ([]postal.Dependency, string, error) {
