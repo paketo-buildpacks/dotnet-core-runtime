@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -88,7 +87,7 @@ func testRollForwardLogging(t *testing.T, context spec.G, it spec.S) {
 			it.Before(func() {
 				source, err = occam.Source(filepath.Join("testdata", "rollforward"))
 				availableVersion = settings.BuildpackInfo.Metadata.Dependencies[0].Version
-				err = ioutil.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
+				err = os.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
 			name = "dotnet-runtime"
 
 				[requires.metadata]
