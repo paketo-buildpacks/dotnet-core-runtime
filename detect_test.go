@@ -8,7 +8,7 @@ import (
 
 	dotnetcoreruntime "github.com/paketo-buildpacks/dotnet-core-runtime"
 	"github.com/paketo-buildpacks/dotnet-core-runtime/fakes"
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"

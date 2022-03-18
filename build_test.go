@@ -11,9 +11,12 @@ import (
 
 	dotnetcoreruntime "github.com/paketo-buildpacks/dotnet-core-runtime"
 	"github.com/paketo-buildpacks/dotnet-core-runtime/fakes"
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/chronos"
-	"github.com/paketo-buildpacks/packit/postal"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/chronos"
+
+	//nolint Ignore SA1019, informed usage of deprecated package
+	"github.com/paketo-buildpacks/packit/v2/paketosbom"
+	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -65,10 +68,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		dependencyManager.GenerateBillOfMaterialsCall.Returns.BOMEntrySlice = []packit.BOMEntry{
 			{
 				Name: "dotnet-runtime",
-				Metadata: packit.BOMMetadata{
+				Metadata: paketosbom.BOMMetadata{
 					Version: "dotnet-runtime-dep-version",
-					Checksum: packit.BOMChecksum{
-						Algorithm: packit.SHA256,
+					Checksum: paketosbom.BOMChecksum{
+						Algorithm: paketosbom.SHA256,
 						Hash:      "dotnet-runtime-dep-sha",
 					},
 					URI: "dotnet-runtime-dep-uri",
@@ -112,6 +115,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Name:    "Some Buildpack",
 				Version: "some-version",
 			},
+			Platform: packit.Platform{Path: "platform"},
 			Plan: packit.BuildpackPlan{
 				Entries: []packit.BuildpackPlanEntry{
 					{
@@ -154,10 +158,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				BOM: []packit.BOMEntry{
 					{
 						Name: "dotnet-runtime",
-						Metadata: packit.BOMMetadata{
+						Metadata: paketosbom.BOMMetadata{
 							Version: "dotnet-runtime-dep-version",
-							Checksum: packit.BOMChecksum{
-								Algorithm: packit.SHA256,
+							Checksum: paketosbom.BOMChecksum{
+								Algorithm: paketosbom.SHA256,
 								Hash:      "dotnet-runtime-dep-sha",
 							},
 							URI: "dotnet-runtime-dep-uri",
@@ -191,14 +195,15 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(versionResolver.ResolveCall.Receives.Entry).To(Equal(entryResolver.ResolveCall.Returns.BuildpackPlanEntry))
 		Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
 
-		Expect(dependencyManager.InstallCall.Receives.Dependency).To(Equal(postal.Dependency{
+		Expect(dependencyManager.DeliverCall.Receives.Dependency).To(Equal(postal.Dependency{
 			ID:      "dotnet-runtime",
 			Version: "2.5.x",
 			Name:    "Dotnet Core Runtime",
 			SHA256:  "some-sha",
 		}))
-		Expect(dependencyManager.InstallCall.Receives.CnbPath).To(Equal(cnbDir))
-		Expect(dependencyManager.InstallCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
+		Expect(dependencyManager.DeliverCall.Receives.CnbPath).To(Equal(cnbDir))
+		Expect(dependencyManager.DeliverCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
+		Expect(dependencyManager.DeliverCall.Receives.PlatformPath).To(Equal("platform"))
 
 		Expect(dotnetSymlinker.LinkCall.CallCount).To(Equal(1))
 		Expect(dotnetSymlinker.LinkCall.Receives.WorkingDir).To(Equal(workingDir))
@@ -265,10 +270,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					BOM: []packit.BOMEntry{
 						{
 							Name: "dotnet-runtime",
-							Metadata: packit.BOMMetadata{
+							Metadata: paketosbom.BOMMetadata{
 								Version: "dotnet-runtime-dep-version",
-								Checksum: packit.BOMChecksum{
-									Algorithm: packit.SHA256,
+								Checksum: paketosbom.BOMChecksum{
+									Algorithm: paketosbom.SHA256,
 									Hash:      "dotnet-runtime-dep-sha",
 								},
 								URI: "dotnet-runtime-dep-uri",
@@ -302,7 +307,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(versionResolver.ResolveCall.Receives.Entry).To(Equal(entryResolver.ResolveCall.Returns.BuildpackPlanEntry))
 			Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
 
-			Expect(dependencyManager.InstallCall.CallCount).To(Equal(0))
+			Expect(dependencyManager.DeliverCall.CallCount).To(Equal(0))
 
 			Expect(dotnetSymlinker.LinkCall.CallCount).To(Equal(1))
 			Expect(dotnetSymlinker.LinkCall.Receives.WorkingDir).To(Equal(workingDir))
@@ -453,7 +458,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		context("when the executable errors", func() {
 			it.Before(func() {
-				dependencyManager.InstallCall.Returns.Error = errors.New("some-error")
+				dependencyManager.DeliverCall.Returns.Error = errors.New("some-error")
 			})
 
 			it("returns an error", func() {
