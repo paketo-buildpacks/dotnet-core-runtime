@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	dotnetcoreruntime "github.com/paketo-buildpacks/dotnet-core-runtime"
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/postal"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
