@@ -126,7 +126,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				),
 			)
 
-			Expect(secondImage.Buildpacks[0].Layers["dotnet-core-runtime"].Metadata["built_at"]).To(Equal(firstImage.Buildpacks[0].Layers["dotnet-core-runtime"].Metadata["built_at"]))
+			Expect(secondImage.Buildpacks[0].Layers["dotnet-core-runtime"].SHA).To(Equal(firstImage.Buildpacks[0].Layers["dotnet-core-runtime"].SHA))
 		})
 	})
 
@@ -245,7 +245,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				),
 			)
 
-			Expect(secondImage.Buildpacks[0].Layers["dotnet-core-runtime"].Metadata["built_at"]).NotTo(Equal(firstImage.Buildpacks[0].Layers["dotnet-core-runtime"].Metadata["built_at"]))
+			Expect(secondImage.Buildpacks[0].Layers["dotnet-core-runtime"].SHA).NotTo(Equal(firstImage.Buildpacks[0].Layers["dotnet-core-runtime"].SHA))
 		})
 	})
 }

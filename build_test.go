@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	dotnetcoreruntime "github.com/paketo-buildpacks/dotnet-core-runtime"
 	"github.com/paketo-buildpacks/dotnet-core-runtime/fakes"
@@ -28,8 +27,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir  string
 		workingDir string
 		cnbDir     string
-		clock      chronos.Clock
-		timeStamp  time.Time
 		buffer     *bytes.Buffer
 
 		entryResolver     *fakes.EntryResolver
@@ -91,12 +88,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logEmitter := dotnetcoreruntime.NewLogEmitter(buffer)
 
-		timeStamp = time.Now()
-		clock = chronos.NewClock(func() time.Time {
-			return timeStamp
-		})
-
-		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, dotnetSymlinker, versionResolver, logEmitter, clock)
+		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, dotnetSymlinker, versionResolver, logEmitter, chronos.DefaultClock)
 	})
 
 	it.After(func() {
@@ -149,7 +141,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					Cache:            false,
 					Metadata: map[string]interface{}{
 						"dependency-sha": "some-sha",
-						"built_at":       timeStamp.Format(time.RFC3339Nano),
 					},
 				},
 			},
