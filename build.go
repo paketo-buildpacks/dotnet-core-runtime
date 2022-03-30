@@ -130,7 +130,6 @@ func Build(
 
 		dotnetCoreRuntimeLayer.Metadata = map[string]interface{}{
 			"dependency-sha": dependency.SHA256,
-			"built_at":       clock.Now().Format(time.RFC3339Nano),
 		}
 
 		err = dotnetSymlinker.Link(context.WorkingDir, dotnetCoreRuntimeLayer.Path)
