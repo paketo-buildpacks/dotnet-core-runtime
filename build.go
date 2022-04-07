@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/Masterminds/semver"
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/chronos"
-	"github.com/paketo-buildpacks/packit/postal"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/postal"
 )
 
 //go:generate faux --interface EntryResolver --output fakes/entry_resolver.go
@@ -20,7 +20,7 @@ type EntryResolver interface {
 
 //go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 type DependencyManager interface {
-	Install(dependency postal.Dependency, cnbPath, layerPath string) error
+	Deliver(dependency postal.Dependency, cnbPath, layerPath, platformPath string) error
 	GenerateBillOfMaterials(dependencies ...postal.Dependency) []packit.BOMEntry
 }
 
@@ -119,7 +119,7 @@ func Build(
 
 		logger.Subprocess("Installing Dotnet Core Runtime %s", dependency.Version)
 		duration, err := clock.Measure(func() error {
-			return dependencies.Install(dependency, context.CNBPath, dotnetCoreRuntimeLayer.Path)
+			return dependencies.Deliver(dependency, context.CNBPath, dotnetCoreRuntimeLayer.Path, context.Platform.Path)
 		})
 		if err != nil {
 			return packit.BuildResult{}, err
@@ -130,7 +130,6 @@ func Build(
 
 		dotnetCoreRuntimeLayer.Metadata = map[string]interface{}{
 			"dependency-sha": dependency.SHA256,
-			"built_at":       clock.Now().Format(time.RFC3339Nano),
 		}
 
 		err = dotnetSymlinker.Link(context.WorkingDir, dotnetCoreRuntimeLayer.Path)

@@ -2,14 +2,13 @@ package dotnetcoreruntime_test
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
 	dotnetcoreruntime "github.com/paketo-buildpacks/dotnet-core-runtime"
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/postal"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -34,11 +33,12 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		logEmitter = dotnetcoreruntime.NewLogEmitter(buffer)
 
 		versionResolver = dotnetcoreruntime.NewRuntimeVersionResolver(logEmitter)
+
 		cnbDir, err = ioutil.TempDir("", "cnb")
 		buildpackToml = filepath.Join(cnbDir, "buildpack.toml")
 		Expect(err).NotTo(HaveOccurred())
 
-		err = ioutil.WriteFile(buildpackToml, []byte(`api = "0.2"
+		err = os.WriteFile(buildpackToml, []byte(`api = "0.2"
 [buildpack]
   id = "org.some-org.some-buildpack"
   name = "Some Buildpack"
@@ -355,7 +355,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 	context("failure cases", func() {
 		context("the buildpack.toml cannot be parsed", func() {
 			it.Before(func() {
-				Expect(ioutil.WriteFile(buildpackToml, []byte(`%%%`), 0600)).To(Succeed())
+				Expect(os.WriteFile(buildpackToml, []byte(`%%%`), 0600)).To(Succeed())
 				entry.Metadata["version"] = "2.2.3"
 			})
 
@@ -377,7 +377,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 		context("a buildpack.toml version is not semver compatible", func() {
 			it.Before(func() {
-				err := ioutil.WriteFile(buildpackToml, []byte(`api = "0.2"
+				err := os.WriteFile(buildpackToml, []byte(`api = "0.2"
 [buildpack]
 id = "org.some-org.some-buildpack"
 name = "Some Buildpack"

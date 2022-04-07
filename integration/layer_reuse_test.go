@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -127,7 +126,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				),
 			)
 
-			Expect(secondImage.Buildpacks[0].Layers["dotnet-core-runtime"].Metadata["built_at"]).To(Equal(firstImage.Buildpacks[0].Layers["dotnet-core-runtime"].Metadata["built_at"]))
+			Expect(secondImage.Buildpacks[0].Layers["dotnet-core-runtime"].SHA).To(Equal(firstImage.Buildpacks[0].Layers["dotnet-core-runtime"].SHA))
 		})
 	})
 
@@ -169,7 +168,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
-			err = ioutil.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
+			err = os.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
 			name = "dotnet-runtime"
 
 				[requires.metadata]
@@ -193,7 +192,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 			Expect(firstImage.Buildpacks[0].Layers).To(HaveKey("dotnet-core-runtime"))
 
 			// second pack build
-			err = ioutil.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
+			err = os.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
 			name = "dotnet-runtime"
 
 				[requires.metadata]
@@ -246,7 +245,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				),
 			)
 
-			Expect(secondImage.Buildpacks[0].Layers["dotnet-core-runtime"].Metadata["built_at"]).NotTo(Equal(firstImage.Buildpacks[0].Layers["dotnet-core-runtime"].Metadata["built_at"]))
+			Expect(secondImage.Buildpacks[0].Layers["dotnet-core-runtime"].SHA).NotTo(Equal(firstImage.Buildpacks[0].Layers["dotnet-core-runtime"].SHA))
 		})
 	})
 }
