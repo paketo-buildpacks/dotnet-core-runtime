@@ -34,7 +34,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 
 		versionResolver = dotnetcoreruntime.NewRuntimeVersionResolver(logEmitter)
 
-		cnbDir, err = ioutil.TempDir("", "cnb")
+		cnbDir, err = os.MkdirTemp("", "cnb")
 		buildpackToml = filepath.Join(cnbDir, "buildpack.toml")
 		Expect(err).NotTo(HaveOccurred())
 
