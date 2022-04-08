@@ -1,4 +1,5 @@
 /.bin
 /.idea
+build/
 /bin
 /*-cnb_*

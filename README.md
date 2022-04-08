@@ -10,11 +10,11 @@ directory](https://github.com/paketo-buildpacks/samples/tree/main/dotnet-core/ru
 
 ## Integration
 
-The Dotnet Core Runtime CNB provides dotnet-runtime as a dependency.
+The Dotnet Core Runtime CNB provides `dotnet-runtime` as a dependency.
 Downstream buildpacks, like [Dotnet
 Publish](https://github.com/paketo-buildpacks/dotnet-publish) and [Dotnet
 Execute](https://github.com/paketo-buildpacks/dotnet-execute) can require the
-dotnet-runtime dependency by generating a [Build Plan
+`dotnet-runtime` dependency by generating a [Build Plan
 TOML](https://github.com/buildpacks/spec/blob/master/buildpack.md#build-plan-toml)
 file that looks like the following:
 
@@ -61,12 +61,12 @@ selected runtimes do not match those used to build the application.
 
 #### Source based applications
 We do not recommend specifying a runtime version for source based workflows.
-Doing so could result in an incompatibility between the dotnet-sdk and
-its internal dotnet-runtime.
+Doing so could result in an incompatibility between the `dotnet-sdk` and
+its internal `dotnet-runtime`.
 
 ## Usage
 
-To package this buildpack for consumption
+To package this buildpack for consumption:
 
 ```
 $ ./scripts/package.sh -v <version>
@@ -79,8 +79,8 @@ will be deprecated in .NET Core Runtime Buildpack v1.0.0.
 
 To migrate from using `buildpack.yml` please set the following environment
 variables at build time either directly (ex. `pack build my-app --env
-BP_ENVIRONMENT_VARIABLE=some-value`) or through a [`project.toml`
-file](https://github.com/buildpacks/spec/blob/main/extensions/project-descriptor.md)
+BP_ENVIRONMENT_VARIABLE=some-value`) or through [a `project.toml`
+file](https://github.com/buildpacks/spec/blob/main/extensions/project-descriptor.md).
 
 ### `BP_DOTNET_FRAMEWORK_VERSION`
 The `BP_DOTNET_FRAMEWORK_VERSION` variable allows you to specify the version of .NET Core Runtime that is installed.
@@ -96,3 +96,10 @@ dotnet-framework:
 ```
 For more information about version roll-forward logic, see [the .NET
 documentation.](https://docs.microsoft.com/en-us/dotnet/core/versions/selection#framework-dependent-apps-roll-forward)
+
+### `BP_DOTNET_ROLL_FORWARD`
+The `BP_DOTNET_ROLL_FORWARD` variable, when set to `Disable`, will only allow binding to the exact version specified.
+See [.NET Core Runtime Binding](https://github.com/dotnet/designs/blob/main/accepted/2019/runtime-binding.md#rollforward) for more information.
+
+This variable has no purpose when using either `buildpack.yml` or `BP_DOTNET_FRAMEWORK_VERSION` to set the version, since those methods allow wildcarded version specifications. 
+The version must be set using either the `.runtimeconfig.json` or `vb|fs|csproj` files. 
