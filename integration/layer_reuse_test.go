@@ -103,6 +103,8 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				"      <unknown> -> \"\"",
 				"",
 				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
+				MatchRegexp(`      Version 5\.\d+\.\d+ of dotnet-runtime will be deprecated after 2022-05-08.`),
+				"      Migrate your application to a supported version of dotnet-runtime before this time.",
 				"",
 				MatchRegexp(fmt.Sprintf("  Reusing cached layer /layers/%s/dotnet-core-runtime", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
 				"",
