@@ -8,6 +8,7 @@ import (
 	dotnetcoreruntime "github.com/paketo-buildpacks/dotnet-core-runtime"
 	"github.com/paketo-buildpacks/dotnet-core-runtime/fakes"
 	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/planning"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -19,7 +20,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		buildpackYMLParser *fakes.VersionParser
 		workingDir         string
-		detect             packit.DetectFunc
+		detect             packit.DetectFuncOf[planning.Metadata]
 	)
 
 	it.Before(func() {
@@ -41,7 +42,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				WorkingDir: workingDir,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Plan).To(Equal(packit.BuildPlan{
+			Expect(result.Plan).To(Equal(packit.BuildPlanOf[planning.Metadata]{
 				Provides: []packit.BuildPlanProvision{
 					{
 						Name: "dotnet-runtime",
@@ -65,18 +66,18 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				WorkingDir: workingDir,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Plan).To(Equal(packit.BuildPlan{
+			Expect(result.Plan).To(Equal(packit.BuildPlanOf[planning.Metadata]{
 				Provides: []packit.BuildPlanProvision{
 					{
 						Name: "dotnet-runtime",
 					},
 				},
-				Requires: []packit.BuildPlanRequirement{
+				Requires: []packit.BuildPlanRequirementOf[planning.Metadata]{
 					{
 						Name: "dotnet-runtime",
-						Metadata: map[string]interface{}{
-							"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-							"version":        "1.2.3",
+						Metadata: planning.Metadata{
+							VersionSource: "BP_DOTNET_FRAMEWORK_VERSION",
+							Version:       "1.2.3",
 						},
 					},
 				},
@@ -94,18 +95,18 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				WorkingDir: workingDir,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Plan).To(Equal(packit.BuildPlan{
+			Expect(result.Plan).To(Equal(packit.BuildPlanOf[planning.Metadata]{
 				Provides: []packit.BuildPlanProvision{
 					{
 						Name: "dotnet-runtime",
 					},
 				},
-				Requires: []packit.BuildPlanRequirement{
+				Requires: []packit.BuildPlanRequirementOf[planning.Metadata]{
 					{
 						Name: "dotnet-runtime",
-						Metadata: map[string]interface{}{
-							"version-source": "buildpack.yml",
-							"version":        "1.2.3",
+						Metadata: planning.Metadata{
+							VersionSource: "buildpack.yml",
+							Version:       "1.2.3",
 						},
 					},
 				},
