@@ -2,6 +2,8 @@ module github.com/paketo-buildpacks/dotnet-core-runtime
 
 go 1.18
 
+replace github.com/paketo-buildpacks/packit/v2 => /Users/caseyj/git/paketo-buildpacks/packit
+
 require (
 	github.com/BurntSushi/toml v1.1.0
 	github.com/Masterminds/semver v1.5.0
