@@ -103,8 +103,6 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				"      <unknown> -> \"\"",
 				"",
 				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
-				MatchRegexp(`      Version 5\.\d+\.\d+ of dotnet-runtime will be deprecated after 2022-05-08.`),
-				"      Migrate your application to a supported version of dotnet-runtime before this time.",
 				"",
 				MatchRegexp(fmt.Sprintf("  Reusing cached layer /layers/%s/dotnet-core-runtime", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
 				"",
@@ -134,21 +132,17 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 	context("when an app is rebuilt with changed requirements", func() {
 		var (
-			firstImage        occam.Image
-			secondImage       occam.Image
-			secondContainer   occam.Container
-			name              string
-			source            string
-			availableVersion1 string
-			availableVersion2 string
+			firstImage      occam.Image
+			secondImage     occam.Image
+			secondContainer occam.Container
+			name            string
+			source          string
 		)
 
 		it.Before(func() {
 			var err error
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
-			availableVersion1 = settings.BuildpackInfo.Metadata.Dependencies[0].Version
-			availableVersion2 = settings.BuildpackInfo.Metadata.Dependencies[1].Version
 		})
 
 		it.After(func() {
@@ -170,20 +164,15 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
-			err = os.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
-			name = "dotnet-runtime"
-
-				[requires.metadata]
-					launch = true
-					version = "%s"
-			`, availableVersion1)), os.ModePerm)
-			Expect(err).NotTo(HaveOccurred())
 			firstImage, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.DotnetCoreRuntime.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
+				WithEnv(map[string]string{
+					"BP_DOTNET_FRAMEWORK_VERSION": "3.*",
+				}).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
@@ -194,14 +183,6 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 			Expect(firstImage.Buildpacks[0].Layers).To(HaveKey("dotnet-core-runtime"))
 
 			// second pack build
-			err = os.WriteFile(filepath.Join(source, "plan.toml"), []byte(fmt.Sprintf(`[[requires]]
-			name = "dotnet-runtime"
-
-				[requires.metadata]
-					launch = true
-					version = "%s"
-			`, availableVersion2)), os.ModePerm)
-			Expect(err).NotTo(HaveOccurred())
 
 			secondImage, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
@@ -209,6 +190,9 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.DotnetCoreRuntime.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
+				WithEnv(map[string]string{
+					"BP_DOTNET_FRAMEWORK_VERSION": "6.*",
+				}).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
@@ -221,9 +205,10 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				"  Resolving Dotnet Core Runtime version",
 				"    Candidate version sources (in priority order):",
-				MatchRegexp(`      <unknown> -> "\d+\.\d+\.\d+"`),
+				`      BP_DOTNET_FRAMEWORK_VERSION -> "6.*"`,
+				`      <unknown>                   -> ""`,
 				"",
-				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
+				MatchRegexp(`    Selected dotnet-runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): \d+\.\d+\.\d+`),
 			))
 
 			Expect(logs).NotTo(ContainSubstring("Reusing cached layer"))
