@@ -44,32 +44,6 @@ api = "0.6"
     version = "3.1.24"
 
   [[metadata.dependencies]]
-    cpe = "cpe:2.3:a:microsoft:.net:5.0.15:*:*:*:*:*:*:*"
-    deprecation_date = "2022-05-08T00:00:00Z"
-    id = "dotnet-runtime"
-    licenses = ["MIT", "MIT-0"]
-    purl = "pkg:generic/dotnet-runtime@5.0.15?checksum=32546d3282b8d8c9c9e9961c091cb6b1ad5be8ca10f0c141901bb80c93470ebb&download_url=https://download.visualstudio.microsoft.com/download/pr/546d50b2-d85c-433f-b13b-b896f1bc1916/17d7bbb674bf67c3d490489b20a437b7/dotnet-runtime-5.0.15-linux-x64.tar.gz"
-    sha256 = "7428cc24fa014cfcd7cb0f24f5f4f5dfc7d82eb952dad4abb4107142274a7244"
-    source = "https://download.visualstudio.microsoft.com/download/pr/546d50b2-d85c-433f-b13b-b896f1bc1916/17d7bbb674bf67c3d490489b20a437b7/dotnet-runtime-5.0.15-linux-x64.tar.gz"
-    source_sha256 = "32546d3282b8d8c9c9e9961c091cb6b1ad5be8ca10f0c141901bb80c93470ebb"
-    stacks = ["io.buildpacks.stacks.bionic"]
-    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_5.0.15_linux_x64_bionic_7428cc24.tar.xz"
-    version = "5.0.15"
-
-  [[metadata.dependencies]]
-    cpe = "cpe:2.3:a:microsoft:.net:5.0.16:*:*:*:*:*:*:*"
-    deprecation_date = "2022-05-08T00:00:00Z"
-    id = "dotnet-runtime"
-    licenses = ["MIT", "MIT-0"]
-    purl = "pkg:generic/dotnet-runtime@5.0.16?checksum=7117b2a92f9435a379e0ce2b794ba5878f30fac6bdb8394ba6df11fd3386207e&download_url=https://download.visualstudio.microsoft.com/download/pr/ca089696-3890-4d4f-a0c9-969464d98957/a00e3c8fe65ba7d04f5ba32b53e843e2/dotnet-runtime-5.0.16-linux-x64.tar.gz"
-    sha256 = "4acd6761c79042749ef87530dc17f8a557ef27a902aaad38bd8c04f645901cf2"
-    source = "https://download.visualstudio.microsoft.com/download/pr/ca089696-3890-4d4f-a0c9-969464d98957/a00e3c8fe65ba7d04f5ba32b53e843e2/dotnet-runtime-5.0.16-linux-x64.tar.gz"
-    source_sha256 = "7117b2a92f9435a379e0ce2b794ba5878f30fac6bdb8394ba6df11fd3386207e"
-    stacks = ["io.buildpacks.stacks.bionic"]
-    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_5.0.16_linux_x64_bionic_4acd6761.tar.xz"
-    version = "5.0.16"
-
-  [[metadata.dependencies]]
     cpe = "cpe:2.3:a:microsoft:.net:6.0.3:*:*:*:*:*:*:*"
     deprecation_date = "2024-11-08T00:00:00Z"
     id = "dotnet-runtime"
