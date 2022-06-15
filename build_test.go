@@ -11,6 +11,8 @@ import (
 	"github.com/paketo-buildpacks/dotnet-core-runtime/fakes"
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/sbom"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 
 	//nolint Ignore SA1019, informed usage of deprecated package
 	"github.com/paketo-buildpacks/packit/v2/paketosbom"
@@ -33,6 +35,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		dependencyManager *fakes.DependencyManager
 		dotnetSymlinker   *fakes.DotnetSymlinker
 		versionResolver   *fakes.VersionResolver
+		sbomGenerator     *fakes.SBOMGenerator
 
 		build packit.BuildFunc
 	)
@@ -85,10 +88,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			SHA256:  "some-sha",
 		}
 
-		buffer = bytes.NewBuffer(nil)
-		logEmitter := dotnetcoreruntime.NewLogEmitter(buffer)
+		sbomGenerator = &fakes.SBOMGenerator{}
+		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
-		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, dotnetSymlinker, versionResolver, logEmitter, chronos.DefaultClock)
+		buffer = bytes.NewBuffer(nil)
+		logEmitter := scribe.NewEmitter(buffer)
+
+		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, dotnetSymlinker, versionResolver, sbomGenerator, logEmitter, chronos.DefaultClock)
 	})
 
 	it.After(func() {
@@ -103,8 +109,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			CNBPath:    cnbDir,
 			Stack:      "some-stack",
 			BuildpackInfo: packit.BuildpackInfo{
-				Name:    "Some Buildpack",
-				Version: "some-version",
+				Name:        "Some Buildpack",
+				Version:     "some-version",
+				SBOMFormats: []string{sbom.CycloneDXFormat, sbom.SPDXFormat},
 			},
 			Platform: packit.Platform{Path: "platform"},
 			Plan: packit.BuildpackPlan{
@@ -123,42 +130,46 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result).To(Equal(packit.BuildResult{
-			Layers: []packit.Layer{
-				{
-					Name: "dotnet-core-runtime",
-					Path: filepath.Join(layersDir, "dotnet-core-runtime"),
-					SharedEnv: packit.Environment{
-						"DOTNET_ROOT.override": filepath.Join(workingDir, ".dotnet_root"),
-					},
-					BuildEnv: packit.Environment{
-						"RUNTIME_VERSION.override": "2.5.x",
-					},
-					LaunchEnv:        packit.Environment{},
-					ProcessLaunchEnv: map[string]packit.Environment{},
-					Build:            false,
-					Launch:           true,
-					Cache:            false,
-					Metadata: map[string]interface{}{
-						"dependency-sha": "some-sha",
-					},
-				},
+		Expect(result.Layers).To(HaveLen(1))
+		layer := result.Layers[0]
+
+		Expect(layer.Name).To(Equal("dotnet-core-runtime"))
+		Expect(layer.Path).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
+		Expect(layer.SharedEnv).To(Equal(packit.Environment{
+			"DOTNET_ROOT.override": filepath.Join(workingDir, ".dotnet_root"),
+		}))
+		Expect(layer.BuildEnv).To(Equal(packit.Environment{
+			"RUNTIME_VERSION.override": "2.5.x",
+		}))
+		Expect(layer.Metadata).To(Equal(map[string]interface{}{
+			"dependency-sha": "some-sha",
+		}))
+
+		Expect(layer.Build).To(BeFalse())
+		Expect(layer.Launch).To(BeTrue())
+		Expect(layer.Cache).To(BeFalse())
+
+		Expect(layer.SBOM.Formats()).To(Equal([]packit.SBOMFormat{
+			{
+				Extension: sbom.Format(sbom.CycloneDXFormat).Extension(),
+				Content:   sbom.NewFormattedReader(sbom.SBOM{}, sbom.CycloneDXFormat),
 			},
-			Launch: packit.LaunchMetadata{
-				BOM: []packit.BOMEntry{
-					{
-						Name: "dotnet-runtime",
-						Metadata: paketosbom.BOMMetadata{
-							Version: "dotnet-runtime-dep-version",
-							Checksum: paketosbom.BOMChecksum{
-								Algorithm: paketosbom.SHA256,
-								Hash:      "dotnet-runtime-dep-sha",
-							},
-							URI: "dotnet-runtime-dep-uri",
-						},
-					},
-				},
+			{
+				Extension: sbom.Format(sbom.SPDXFormat).Extension(),
+				Content:   sbom.NewFormattedReader(sbom.SBOM{}, sbom.SPDXFormat),
 			},
+		}))
+
+		Expect(result.Launch.BOM).To(HaveLen(1))
+		launchBOMEntry := result.Launch.BOM[0]
+		Expect(launchBOMEntry.Name).To(Equal("dotnet-runtime"))
+		Expect(launchBOMEntry.Metadata).To(Equal(paketosbom.BOMMetadata{
+			Version: "dotnet-runtime-dep-version",
+			Checksum: paketosbom.BOMChecksum{
+				Algorithm: paketosbom.SHA256,
+				Hash:      "dotnet-runtime-dep-sha",
+			},
+			URI: "dotnet-runtime-dep-uri",
 		}))
 
 		Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
@@ -199,11 +210,20 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(dotnetSymlinker.LinkCall.Receives.WorkingDir).To(Equal(workingDir))
 		Expect(dotnetSymlinker.LinkCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
 
+		Expect(sbomGenerator.GenerateFromDependencyCall.Receives.Dependency).To(Equal(postal.Dependency{
+			ID:      "dotnet-runtime",
+			Version: "2.5.x",
+			Name:    "Dotnet Core Runtime",
+			SHA256:  "some-sha",
+		}))
+		Expect(sbomGenerator.GenerateFromDependencyCall.Receives.Dir).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
+
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
-		Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using BP_DOTNET_FRAMEWORK_VERSION): "))
+		Expect(buffer.String()).To(ContainSubstring("Selected Dotnet Core Runtime version (using BP_DOTNET_FRAMEWORK_VERSION): "))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
-		Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
+		Expect(buffer.String()).To(ContainSubstring("Configuring build environment"))
+		Expect(buffer.String()).To(ContainSubstring("Configuring launch environment"))
 	})
 
 	context("when there is a dependency cache match", func() {
@@ -216,7 +236,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("returns a result that installs the dotnet runtime libraries", func() {
-			result, err := build(packit.BuildContext{
+			_, err := build(packit.BuildContext{
 				WorkingDir: workingDir,
 				CNBPath:    cnbDir,
 				Stack:      "some-stack",
@@ -239,39 +259,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Layers: packit.Layers{Path: layersDir},
 			})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result).To(Equal(packit.BuildResult{
-				Layers: []packit.Layer{
-					{
-						Name:             "dotnet-core-runtime",
-						Path:             filepath.Join(layersDir, "dotnet-core-runtime"),
-						SharedEnv:        packit.Environment{},
-						BuildEnv:         packit.Environment{},
-						LaunchEnv:        packit.Environment{},
-						ProcessLaunchEnv: map[string]packit.Environment{},
-						Build:            true,
-						Launch:           false,
-						Cache:            true,
-						Metadata: map[string]interface{}{
-							"dependency-sha": "some-sha",
-						},
-					},
-				},
-				Build: packit.BuildMetadata{
-					BOM: []packit.BOMEntry{
-						{
-							Name: "dotnet-runtime",
-							Metadata: paketosbom.BOMMetadata{
-								Version: "dotnet-runtime-dep-version",
-								Checksum: paketosbom.BOMChecksum{
-									Algorithm: paketosbom.SHA256,
-									Hash:      "dotnet-runtime-dep-sha",
-								},
-								URI: "dotnet-runtime-dep-uri",
-							},
-						},
-					},
-				},
-			}))
 
 			Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
 				{
@@ -305,7 +292,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 			Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
-			Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using BP_DOTNET_FRAMEWORK_VERSION): "))
+			Expect(buffer.String()).To(ContainSubstring("Selected Dotnet Core Runtime version (using BP_DOTNET_FRAMEWORK_VERSION): "))
 			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
 			Expect(buffer.String()).NotTo(ContainSubstring("Executing build process"))
 		})
@@ -349,12 +336,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack 0.1.2"))
 			Expect(buffer.String()).To(ContainSubstring("Resolving Dotnet Core Runtime version"))
-			Expect(buffer.String()).To(ContainSubstring("Selected dotnet-runtime version (using buildpack.yml): "))
+			Expect(buffer.String()).To(ContainSubstring("Selected Dotnet Core Runtime version (using buildpack.yml): "))
 			// v1.0.0 because that's the next major after input version v0.1.2
 			Expect(buffer.String()).To(ContainSubstring("WARNING: Setting the .NET Framework version through buildpack.yml will be deprecated soon in Dotnet Core Runtime Buildpack v1.0.0."))
 			Expect(buffer.String()).To(ContainSubstring("Please specify the version through the $BP_DOTNET_FRAMEWORK_VERSION environment variable instead. See docs for more information."))
 			Expect(buffer.String()).To(ContainSubstring("Executing build process"))
-			Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
+			Expect(buffer.String()).To(ContainSubstring("Configuring build environment"))
+			Expect(buffer.String()).To(ContainSubstring("Configuring launch environment"))
 		})
 	})
 

@@ -70,17 +70,18 @@ func testOffline(t *testing.T, context spec.G, it spec.S) {
 				"    Candidate version sources (in priority order):",
 				"      <unknown> -> \"\"",
 				"",
-				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
+				MatchRegexp(`    Selected Dotnet Core Runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
 				"",
 				"  Executing build process",
 				MatchRegexp(`    Installing Dotnet Core Runtime \d+\.\d+\.\d+`),
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 				"",
-				"  Configuring environment for build and launch",
-				`    DOTNET_ROOT -> "/workspace/.dotnet_root"`,
-				"",
-				"  Configuring environment for build",
+				"  Configuring build environment",
+				`    DOTNET_ROOT     -> "/workspace/.dotnet_root"`,
 				MatchRegexp(`    RUNTIME_VERSION -> "\d+\.\d+\.\d+"`),
+				"",
+				"  Configuring launch environment",
+				`    DOTNET_ROOT -> "/workspace/.dotnet_root"`,
 			))
 
 			container, err = docker.Container.Run.

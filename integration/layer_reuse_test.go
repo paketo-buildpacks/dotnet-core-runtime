@@ -102,7 +102,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				"    Candidate version sources (in priority order):",
 				"      <unknown> -> \"\"",
 				"",
-				MatchRegexp(`    Selected dotnet-runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
+				MatchRegexp(`    Selected Dotnet Core Runtime version \(using <unknown>\): \d+\.\d+\.\d+`),
 				"",
 				MatchRegexp(fmt.Sprintf("  Reusing cached layer /layers/%s/dotnet-core-runtime", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
 				"",
@@ -208,7 +208,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				`      BP_DOTNET_FRAMEWORK_VERSION -> "6.*"`,
 				`      <unknown>                   -> ""`,
 				"",
-				MatchRegexp(`    Selected dotnet-runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): \d+\.\d+\.\d+`),
+				MatchRegexp(`    Selected Dotnet Core Runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): \d+\.\d+\.\d+`),
 			))
 
 			Expect(logs).NotTo(ContainSubstring("Reusing cached layer"))

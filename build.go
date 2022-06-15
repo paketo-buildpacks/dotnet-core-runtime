@@ -10,6 +10,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 	"github.com/paketo-buildpacks/packit/v2/postal"
+	"github.com/paketo-buildpacks/packit/v2/sbom"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
 
 //go:generate faux --interface EntryResolver --output fakes/entry_resolver.go
@@ -34,12 +36,18 @@ type VersionResolver interface {
 	Resolve(path string, entry packit.BuildpackPlanEntry, stack string) (postal.Dependency, error)
 }
 
+//go:generate faux --interface SBOMGenerator --output fakes/sbom_generator.go
+type SBOMGenerator interface {
+	GenerateFromDependency(dependency postal.Dependency, dir string) (sbom.SBOM, error)
+}
+
 func Build(
 	entries EntryResolver,
 	dependencies DependencyManager,
 	dotnetSymlinker DotnetSymlinker,
 	versionResolver VersionResolver,
-	logger LogEmitter,
+	sbomGenerator SBOMGenerator,
+	logger scribe.Emitter,
 	clock chronos.Clock,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
@@ -138,13 +146,30 @@ func Build(
 		}
 
 		// Set DOTNET_ROOT to the symlink directory in the working directory, instead of setting it to  the layer path itself.
-		logger.Process("Configuring environment for build and launch")
 		dotnetCoreRuntimeLayer.SharedEnv.Override("DOTNET_ROOT", filepath.Join(context.WorkingDir, ".dotnet_root"))
-		logger.Environment(dotnetCoreRuntimeLayer.SharedEnv)
 
-		logger.Process("Configuring environment for build")
 		dotnetCoreRuntimeLayer.BuildEnv.Override("RUNTIME_VERSION", dependency.Version)
-		logger.Environment(dotnetCoreRuntimeLayer.BuildEnv)
+
+		logger.EnvironmentVariables(dotnetCoreRuntimeLayer)
+
+		logger.GeneratingSBOM(dotnetCoreRuntimeLayer.Path)
+		var sbomContent sbom.SBOM
+		duration, err = clock.Measure(func() error {
+			sbomContent, err = sbomGenerator.GenerateFromDependency(dependency, dotnetCoreRuntimeLayer.Path)
+			return err
+		})
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		logger.Action("Completed in %s", duration.Round(time.Millisecond))
+		logger.Break()
+
+		logger.FormattingSBOM(context.BuildpackInfo.SBOMFormats...)
+		dotnetCoreRuntimeLayer.SBOM, err = sbomContent.InFormats(context.BuildpackInfo.SBOMFormats...)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
 
 		return packit.BuildResult{
 			Layers: []packit.Layer{dotnetCoreRuntimeLayer},
