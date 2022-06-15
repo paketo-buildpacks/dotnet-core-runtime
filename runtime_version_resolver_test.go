@@ -9,6 +9,7 @@ import (
 	dotnetcoreruntime "github.com/paketo-buildpacks/dotnet-core-runtime"
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/postal"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -19,7 +20,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		Expect = NewWithT(t).Expect
 
 		buffer          *bytes.Buffer
-		logEmitter      dotnetcoreruntime.LogEmitter
+		logEmitter      scribe.Emitter
 		cnbDir          string
 		buildpackToml   string
 		versionResolver dotnetcoreruntime.RuntimeVersionResolver
@@ -30,7 +31,7 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		var err error
 
 		buffer = bytes.NewBuffer(nil)
-		logEmitter = dotnetcoreruntime.NewLogEmitter(buffer)
+		logEmitter = scribe.NewEmitter(buffer)
 
 		versionResolver = dotnetcoreruntime.NewRuntimeVersionResolver(logEmitter)
 

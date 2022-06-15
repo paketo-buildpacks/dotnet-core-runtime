@@ -12,7 +12,6 @@ func TestUnitDotnetCoreRuntime(t *testing.T) {
 	suite("Build", testBuild)
 	suite("BuildpackYMLParser", testBuildpackYMLParser)
 	suite("Detect", testDetect)
-	suite("LogEmitter", testLogEmitter)
 	suite("RuntimeVersionResolver", testRuntimeVersionResolver)
 	suite("Symlinker", testSymlinker)
 	suite.Run(t)

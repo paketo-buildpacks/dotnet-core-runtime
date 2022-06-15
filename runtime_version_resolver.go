@@ -11,13 +11,14 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/postal"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
 
 type RuntimeVersionResolver struct {
-	logger LogEmitter
+	logger scribe.Emitter
 }
 
-func NewRuntimeVersionResolver(logger LogEmitter) RuntimeVersionResolver {
+func NewRuntimeVersionResolver(logger scribe.Emitter) RuntimeVersionResolver {
 	return RuntimeVersionResolver{logger: logger}
 }
 
