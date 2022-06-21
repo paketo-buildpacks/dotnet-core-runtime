@@ -1,6 +1,6 @@
-# Dotnet Core Runtime Cloud Native Buildpack
+# .NET Core Runtime Cloud Native Buildpack
 
-The Dotnet Core Runtime CNB provides a version of the [Dotnet Core
+The .NET Core Runtime CNB provides a version of the [.NET Core
 Runtime](https://github.com/dotnet/runtime) and sets the initial `$DOTNET_ROOT`
 location.
 
@@ -10,7 +10,7 @@ directory](https://github.com/paketo-buildpacks/samples/tree/main/dotnet-core/ru
 
 ## Integration
 
-The Dotnet Core Runtime CNB provides `dotnet-runtime` as a dependency.
+The .NET Core Runtime CNB provides `dotnet-runtime` as a dependency.
 Downstream buildpacks, like [Dotnet
 Publish](https://github.com/paketo-buildpacks/dotnet-publish) and [Dotnet
 Execute](https://github.com/paketo-buildpacks/dotnet-execute) can require the
@@ -21,12 +21,12 @@ file that looks like the following:
 ```toml
 [[requires]]
 
-  # The name of the Dotnet Core Runtime dependency is "dotnet-runtime". This value is considered
+  # The name of the .NET Core Runtime dependency is "dotnet-runtime". This value is considered
   # part of the public API for the buildpack and will not change without a plan
   # for deprecation.
   name = "dotnet-runtime"
 
-  # The version of the Dotnet Core Runtime dependency is not required. In the case it
+  # The version of the .NET Core Runtime dependency is not required. In the case it
   # is not specified, the buildpack will provide the default version, which can
   # be seen in the buildpack.toml file.
   # If you wish to request a specific version, the buildpack supports
@@ -34,10 +34,10 @@ file that looks like the following:
   # "3.1.1".
   version = "3.1.1"
 
-  # The Dotnet Core Runtime buildpack supports some non-required metadata options.
+  # The .NET Core Runtime buildpack supports some non-required metadata options.
   [requires.metadata]
 
-    # Setting the build flag to true will ensure that the Dotnet Core Runtime
+    # Setting the build flag to true will ensure that the .NET Core Runtime
     # dependency is available to subsequent buildpacks during their build phase.
     # Currently we do not recommend having your application directly interface with
     # the runtimes instead use the dotnet-core-sdk. However,
@@ -45,9 +45,9 @@ file that looks like the following:
     # its build process, this flag should be set to true.
     build = true
 
-    # Setting the launch flag to true will ensure that the Dotnet Core Runtime
+    # Setting the launch flag to true will ensure that the .NET Core Runtime
     # dependency is available on the $DOTNET_ROOT for the running application. If you are
-    # writing an application that needs to run Dotnet Core Runtime at runtime, this flag should
+    # writing an application that needs to run .NET Core Runtime at runtime, this flag should
     # be set to true.
     launch = true
 ```
