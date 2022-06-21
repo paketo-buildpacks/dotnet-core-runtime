@@ -61,16 +61,16 @@ func testRollForwardLogging(t *testing.T, context spec.G, it spec.S) {
 
 				Expect(logs).To(ContainLines(
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
-					"  Resolving Dotnet Core Runtime version",
+					"  Resolving .NET Core Runtime version",
 					"    Candidate version sources (in priority order):",
 					"      runtimeconfig.json -> \"3.0.0\"",
 					"",
 					"    No exact version match found; attempting version roll-forward",
 					"",
-					MatchRegexp(`    Selected Dotnet Core Runtime version \(using runtimeconfig.json\): \d+\.\d+\.\d+`),
+					MatchRegexp(`    Selected .NET Core Runtime version \(using runtimeconfig.json\): \d+\.\d+\.\d+`),
 					"",
 					"  Executing build process",
-					MatchRegexp(`    Installing Dotnet Core Runtime \d+\.\d+\.\d+`),
+					MatchRegexp(`    Installing .NET Core Runtime \d+\.\d+\.\d+`),
 					MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 					"",
 					"  Configuring build environment",
@@ -112,7 +112,7 @@ func testRollForwardLogging(t *testing.T, context spec.G, it spec.S) {
 				Expect(err).NotTo(HaveOccurred(), logs.String())
 
 				Expect(logs).To(ContainLines(
-					MatchRegexp(fmt.Sprintf(`    Selected Dotnet Core Runtime version \(using runtimeconfig.json\): %s`, availableVersion)),
+					MatchRegexp(fmt.Sprintf(`    Selected .NET Core Runtime version \(using runtimeconfig.json\): %s`, availableVersion)),
 				))
 				Expect(logs).NotTo(ContainSubstring("No exact version match found; attempting version roll-forward"))
 			})
