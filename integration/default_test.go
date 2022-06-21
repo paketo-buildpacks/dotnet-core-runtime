@@ -74,14 +74,14 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
-				"  Resolving Dotnet Core Runtime version",
+				"  Resolving .NET Core Runtime version",
 				"    Candidate version sources (in priority order):",
 				"      <unknown> -> \"\"",
 				"",
-				MatchRegexp(`    Selected Dotnet Core Runtime version \(using <unknown>\): 6\.0\.\d+`),
+				MatchRegexp(`    Selected .NET Core Runtime version \(using <unknown>\): 6\.0\.\d+`),
 				"",
 				"  Executing build process",
-				MatchRegexp(`    Installing Dotnet Core Runtime 6\.0\.\d+`),
+				MatchRegexp(`    Installing .NET Core Runtime 6\.0\.\d+`),
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 				"",
 				"  Configuring build environment",
@@ -118,7 +118,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				cLogs, err := docker.Container.Logs.Execute(container2.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-			}).Should(ContainSubstring(`"name":"Dotnet Core Runtime"`))
+			}).Should(ContainSubstring(`"name":".NET Core Runtime"`))
 
 			// check that all required SBOM files are present
 			Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.cdx.json")).To(BeARegularFile())
@@ -128,7 +128,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			// check an SBOM file to make sure it has an entry for go
 			contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.cdx.json"))
 			Expect(err).NotTo(HaveOccurred())
-			Expect(string(contents)).To(ContainSubstring(`"name": "Dotnet Core Runtime"`))
+			Expect(string(contents)).To(ContainSubstring(`"name": ".NET Core Runtime"`))
 		})
 	})
 
@@ -167,15 +167,15 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
-				"  Resolving Dotnet Core Runtime version",
+				"  Resolving .NET Core Runtime version",
 				"    Candidate version sources (in priority order):",
 				"      BP_DOTNET_FRAMEWORK_VERSION -> \"3.1.*\"",
 				"      <unknown>                   -> \"\"",
 				"",
-				MatchRegexp(`    Selected Dotnet Core Runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): 3\.1\.\d+`),
+				MatchRegexp(`    Selected .NET Core Runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): 3\.1\.\d+`),
 				"",
 				"  Executing build process",
-				MatchRegexp(`    Installing Dotnet Core Runtime 3\.1\.\d+`),
+				MatchRegexp(`    Installing .NET Core Runtime 3\.1\.\d+`),
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 				"",
 				"  Configuring build environment",
@@ -221,7 +221,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name))))
 			Expect(logs).To(ContainLines(
-				"  Resolving Dotnet Core Runtime version",
+				"  Resolving .NET Core Runtime version",
 				"    Candidate version sources (in priority order):",
 				"      buildpack.yml -> \"2.0.0\"",
 				"      <unknown>     -> \"\"",
@@ -229,7 +229,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			))
 			Expect(logs).To(ContainLines(MatchRegexp(`failed to satisfy "dotnet-runtime" dependency for stack "io.buildpacks.stacks.bionic" with version constraint "2.0.0": no compatible versions. Supported versions are: \[(\d+\.\d+\.\d+(, )?)*\]`)))
 			Expect(logs).To(ContainLines(
-				"    WARNING: Setting the .NET Framework version through buildpack.yml will be deprecated soon in Dotnet Core Runtime Buildpack v2.0.0.",
+				"    WARNING: Setting the .NET Framework version through buildpack.yml will be deprecated soon in .NET Core Runtime Buildpack v2.0.0.",
 				"    Please specify the version through the $BP_DOTNET_FRAMEWORK_VERSION environment variable instead. See docs for more information.",
 			))
 		})

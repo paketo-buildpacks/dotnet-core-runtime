@@ -52,7 +52,7 @@ func Build(
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
-		logger.Process("Resolving Dotnet Core Runtime version")
+		logger.Process("Resolving .NET Core Runtime version")
 
 		priorities := []interface{}{
 			"BP_DOTNET_FRAMEWORK_VERSION",
@@ -66,7 +66,7 @@ func Build(
 		source, _ := entry.Metadata["version-source"].(string)
 		if source == "buildpack.yml" {
 			nextMajorVersion := semver.MustParse(context.BuildpackInfo.Version).IncMajor()
-			logger.Subprocess("WARNING: Setting the .NET Framework version through buildpack.yml will be deprecated soon in Dotnet Core Runtime Buildpack v%s.", nextMajorVersion.String())
+			logger.Subprocess("WARNING: Setting the .NET Framework version through buildpack.yml will be deprecated soon in .NET Core Runtime Buildpack v%s.", nextMajorVersion.String())
 			logger.Subprocess("Please specify the version through the $BP_DOTNET_FRAMEWORK_VERSION environment variable instead. See docs for more information.")
 			logger.Break()
 		}
@@ -125,7 +125,7 @@ func Build(
 
 		dotnetCoreRuntimeLayer.Launch, dotnetCoreRuntimeLayer.Build, dotnetCoreRuntimeLayer.Cache = launch, build, build
 
-		logger.Subprocess("Installing Dotnet Core Runtime %s", dependency.Version)
+		logger.Subprocess("Installing .NET Core Runtime %s", dependency.Version)
 		duration, err := clock.Measure(func() error {
 			return dependencies.Deliver(dependency, context.CNBPath, dotnetCoreRuntimeLayer.Path, context.Platform.Path)
 		})
