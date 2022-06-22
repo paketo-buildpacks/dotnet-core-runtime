@@ -125,7 +125,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.spdx.json")).To(BeARegularFile())
 			Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.syft.json")).To(BeARegularFile())
 
-			// check an SBOM file to make sure it has an entry for go
+			// check an SBOM file
 			contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.cdx.json"))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(string(contents)).To(ContainSubstring(`"name": ".NET Core Runtime"`))
