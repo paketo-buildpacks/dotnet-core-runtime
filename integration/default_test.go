@@ -29,12 +29,12 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 	context("when building a container with dotnet-runtime", func() {
 		var (
-			image      occam.Image
-			container1 occam.Container
-			container2 occam.Container
-			name       string
-			source     string
-			sbomDir    string
+			image     occam.Image
+			container occam.Container
+
+			name    string
+			source  string
+			sbomDir string
 
 			err error
 		)
@@ -49,10 +49,10 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it.After(func() {
-			Expect(docker.Container.Remove.Execute(container1.ID)).To(Succeed())
-			Expect(docker.Container.Remove.Execute(container2.ID)).To(Succeed())
+			Expect(docker.Container.Remove.Execute(container.ID)).To(Succeed())
 			Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
 			Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
+
 			Expect(os.RemoveAll(source)).To(Succeed())
 			Expect(os.RemoveAll(sbomDir)).To(Succeed())
 		})
@@ -92,13 +92,13 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				`    DOTNET_ROOT -> "/workspace/.dotnet_root"`,
 			))
 
-			container1, err = docker.Container.Run.
+			container, err = docker.Container.Run.
 				WithCommand("ls -al $DOTNET_ROOT && ls -al $DOTNET_ROOT/shared").
 				Execute(image.ID)
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(func() string {
-				cLogs, err := docker.Container.Logs.Execute(container1.ID)
+				cLogs, err := docker.Container.Logs.Execute(container.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
 			}).Should(
@@ -109,16 +109,10 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				),
 			)
 
-			container2, err = docker.Container.Run.
-				WithCommand("cat /layers/sbom/launch/sbom.legacy.json").
-				Execute(image.ID)
+			// check an SBOM file
+			contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", "sbom.legacy.json"))
 			Expect(err).NotTo(HaveOccurred())
-
-			Eventually(func() string {
-				cLogs, err := docker.Container.Logs.Execute(container2.ID)
-				Expect(err).NotTo(HaveOccurred())
-				return cLogs.String()
-			}).Should(ContainSubstring(`"name":".NET Core Runtime"`))
+			Expect(string(contents)).To(ContainSubstring(`"name":".NET Core Runtime"`))
 
 			// check that all required SBOM files are present
 			Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.cdx.json")).To(BeARegularFile())
@@ -126,7 +120,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.syft.json")).To(BeARegularFile())
 
 			// check an SBOM file
-			contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.cdx.json"))
+			contents, err = os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"), "dotnet-core-runtime", "sbom.cdx.json"))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(string(contents)).To(ContainSubstring(`"name": ".NET Core Runtime"`))
 		})
