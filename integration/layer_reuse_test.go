@@ -120,9 +120,9 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(
 				And(
-					MatchRegexp(fmt.Sprintf(`.* \d+ cnb cnb   \d+ .* host -> \/layers\/%s\/dotnet-core-runtime\/host`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
-					MatchRegexp(`.* \d+ cnb cnb \d+ .* shared`),
-					MatchRegexp(fmt.Sprintf(`.* \d+ cnb cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/%s\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
+					MatchRegexp(fmt.Sprintf(`.* \d+ \w+ cnb   \d+ .* host -> \/layers\/%s\/dotnet-core-runtime\/host`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
+					MatchRegexp(`.* \d+ \w+ cnb \d+ .* shared`),
+					MatchRegexp(fmt.Sprintf(`.* \d+ \w+ cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/%s\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
 				),
 			)
 
@@ -226,9 +226,9 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(
 				And(
-					MatchRegexp(fmt.Sprintf(`.* \d+ cnb cnb   \d+ .* host -> \/layers\/%s\/dotnet-core-runtime\/host`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
-					MatchRegexp(`.* \d+ cnb cnb \d+ .* shared`),
-					MatchRegexp(fmt.Sprintf(`.* \d+ cnb cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/%s\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
+					MatchRegexp(fmt.Sprintf(`.* \d+ \w+ cnb   \d+ .* host -> \/layers\/%s\/dotnet-core-runtime\/host`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
+					MatchRegexp(`.* \d+ \w+ cnb \d+ .* shared`),
+					MatchRegexp(fmt.Sprintf(`.* \d+ \w+ cnb   \d+ .* Microsoft.NETCore.App -> \/layers\/%s\/dotnet-core-runtime\/shared\/Microsoft.NETCore.App`, strings.ReplaceAll(settings.BuildpackInfo.Buildpack.ID, "/", "_"))),
 				),
 			)
 
