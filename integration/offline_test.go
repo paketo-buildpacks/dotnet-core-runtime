@@ -77,7 +77,6 @@ func testOffline(t *testing.T, context spec.G, it spec.S) {
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 				"",
 				"  Configuring build environment",
-				`    DOTNET_ROOT     -> "/workspace/.dotnet_root"`,
 				MatchRegexp(`    RUNTIME_VERSION -> "\d+\.\d+\.\d+"`),
 				"",
 				"  Configuring launch environment",

@@ -135,7 +135,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(layer.Name).To(Equal("dotnet-core-runtime"))
 		Expect(layer.Path).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
-		Expect(layer.SharedEnv).To(Equal(packit.Environment{
+		Expect(layer.LaunchEnv).To(Equal(packit.Environment{
 			"DOTNET_ROOT.override": filepath.Join(workingDir, ".dotnet_root"),
 		}))
 		Expect(layer.BuildEnv).To(Equal(packit.Environment{
