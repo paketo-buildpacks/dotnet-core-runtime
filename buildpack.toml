@@ -28,7 +28,7 @@ api = "0.8"
     sha256 = "4ca4926027738e7eba484d31810d3198a351b8f3143fc80dc557797c98d0f337"
     source = "https://download.visualstudio.microsoft.com/download/pr/e74046f6-ee72-4619-8648-2d31ca1cbacf/6c634a9ac8d2df9ec76f278b37e22dc7/dotnet-runtime-3.1.25-linux-x64.tar.gz"
     source_sha256 = "b3cb385d1ccea91d461b0d1ca12285f96218de1ce7bfdf80bdf92d6df2c1900f"
-    stacks = ["io.buildpacks.stacks.bionic"]
+    stacks = ["io.buildpacks.stacks.bionic" ]
     uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_3.1.25_linux_x64_bionic_4ca49260.tar.xz"
     version = "3.1.25"
 
@@ -42,7 +42,7 @@ api = "0.8"
     sha256 = "e85291aa28e4943f93400cb030ec6150dddd84b1424169a60f48ed0de8166d5c"
     source = "https://download.visualstudio.microsoft.com/download/pr/a14c8e4d-a22b-47f8-953c-bb4337634513/58017d103d432f7106c44b0891936aba/dotnet-runtime-3.1.26-linux-x64.tar.gz"
     source_sha256 = "ef6a030adfc4708e2840c85a69038c29a1e98a0bc009a1828034c15e6c30c0e6"
-    stacks = ["io.buildpacks.stacks.bionic"]
+    stacks = ["io.buildpacks.stacks.bionic" ]
     uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_3.1.26_linux_x64_bionic_e85291aa.tar.xz"
     version = "3.1.26"
 
@@ -56,7 +56,7 @@ api = "0.8"
     sha256 = "d339fa613478fdcbbab5d0016fead71680e61d65b97121cb03d7b162c3c73197"
     source = "https://download.visualstudio.microsoft.com/download/pr/56d9250f-97df-4786-b33e-a8e34b349e86/dcf054ca00899a70a80aa1a7d3072b52/dotnet-runtime-6.0.5-linux-x64.tar.gz"
     source_sha256 = "688694c604bbd810d28446752131e20468390a071aa2a5157a4e2d87a43dfa3c"
-    stacks = ["io.buildpacks.stacks.bionic"]
+    stacks = ["io.buildpacks.stacks.bionic", "io.buildpacks.stacks.jammy" ]
     uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_6.0.5_linux_x64_bionic_d339fa61.tar.xz"
     version = "6.0.5"
 
@@ -70,7 +70,7 @@ api = "0.8"
     sha256 = "aa9cd7529c2797d92daadefac86e57fe2a25a1d248464323278b3b39ac6f2682"
     source = "https://download.visualstudio.microsoft.com/download/pr/ec4172e3-077a-42c0-859d-349e517d7935/82d945cdc4c33fbe440a86a240a58a41/dotnet-runtime-6.0.6-linux-x64.tar.gz"
     source_sha256 = "9a3e9b9f39ca51c354725738fea4b931dd4a85e30d0373f0dd2c0517f7de65ac"
-    stacks = ["io.buildpacks.stacks.bionic"]
+    stacks = ["io.buildpacks.stacks.bionic", "io.buildpacks.stacks.jammy" ]
     uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_6.0.6_linux_x64_bionic_aa9cd752.tar.xz"
     version = "6.0.6"
 
@@ -86,3 +86,5 @@ api = "0.8"
 
 [[stacks]]
   id = "io.buildpacks.stacks.bionic"
+[[stacks]]
+  id = "io.buildpacks.stacks.jammy"
