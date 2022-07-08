@@ -1,7 +1,7 @@
 api = "0.8"
 
 [buildpack]
-  description = "A buildpack for installing the approriate .NET Core runtime version"
+  description = "A buildpack for installing the appropriate .NET Core runtime version"
   homepage = "https://github.com/paketo-buildpacks/dotnet-core-runtime"
   id = "paketo-buildpacks/dotnet-core-runtime"
   keywords = ["dotnet", "runtime"]
