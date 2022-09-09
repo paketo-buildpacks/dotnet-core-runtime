@@ -212,12 +212,11 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).To(HaveOccurred(), logs.String())
 
 			Expect(logs).To(ContainLines(MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name))))
+			Expect(logs).To(ContainLines("  Resolving .NET Core Runtime version"))
 			Expect(logs).To(ContainLines(
-				"  Resolving .NET Core Runtime version",
 				"    Candidate version sources (in priority order):",
 				"      buildpack.yml -> \"2.0.0\"",
 				"      <unknown>     -> \"\"",
-				"",
 			))
 			Expect(logs).To(ContainLines(MatchRegexp(`failed to satisfy "dotnet-runtime" dependency for stack "io.buildpacks.stacks.bionic" with version constraint "2.0.0": no compatible versions. Supported versions are: \[(\d+\.\d+\.\d+(, )?)*\]`)))
 			Expect(logs).To(ContainLines(
