@@ -85,7 +85,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			ID:      "dotnet-runtime",
 			Version: "2.5.x",
 			Name:    ".NET Core Runtime",
-			SHA256:  "some-sha",
+			SHA256:  "some-sha", //nolint:staticcheck
 		}
 
 		sbomGenerator = &fakes.SBOMGenerator{}
@@ -188,7 +188,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ID:      "dotnet-runtime",
 				Version: "2.5.x",
 				Name:    ".NET Core Runtime",
-				SHA256:  "some-sha",
+				SHA256:  "some-sha", //nolint:staticcheck
 			},
 		}))
 
@@ -200,7 +200,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			ID:      "dotnet-runtime",
 			Version: "2.5.x",
 			Name:    ".NET Core Runtime",
-			SHA256:  "some-sha",
+			SHA256:  "some-sha", //nolint:staticcheck
 		}))
 		Expect(dependencyManager.DeliverCall.Receives.CnbPath).To(Equal(cnbDir))
 		Expect(dependencyManager.DeliverCall.Receives.LayerPath).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
@@ -214,7 +214,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			ID:      "dotnet-runtime",
 			Version: "2.5.x",
 			Name:    ".NET Core Runtime",
-			SHA256:  "some-sha",
+			SHA256:  "some-sha", //nolint:staticcheck
 		}))
 		Expect(sbomGenerator.GenerateFromDependencyCall.Receives.Dir).To(Equal(filepath.Join(layersDir, "dotnet-core-runtime")))
 
@@ -276,7 +276,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					ID:      "dotnet-runtime",
 					Version: "2.5.x",
 					Name:    ".NET Core Runtime",
-					SHA256:  "some-sha",
+					SHA256:  "some-sha", //nolint:staticcheck
 				},
 			}))
 
