@@ -97,7 +97,7 @@ func Build(
 		}
 
 		cachedDependencySHA, ok := dotnetCoreRuntimeLayer.Metadata["dependency-sha"]
-		if ok && cachedDependencySHA == dependency.SHA256 {
+		if ok && cachedDependencySHA == dependency.SHA256 { //nolint:staticcheck
 			logger.Process(fmt.Sprintf("Reusing cached layer %s", dotnetCoreRuntimeLayer.Path))
 			logger.Break()
 
@@ -137,7 +137,7 @@ func Build(
 		logger.Break()
 
 		dotnetCoreRuntimeLayer.Metadata = map[string]interface{}{
-			"dependency-sha": dependency.SHA256,
+			"dependency-sha": dependency.SHA256, //nolint:staticcheck
 		}
 
 		err = dotnetSymlinker.Link(context.WorkingDir, dotnetCoreRuntimeLayer.Path)
