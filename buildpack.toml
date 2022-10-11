@@ -19,20 +19,6 @@ api = "0.8"
     dotnet-runtime = "6.0.*"
 
   [[metadata.dependencies]]
-    cpe = "cpe:2.3:a:microsoft:.net_core:3.1.28:*:*:*:*:*:*:*"
-    deprecation_date = "2022-12-13T00:00:00Z"
-    id = "dotnet-runtime"
-    licenses = ["MIT", "MIT-0"]
-    name = ".NET Core Runtime"
-    purl = "pkg:generic/dotnet-runtime@3.1.28?checksum=dbb5552b8082b22d0a348291d030b324cf4e4c7d409dccb6fb3c859b9f16a114&download_url=https://download.visualstudio.microsoft.com/download/pr/9a0b8ff8-d3da-4e77-9b5b-2fb3202afbbe/94dbcaacd4ebf59106a141c8e9e84167/dotnet-runtime-3.1.28-linux-x64.tar.gz"
-    sha256 = "f5f25f3151e0c89d86b9bf9258f7db95a54e9476335e1585a7a58f2956e17cef"
-    source = "https://download.visualstudio.microsoft.com/download/pr/9a0b8ff8-d3da-4e77-9b5b-2fb3202afbbe/94dbcaacd4ebf59106a141c8e9e84167/dotnet-runtime-3.1.28-linux-x64.tar.gz"
-    source_sha256 = "dbb5552b8082b22d0a348291d030b324cf4e4c7d409dccb6fb3c859b9f16a114"
-    stacks = ["io.buildpacks.stacks.bionic"]
-    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_3.1.28_linux_x64_bionic_f5f25f31.tar.xz"
-    version = "3.1.28"
-
-  [[metadata.dependencies]]
     cpe = "cpe:2.3:a:microsoft:.net_core:3.1.29:*:*:*:*:*:*:*"
     deprecation_date = "2022-12-13T00:00:00Z"
     id = "dotnet-runtime"
@@ -47,18 +33,18 @@ api = "0.8"
     version = "3.1.29"
 
   [[metadata.dependencies]]
-    cpe = "cpe:2.3:a:microsoft:.net:6.0.8:*:*:*:*:*:*:*"
-    deprecation_date = "2024-11-12T00:00:00Z"
+    cpe = "cpe:2.3:a:microsoft:.net_core:3.1.30:*:*:*:*:*:*:*"
+    deprecation_date = "2022-12-13T00:00:00Z"
     id = "dotnet-runtime"
     licenses = ["MIT", "MIT-0"]
     name = ".NET Core Runtime"
-    purl = "pkg:generic/dotnet-runtime@6.0.8?checksum=be20edcb435e3505f661b01a0d363378f9e067fdd05e21b177817f072d43b2dd&download_url=https://download.visualstudio.microsoft.com/download/pr/5596ef6f-a174-4fba-aef1-99173e3f3c67/77edd755d605688885ca7114bc4f9ae9/dotnet-runtime-6.0.8-linux-x64.tar.gz"
-    sha256 = "1d3ebec9c63dc5f4b32fa6f36f36c84d48f38cd4790dab0874b17d1f848bf267"
-    source = "https://download.visualstudio.microsoft.com/download/pr/5596ef6f-a174-4fba-aef1-99173e3f3c67/77edd755d605688885ca7114bc4f9ae9/dotnet-runtime-6.0.8-linux-x64.tar.gz"
-    source_sha256 = "be20edcb435e3505f661b01a0d363378f9e067fdd05e21b177817f072d43b2dd"
-    stacks = ["io.buildpacks.stacks.bionic", "io.buildpacks.stacks.jammy"]
-    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_6.0.8_linux_x64_bionic_1d3ebec9.tar.xz"
-    version = "6.0.8"
+    purl = "pkg:generic/dotnet-runtime@3.1.30?checksum=b2600a6135ab07ed14f0fd23677511cbb4b6bad7c62f42b2215834b8a2cbc867&download_url=https://download.visualstudio.microsoft.com/download/pr/9f6128a8-3962-4018-b9b0-9608b9aecec8/f46a672e0117d9128acdbc82cc314e20/dotnet-runtime-3.1.30-linux-x64.tar.gz"
+    sha256 = "548b8ad294f4a14f4a1f7919a182aa34caa56e593cd54a0cb147aa3bdec4cac6"
+    source = "https://download.visualstudio.microsoft.com/download/pr/9f6128a8-3962-4018-b9b0-9608b9aecec8/f46a672e0117d9128acdbc82cc314e20/dotnet-runtime-3.1.30-linux-x64.tar.gz"
+    source_sha256 = "b2600a6135ab07ed14f0fd23677511cbb4b6bad7c62f42b2215834b8a2cbc867"
+    stacks = ["io.buildpacks.stacks.bionic"]
+    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_3.1.30_linux_x64_bionic_548b8ad2.tar.xz"
+    version = "3.1.30"
 
   [[metadata.dependencies]]
     cpe = "cpe:2.3:a:microsoft:.net:6.0.9:*:*:*:*:*:*:*"
@@ -73,6 +59,20 @@ api = "0.8"
     stacks = ["io.buildpacks.stacks.bionic", "io.buildpacks.stacks.jammy"]
     uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_6.0.9_linux_x64_bionic_a691f754.tar.xz"
     version = "6.0.9"
+
+  [[metadata.dependencies]]
+    cpe = "cpe:2.3:a:microsoft:.net:6.0.10:*:*:*:*:*:*:*"
+    deprecation_date = "2024-11-12T00:00:00Z"
+    id = "dotnet-runtime"
+    licenses = ["MIT", "MIT-0"]
+    name = ".NET Core Runtime"
+    purl = "pkg:generic/dotnet-runtime@6.0.10?checksum=c7e7e1faa375ca7b98124ed5c694f9a28878bb243b4301ce0966100ae38910e6&download_url=https://download.visualstudio.microsoft.com/download/pr/48fbc600-8228-424e-aaed-52b7e601c277/c493b8ac4629341f1e5acc4ff515fead/dotnet-runtime-6.0.10-linux-x64.tar.gz"
+    sha256 = "20d2bf6f1f67a9869deabbb6964d841e42cb2a6056534f43c16e188c2f933911"
+    source = "https://download.visualstudio.microsoft.com/download/pr/48fbc600-8228-424e-aaed-52b7e601c277/c493b8ac4629341f1e5acc4ff515fead/dotnet-runtime-6.0.10-linux-x64.tar.gz"
+    source_sha256 = "c7e7e1faa375ca7b98124ed5c694f9a28878bb243b4301ce0966100ae38910e6"
+    stacks = ["io.buildpacks.stacks.bionic", "io.buildpacks.stacks.jammy"]
+    uri = "https://deps.paketo.io/dotnet-runtime/dotnet-runtime_6.0.10_linux_x64_bionic_20d2bf6f.tar.xz"
+    version = "6.0.10"
 
   [[metadata.dependency-constraints]]
     constraint = "3.1.*"
