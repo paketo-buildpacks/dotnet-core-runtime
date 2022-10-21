@@ -31,7 +31,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		cnbDir     string
 		buffer     *bytes.Buffer
 
-		entryResolver     *fakes.EntryResolver
 		dependencyManager *fakes.DependencyManager
 		dotnetSymlinker   *fakes.DotnetSymlinker
 		versionResolver   *fakes.VersionResolver
@@ -45,18 +44,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir = t.TempDir()
 		cnbDir = t.TempDir()
 		workingDir = t.TempDir()
-
-		entryResolver = &fakes.EntryResolver{}
-		entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
-			Name: "dotnet-runtime",
-			Metadata: map[string]interface{}{
-				"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-				"version":        "2.5.x",
-				"launch":         true,
-			},
-		}
-
-		entryResolver.MergeLayerTypesCall.Returns.Launch = true
 
 		dependencyManager = &fakes.DependencyManager{}
 		dependencyManager.GenerateBillOfMaterialsCall.Returns.BOMEntrySlice = []packit.BOMEntry{
@@ -114,7 +101,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Layers: packit.Layers{Path: layersDir},
 		}
 
-		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, dotnetSymlinker, versionResolver, sbomGenerator, logEmitter, chronos.DefaultClock)
+		build = dotnetcoreruntime.Build(dependencyManager, dotnetSymlinker, versionResolver, sbomGenerator, logEmitter, chronos.DefaultClock)
 	})
 
 	it("returns a result that installs the dotnet runtime libraries", func() {
@@ -163,17 +150,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			URI: "dotnet-runtime-dep-uri",
 		}))
 
-		Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
-			{
-				Name: "dotnet-runtime",
-				Metadata: map[string]interface{}{
-					"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-					"version":        "2.5.x",
-					"launch":         true,
-				},
-			},
-		}))
-
 		Expect(dependencyManager.GenerateBillOfMaterialsCall.Receives.Dependencies).To(Equal([]postal.Dependency{
 			{
 				ID:      "dotnet-runtime",
@@ -184,7 +160,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}))
 
 		Expect(versionResolver.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
-		Expect(versionResolver.ResolveCall.Receives.Entry).To(Equal(entryResolver.ResolveCall.Returns.BuildpackPlanEntry))
+		Expect(versionResolver.ResolveCall.Receives.Entry).To(Equal(buildContext.Plan.Entries[0]))
 		Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
 
 		Expect(dependencyManager.DeliverCall.Receives.Dependency).To(Equal(postal.Dependency{
@@ -219,8 +195,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when there is a dependency cache match", func() {
 		it.Before(func() {
-			entryResolver.MergeLayerTypesCall.Returns.Build = true
-			entryResolver.MergeLayerTypesCall.Returns.Launch = false
+			buildContext.Plan.Entries[0].Metadata["build"] = true
+			buildContext.Plan.Entries[0].Metadata["launch"] = false
 
 			err := os.WriteFile(filepath.Join(layersDir, "dotnet-core-runtime.toml"), []byte("[metadata]\ndependency-sha = \"some-sha\"\n"), 0600)
 			Expect(err).NotTo(HaveOccurred())
@@ -229,17 +205,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		it("returns a result that installs the dotnet runtime libraries", func() {
 			_, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
-
-			Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
-				{
-					Name: "dotnet-runtime",
-					Metadata: map[string]interface{}{
-						"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-						"version":        "2.5.x",
-						"launch":         true,
-					},
-				},
-			}))
 
 			Expect(dependencyManager.GenerateBillOfMaterialsCall.Receives.Dependencies).To(Equal([]postal.Dependency{
 				{
@@ -251,7 +216,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}))
 
 			Expect(versionResolver.ResolveCall.Receives.Path).To(Equal(filepath.Join(cnbDir, "buildpack.toml")))
-			Expect(versionResolver.ResolveCall.Receives.Entry).To(Equal(entryResolver.ResolveCall.Returns.BuildpackPlanEntry))
+			Expect(versionResolver.ResolveCall.Receives.Entry).To(Equal(buildContext.Plan.Entries[0]))
 			Expect(versionResolver.ResolveCall.Receives.Stack).To(Equal("some-stack"))
 
 			Expect(dependencyManager.DeliverCall.CallCount).To(Equal(0))
@@ -272,15 +237,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		it.Before(func() {
 			buildContext.BuildpackInfo.Version = "0.1.2"
 			buildContext.Plan.Entries[0].Metadata["version-source"] = "buildpack.yml"
-
-			entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
-				Name: "dotnet-runtime",
-				Metadata: map[string]interface{}{
-					"version-source": "buildpack.yml",
-					"version":        "2.5.x",
-					"launch":         true,
-				},
-			}
 		})
 
 		it("prints a deprecation warning", func() {

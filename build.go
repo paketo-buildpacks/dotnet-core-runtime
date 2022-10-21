@@ -9,16 +9,11 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/draft"
 	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
-
-//go:generate faux --interface EntryResolver --output fakes/entry_resolver.go
-type EntryResolver interface {
-	Resolve(string, []packit.BuildpackPlanEntry, []interface{}) (packit.BuildpackPlanEntry, []packit.BuildpackPlanEntry)
-	MergeLayerTypes(string, []packit.BuildpackPlanEntry) (launch, build bool)
-}
 
 //go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 type DependencyManager interface {
@@ -42,7 +37,6 @@ type SBOMGenerator interface {
 }
 
 func Build(
-	entries EntryResolver,
 	dependencies DependencyManager,
 	dotnetSymlinker DotnetSymlinker,
 	versionResolver VersionResolver,
@@ -60,7 +54,9 @@ func Build(
 			regexp.MustCompile(`.*\.(cs)|(fs)|(vb)proj`),
 			"runtimeconfig.json",
 		}
-		entry, sortedEntries := entries.Resolve("dotnet-runtime", context.Plan.Entries, priorities)
+
+		planner := draft.NewPlanner()
+		entry, sortedEntries := planner.Resolve("dotnet-runtime", context.Plan.Entries, priorities)
 		logger.Candidates(sortedEntries)
 
 		source, _ := entry.Metadata["version-source"].(string)
@@ -84,7 +80,7 @@ func Build(
 		}
 
 		bom := dependencies.GenerateBillOfMaterials(dependency)
-		launch, build := entries.MergeLayerTypes("dotnet-runtime", context.Plan.Entries)
+		launch, build := planner.MergeLayerTypes("dotnet-runtime", context.Plan.Entries)
 
 		var buildMetadata packit.BuildMetadata
 		if build {

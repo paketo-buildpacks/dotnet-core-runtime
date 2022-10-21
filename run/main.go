@@ -7,7 +7,6 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/cargo"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
-	"github.com/paketo-buildpacks/packit/v2/draft"
 	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
@@ -22,7 +21,6 @@ func (f Generator) GenerateFromDependency(dependency postal.Dependency, path str
 func main() {
 	bpYMLParser := dotnetcoreruntime.NewBuildpackYMLParser()
 	logEmitter := scribe.NewEmitter(os.Stdout).WithLevel(os.Getenv("BP_LOG_LEVEL"))
-	entryResolver := draft.NewPlanner()
 	dependencyManager := postal.NewService(cargo.NewTransport())
 	symlinker := dotnetcoreruntime.NewSymlinker()
 	runtimeVersionResolver := dotnetcoreruntime.NewRuntimeVersionResolver(logEmitter)
@@ -30,7 +28,6 @@ func main() {
 	packit.Run(
 		dotnetcoreruntime.Detect(bpYMLParser),
 		dotnetcoreruntime.Build(
-			entryResolver,
 			dependencyManager,
 			symlinker,
 			runtimeVersionResolver,
