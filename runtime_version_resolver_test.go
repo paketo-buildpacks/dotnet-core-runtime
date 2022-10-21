@@ -28,18 +28,15 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		var err error
-
 		buffer = bytes.NewBuffer(nil)
 		logEmitter = scribe.NewEmitter(buffer)
 
 		versionResolver = dotnetcoreruntime.NewRuntimeVersionResolver(logEmitter)
 
-		cnbDir, err = os.MkdirTemp("", "cnb")
+		cnbDir = t.TempDir()
 		buildpackToml = filepath.Join(cnbDir, "buildpack.toml")
-		Expect(err).NotTo(HaveOccurred())
 
-		err = os.WriteFile(buildpackToml, []byte(`api = "0.2"
+		err := os.WriteFile(buildpackToml, []byte(`api = "0.2"
 [buildpack]
   id = "org.some-org.some-buildpack"
   name = "Some Buildpack"
@@ -80,10 +77,6 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 				"launch":         true,
 			},
 		}
-	})
-
-	it.After(func() {
-		Expect(os.RemoveAll(cnbDir)).To(Succeed())
 	})
 
 	context("the version source is empty", func() {
@@ -150,11 +143,9 @@ func testRuntimeVersionResolver(t *testing.T, context spec.G, it spec.S) {
 		context("the buildpack.toml only has a major minor version match with BP_DOTNET_ROLL_FORWARD=Disable", func() {
 			it.Before(func() {
 				entry.Metadata["version"] = "2.2.0"
-				Expect(os.Setenv("BP_DOTNET_ROLL_FORWARD", "Disable")).To(Succeed())
+				t.Setenv("BP_DOTNET_ROLL_FORWARD", "Disable")
 			})
-			it.After(func() {
-				Expect(os.Unsetenv("BP_DOTNET_ROLL_FORWARD")).To(Succeed())
-			})
+
 			it("returns a compatible version", func() {
 				_, err := versionResolver.Resolve(buildpackToml, entry, "some-stack")
 				Expect(err).To(MatchError(ContainSubstring(`failed to satisfy "dotnet-runtime" dependency for stack "some-stack" with version constraint "2.2.0": no compatible versions. Supported versions are: [1.2.2, 2.2.3, 2.2.4]. This may be due to BP_DOTNET_ROLL_FORWARD=Disable`)))

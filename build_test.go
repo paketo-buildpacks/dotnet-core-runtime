@@ -41,15 +41,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		var err error
-		layersDir, err = os.MkdirTemp("", "layers")
-		Expect(err).NotTo(HaveOccurred())
-
-		cnbDir, err = os.MkdirTemp("", "cnb")
-		Expect(err).NotTo(HaveOccurred())
-
-		workingDir, err = os.MkdirTemp("", "working-dir")
-		Expect(err).NotTo(HaveOccurred())
+		layersDir = t.TempDir()
+		cnbDir = t.TempDir()
+		workingDir = t.TempDir()
 
 		entryResolver = &fakes.EntryResolver{}
 		entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
@@ -95,12 +89,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		logEmitter := scribe.NewEmitter(buffer)
 
 		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, dotnetSymlinker, versionResolver, sbomGenerator, logEmitter, chronos.DefaultClock)
-	})
-
-	it.After(func() {
-		Expect(os.RemoveAll(layersDir)).To(Succeed())
-		Expect(os.RemoveAll(cnbDir)).To(Succeed())
-		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
 	it("returns a result that installs the dotnet runtime libraries", func() {

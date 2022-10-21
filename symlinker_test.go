@@ -21,19 +21,10 @@ func testSymlinker(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		var err error
-		workingDir, err = os.MkdirTemp("", "working-dir")
-		Expect(err).NotTo(HaveOccurred())
-
-		layerPath, err = os.MkdirTemp("", "layer-path")
-		Expect(err).NotTo(HaveOccurred())
+		workingDir = t.TempDir()
+		layerPath = t.TempDir()
 
 		symlinker = dotnetcoreruntime.NewSymlinker()
-	})
-
-	it.After(func() {
-		Expect(os.RemoveAll(workingDir)).To(Succeed())
-		Expect(os.RemoveAll(layerPath)).To(Succeed())
 	})
 
 	context("Link", func() {

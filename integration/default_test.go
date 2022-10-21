@@ -43,8 +43,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			sbomDir, err = os.MkdirTemp("", "sbom")
-			Expect(err).NotTo(HaveOccurred())
+			sbomDir = t.TempDir()
 			Expect(os.Chmod(sbomDir, os.ModePerm)).To(Succeed())
 		})
 

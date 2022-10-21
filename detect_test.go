@@ -2,7 +2,6 @@ package dotnetcoreruntime_test
 
 import (
 	"errors"
-	"os"
 	"testing"
 
 	dotnetcoreruntime "github.com/paketo-buildpacks/dotnet-core-runtime"
@@ -23,16 +22,10 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		var err error
-		workingDir, err = os.MkdirTemp("", "working-dir")
-		Expect(err).NotTo(HaveOccurred())
+		workingDir = t.TempDir()
 
 		buildpackYMLParser = &fakes.VersionParser{}
 		detect = dotnetcoreruntime.Detect(buildpackYMLParser)
-	})
-
-	it.After(func() {
-		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
 	context("when there is no buildpack.yml and BP_DOTNET_FRAMEWORK_VERSION is unset", func() {
@@ -53,11 +46,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	context("when BP_DOTNET_FRAMEWORK_VERSION is set", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_DOTNET_FRAMEWORK_VERSION", "1.2.3")).To(Succeed())
-		})
-
-		it.After(func() {
-			Expect(os.Unsetenv("BP_DOTNET_FRAMEWORK_VERSION")).To(Succeed())
+			t.Setenv("BP_DOTNET_FRAMEWORK_VERSION", "1.2.3")
 		})
 
 		it("provides and requires dotnet core runtime", func() {
