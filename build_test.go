@@ -37,7 +37,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		versionResolver   *fakes.VersionResolver
 		sbomGenerator     *fakes.SBOMGenerator
 
-		build packit.BuildFunc
+		buildContext packit.BuildContext
+		build        packit.BuildFunc
 	)
 
 	it.Before(func() {
@@ -88,11 +89,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logEmitter := scribe.NewEmitter(buffer)
 
-		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, dotnetSymlinker, versionResolver, sbomGenerator, logEmitter, chronos.DefaultClock)
-	})
-
-	it("returns a result that installs the dotnet runtime libraries", func() {
-		result, err := build(packit.BuildContext{
+		buildContext = packit.BuildContext{
 			WorkingDir: workingDir,
 			CNBPath:    cnbDir,
 			Stack:      "some-stack",
@@ -115,7 +112,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				},
 			},
 			Layers: packit.Layers{Path: layersDir},
-		})
+		}
+
+		build = dotnetcoreruntime.Build(entryResolver, dependencyManager, dotnetSymlinker, versionResolver, sbomGenerator, logEmitter, chronos.DefaultClock)
+	})
+
+	it("returns a result that installs the dotnet runtime libraries", func() {
+		result, err := build(buildContext)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(1))
@@ -224,28 +227,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("returns a result that installs the dotnet runtime libraries", func() {
-			_, err := build(packit.BuildContext{
-				WorkingDir: workingDir,
-				CNBPath:    cnbDir,
-				Stack:      "some-stack",
-				BuildpackInfo: packit.BuildpackInfo{
-					Name:    "Some Buildpack",
-					Version: "some-version",
-				},
-				Plan: packit.BuildpackPlan{
-					Entries: []packit.BuildpackPlanEntry{
-						{
-							Name: "dotnet-runtime",
-							Metadata: map[string]interface{}{
-								"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-								"version":        "2.5.x",
-								"launch":         true,
-							},
-						},
-					},
-				},
-				Layers: packit.Layers{Path: layersDir},
-			})
+			_, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
@@ -288,6 +270,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when version-source of the selected entry is buildpack.yml", func() {
 		it.Before(func() {
+			buildContext.BuildpackInfo.Version = "0.1.2"
+			buildContext.Plan.Entries[0].Metadata["version-source"] = "buildpack.yml"
+
 			entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
 				Name: "dotnet-runtime",
 				Metadata: map[string]interface{}{
@@ -299,29 +284,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("prints a deprecation warning", func() {
-			_, err := build(packit.BuildContext{
-				WorkingDir: workingDir,
-				CNBPath:    cnbDir,
-				Stack:      "some-stack",
-				BuildpackInfo: packit.BuildpackInfo{
-					Name:    "Some Buildpack",
-					Version: "0.1.2",
-				},
-				Plan: packit.BuildpackPlan{
-					Entries: []packit.BuildpackPlanEntry{
-						{
-							Name: "dotnet-runtime",
-							Metadata: map[string]interface{}{
-								"version-source": "buildpack.yml",
-								"version":        "2.5.x",
-								"launch":         true,
-							},
-						},
-					},
-				},
-				Layers: packit.Layers{Path: layersDir},
-			})
+			_, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
+
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack 0.1.2"))
 			Expect(buffer.String()).To(ContainSubstring("Resolving .NET Core Runtime version"))
 			Expect(buffer.String()).To(ContainSubstring("Selected .NET Core Runtime version (using buildpack.yml): "))
@@ -341,21 +306,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(packit.BuildContext{
-					CNBPath: cnbDir,
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{
-							{
-								Name: "dotnet-runtime",
-								Metadata: map[string]interface{}{
-									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-									"version":        "2.5.x",
-								},
-							},
-						},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				})
+				_, err := build(buildContext)
 				Expect(err).To(MatchError("failed to resolve version"))
 			})
 		})
@@ -370,21 +321,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(packit.BuildContext{
-					CNBPath: cnbDir,
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{
-							{
-								Name: "dotnet-runtime",
-								Metadata: map[string]interface{}{
-									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-									"version":        "2.5.x",
-								},
-							},
-						},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				})
+				_, err := build(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("permission denied")))
 			})
 		})
@@ -403,21 +340,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(packit.BuildContext{
-					CNBPath: cnbDir,
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{
-							{
-								Name: "dotnet-core-runtime",
-								Metadata: map[string]interface{}{
-									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-									"version":        "2.5.x",
-								},
-							},
-						},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				})
+				_, err := build(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("permission denied")))
 			})
 		})
@@ -428,21 +351,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(packit.BuildContext{
-					CNBPath: cnbDir,
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{
-							{
-								Name: "dotnet-core-runtime",
-								Metadata: map[string]interface{}{
-									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-									"version":        "2.5.x",
-								},
-							},
-						},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				})
+				_, err := build(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("some-error")))
 			})
 		})
@@ -453,43 +362,18 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(packit.BuildContext{
-					CNBPath: cnbDir,
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{
-							{
-								Name: "dotnet-core-runtime",
-								Metadata: map[string]interface{}{
-									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-									"version":        "2.5.x",
-								},
-							},
-						},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				})
+				_, err := build(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to generate SBOM")))
 			})
 		})
 
 		context("when formatting the SBOM returns an error", func() {
+			it.Before(func() {
+				buildContext.BuildpackInfo.SBOMFormats = []string{"random-format"}
+			})
+
 			it("returns an error", func() {
-				_, err := build(packit.BuildContext{
-					BuildpackInfo: packit.BuildpackInfo{SBOMFormats: []string{"random-format"}},
-					CNBPath:       cnbDir,
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{
-							{
-								Name: "dotnet-core-runtime",
-								Metadata: map[string]interface{}{
-									"version-source": "BP_DOTNET_FRAMEWORK_VERSION",
-									"version":        "2.5.x",
-								},
-							},
-						},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				})
+				_, err := build(buildContext)
 				Expect(err).To(MatchError("unsupported SBOM format: 'random-format'"))
 			})
 		})
