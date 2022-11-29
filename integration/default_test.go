@@ -165,8 +165,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				"      BP_DOTNET_FRAMEWORK_VERSION -> \"3.1.*\"",
 				"      <unknown>                   -> \"\"",
 				"",
-				MatchRegexp(`    Selected .NET Core Runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): 3\.1\.\d+`),
-				"",
+				MatchRegexp(`    Selected .NET Core Runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): 3\.1\.\d+`)))
+			Expect(logs).To(ContainLines(
 				"  Executing build process",
 				MatchRegexp(`    Installing .NET Core Runtime 3\.1\.\d+`),
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),

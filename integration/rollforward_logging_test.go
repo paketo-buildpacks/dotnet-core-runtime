@@ -67,8 +67,8 @@ func testRollForwardLogging(t *testing.T, context spec.G, it spec.S) {
 					"",
 					"    No exact version match found; attempting version roll-forward",
 					"",
-					MatchRegexp(`    Selected .NET Core Runtime version \(using runtimeconfig.json\): \d+\.\d+\.\d+`),
-					"",
+					MatchRegexp(`    Selected .NET Core Runtime version \(using runtimeconfig.json\): \d+\.\d+\.\d+`)))
+				Expect(logs).To(ContainLines(
 					"  Executing build process",
 					MatchRegexp(`    Installing .NET Core Runtime \d+\.\d+\.\d+`),
 					MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
