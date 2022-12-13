@@ -3,6 +3,6 @@
 
   [requires.metadata]
     launch = true
-    # 3.0.0 is unavailable in the buildpack
-    version = "3.0.0"
+    # 6.0.0 is unavailable in the buildpack
+    version = "6.0.0"
     version-source = "runtimeconfig.json"

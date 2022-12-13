@@ -154,7 +154,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.DotnetCoreRuntime.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_DOTNET_FRAMEWORK_VERSION": "3.1.*"}).
+				WithEnv(map[string]string{"BP_DOTNET_FRAMEWORK_VERSION": "7.0.*"}).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
@@ -162,17 +162,17 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.BuildpackInfo.Buildpack.Name)),
 				"  Resolving .NET Core Runtime version",
 				"    Candidate version sources (in priority order):",
-				"      BP_DOTNET_FRAMEWORK_VERSION -> \"3.1.*\"",
+				"      BP_DOTNET_FRAMEWORK_VERSION -> \"7.0.*\"",
 				"      <unknown>                   -> \"\"",
 				"",
-				MatchRegexp(`    Selected .NET Core Runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): 3\.1\.\d+`)))
+				MatchRegexp(`    Selected .NET Core Runtime version \(using BP_DOTNET_FRAMEWORK_VERSION\): 7\.0\.\d+`)))
 			Expect(logs).To(ContainLines(
 				"  Executing build process",
-				MatchRegexp(`    Installing .NET Core Runtime 3\.1\.\d+`),
+				MatchRegexp(`    Installing .NET Core Runtime 7\.0\.\d+`),
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 				"",
 				"  Configuring build environment",
-				MatchRegexp(`    RUNTIME_VERSION -> "3\.1\.\d+"`),
+				MatchRegexp(`    RUNTIME_VERSION -> "7\.0\.\d+"`),
 				"",
 				"  Configuring launch environment",
 				`    DOTNET_ROOT -> "/workspace/.dotnet_root"`,
