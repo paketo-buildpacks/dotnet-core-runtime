@@ -30,9 +30,9 @@ file that looks like the following:
   # is not specified, the buildpack will provide the default version, which can
   # be seen in the buildpack.toml file.
   # If you wish to request a specific version, the buildpack supports
-  # specifying a semver constraint in the form of "3.*", "3.1.*", or even
-  # "3.1.1".
-  version = "3.1.1"
+  # specifying a semver constraint in the form of "6.*", "6.0.*", or even
+  # "6.0.1".
+  version = "6.0.1"
 
   # The .NET Core Runtime buildpack supports some non-required metadata options.
   [requires.metadata]
